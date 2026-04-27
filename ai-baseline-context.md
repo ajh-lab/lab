@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-04-13 12:46 (America/Chicago)
+Last updated: 2026-04-27 16:56 (America/Chicago)
 
 ## Purpose
 
@@ -14,6 +14,7 @@ This repository is the baseline operational context for the home lab. It is inte
 - `automation/n8n/*`: n8n workflow exports/templates and API helper scripts.
 - `automation/netbox/*`: NetBox IPAM + asset sync scripts.
 - `automation/unifi/*`: UniFi (UDM Pro) inventory fetch + NetBox sync scripts.
+- `automation/ai-workstation/*`: AI workstation automation and Strix Halo backend sync scripts.
 
 ## Repo Layout
 
@@ -45,6 +46,10 @@ lab/
       scripts/
         fetch-unifi-inventory.ps1
         sync-unifi-to-netbox.ps1
+    ai-workstation/
+      README.md
+      scripts/
+        sync-strix-halo-backend.ps1
   k8s/
     helm/
       argocd/
@@ -137,6 +142,41 @@ Worker recovery note:
   - service endpoints are populated
   - namespace creation admission works again
 - Deployment pinned to master node selector to avoid scheduling back onto unreachable worker nodes.
+
+### AI Workstation
+
+- Host: `ai-workstation-evox2` (`192.168.1.123`, Fedora 43, AMD Strix Halo / Radeon 8060S)
+- SSH: key-based access validated from Windows; management user references in `.env` as `AI_WORKSTATION_*`
+- Dedicated AI storage: `/mnt/ai` (btrfs subvolume, persistent via `/etc/fstab`)
+- AI data directories:
+  - `/mnt/ai/models`
+  - `/mnt/ai/ollama`
+  - `/mnt/ai/llama`
+  - `/mnt/ai/qdrant`
+  - `/mnt/ai/docker`
+  - `/mnt/ai/logs`
+  - `/mnt/ai/agent`
+  - `/mnt/ai/voice`
+- Runtime/services (2026-04-27):
+  - `ollama` systemd service active (`0.21.2`)
+  - `qdrant` active via Docker (`http://192.168.1.123:6333`)
+  - local tool-calling agent active (`http://192.168.1.123:8777/health`)
+  - cockpit socket active (`https://192.168.1.123:9090`)
+- Installed Ollama models:
+  - `qwen2.5:1.5b`
+  - `llama3.2:1b`
+  - `tinyllama:latest`
+- `llama.cpp` built and installed from source with Vulkan support (`/usr/local/bin/llama-cli`)
+
+### Strix Halo Backend (Required)
+
+- Backend repo: `https://github.com/kyuz0/amd-strix-halo-toolboxes`
+- Remote checkout path: `/mnt/ai/llama/amd-strix-halo-toolboxes`
+- Provisioned toolbox container: `llama-rocm-7.2.2`
+- GPU visibility validation command:
+  - `toolbox run -c llama-rocm-7.2.2 llama-cli --list-devices`
+- Repo sync script:
+  - `automation/ai-workstation/scripts/sync-strix-halo-backend.ps1`
 
 ## Platform Services (Live)
 
@@ -300,6 +340,7 @@ Current key groups include:
 6. For n8n workflow changes, export updated JSON to `automation/n8n/workflows/exports/` and keep reusable templates in `automation/n8n/workflows/templates/`.
 7. For inventory updates, run both NetBox sync scripts: first `sync-network-devices-to-netbox.ps1` (IPs/prefixes), then `sync-netbox-assets-from-csv.ps1` (devices/VMs + primary IP links).
 8. For UniFi context refresh, run `automation/unifi/scripts/fetch-unifi-inventory.ps1` and then `automation/unifi/scripts/sync-unifi-to-netbox.ps1 -FetchFresh`.
+9. For Strix Halo workstation inference backend operations, use `kyuz0/amd-strix-halo-toolboxes` and keep it synced with `automation/ai-workstation/scripts/sync-strix-halo-backend.ps1`.
 
 ## Next Actions
 
