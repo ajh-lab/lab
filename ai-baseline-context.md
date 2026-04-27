@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-04-27 16:56 (America/Chicago)
+Last updated: 2026-04-27 17:13 (America/Chicago)
 
 ## Purpose
 
@@ -157,9 +157,11 @@ Worker recovery note:
   - `/mnt/ai/logs`
   - `/mnt/ai/agent`
   - `/mnt/ai/voice`
+  - `/mnt/ai/open-webui`
 - Runtime/services (2026-04-27):
   - `ollama` systemd service active (`0.21.2`)
   - `qdrant` active via Docker (`http://192.168.1.123:6333`)
+  - `open-webui` active via Docker (`http://192.168.1.123:3000`)
   - local tool-calling agent active (`http://192.168.1.123:8777/health`)
   - cockpit socket active (`https://192.168.1.123:9090`)
 - Installed Ollama models:
