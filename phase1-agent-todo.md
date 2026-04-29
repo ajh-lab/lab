@@ -1,6 +1,6 @@
 # Phase 1 Agent To-Do (LAB)
 
-Last updated: 2026-04-28 20:45 (America/Chicago)
+Last updated: 2026-04-29 11:25 (America/Chicago)
 
 Machine-readable queue files:
 
@@ -30,7 +30,7 @@ Build a durable internal control plane where AI agents can safely read context, 
 | ID | Priority | Status | Task | Definition of Done |
 |---|---|---|---|---|
 | P1-001 | P0 | Todo | Stand up internal Wiki.js knowledge system | Wiki.js deployed with auth enabled, backed by PostgreSQL, reachable internally over HTTPS, and has initial spaces for `Architecture`, `Runbooks`, and `Operations Log`. |
-| P1-002 | P0 | Todo | Provision internal PostgreSQL service host | Linux VM provisioned on ESXi, PostgreSQL hardened (non-default creds, backups, firewall), and documented connection details (no secrets) for Wiki.js and future internal apps. |
+| P1-002 | P0 | Done | Provision internal PostgreSQL service host | Linux VM provisioned on ESXi, PostgreSQL hardened (non-default creds, backups, firewall), and documented connection details (no secrets) for Wiki.js and future internal apps. |
 | P1-003 | P0 | Todo | Replace OpenBao dev mode with persistent configuration | OpenBao moved to non-dev mode with persistent storage, initialization/unseal process documented, and basic policy separation (read-context vs deploy-write). |
 | P1-004 | P0 | Todo | Wire agents to controlled context sources | Agent runtime can read from NetBox API + Wiki API + `lab` repo, with explicit read/write boundaries documented. |
 | P1-005 | P0 | Todo | Define agent change-write policy for wiki updates | Agent only writes to approved wiki paths (for example `Ops/Auto-Updates/*`) and appends timestamped change log entries with rollback note. |
@@ -62,9 +62,8 @@ Build a durable internal control plane where AI agents can safely read context, 
 
 ## Ready Queue Seed (Suggested First Work Items)
 
-1. P1-002 PostgreSQL VM provisioning and hardening.
-2. P1-001 Wiki.js deployment using PostgreSQL backend.
-3. P1-003 OpenBao non-dev migration.
-4. P1-009 Internal image registry deployment (Harbor preferred).
-5. P1-008 Self-hosted GitHub runner deployment.
-6. P1-006 Jira project setup for agent queue intake.
+1. P1-001 Wiki.js deployment using PostgreSQL backend.
+2. P1-003 OpenBao non-dev migration.
+3. P1-009 Internal image registry deployment (Harbor preferred).
+4. P1-008 Self-hosted GitHub runner deployment.
+5. P1-006 Jira project setup for agent queue intake.

@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-04-28 20:45 (America/Chicago)
+Last updated: 2026-04-29 11:25 (America/Chicago)
 
 ## Purpose
 
@@ -144,6 +144,21 @@ Worker recovery note:
   - service endpoints are populated
   - namespace creation admission works again
 - Deployment pinned to master node selector to avoid scheduling back onto unreachable worker nodes.
+
+### PostgreSQL Service Host
+
+- Host: `lab-pgsql01` (`192.168.1.216`, Ubuntu 24.04 LTS)
+- PostgreSQL service is active and listening on `0.0.0.0:5432`
+- Access controls:
+  - `password_encryption = scram-sha-256`
+  - `pg_hba.conf` allows `192.168.1.0/24` with `scram-sha-256`
+  - UFW enabled with `5432/tcp` restricted to `192.168.1.0/24`
+- Bootstrap objects:
+  - admin role: `lab_admin` (LOGIN, CREATEDB)
+  - default database: `lab_platform`
+- Credential references:
+  - SSH: `LAB-PGSQL01_*`
+  - Database: `LAB_PGSQL01_DB_*`
 
 ### AI Workstation
 
@@ -328,6 +343,8 @@ Current key groups include:
 - `K3S_MASTER_*`
 - `RANCHERWEB01_*`
 - `VM_HOST_IP`
+- `LAB-PGSQL01_*`
+- `LAB_PGSQL01_DB_*`
 - `N8N_*`
 - `NETBOX_*`
 - `UDM_PRO_*`
