@@ -6,7 +6,21 @@ service:
   port: 80
 
 ingress:
-  enabled: false
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: "lab-selfsigned"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+  hosts:
+    - host: wikijs.192.168.1.80.sslip.io
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: wikijs-tls
+      hosts:
+        - wikijs.192.168.1.80.sslip.io
 
 resources:
   requests:
@@ -18,6 +32,18 @@ resources:
 
 nodeSelector:
   kubernetes.io/hostname: oma01rpicls01mstr01
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
 
 postgresql:
   enabled: false

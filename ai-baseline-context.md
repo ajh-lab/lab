@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-04-29 12:55 (America/Chicago)
+Last updated: 2026-04-29 13:56 (America/Chicago)
 
 ## Purpose
 
@@ -304,11 +304,22 @@ Worker recovery note:
 
 - Namespace: `wikijs`
 - Helm chart: `requarks/wiki` (`3.0.0`)
-- Service: NodePort `32094` via `wikijs/wikijs-nodeport`
-- URL: `http://192.168.1.80:32094`
+- Service exposure: `ClusterIP` only (`wikijs` service)
+- URL: `https://wikijs.192.168.1.80.sslip.io`
 - Database backend: external PostgreSQL on `lab-pgsql01` (`192.168.1.216:5432`, DB `wikijs`)
 - DB password source: ESO-managed secret `wikijs/wikijs-db-secret` from OpenBao key `lab/runtime/wikijs`
-- Ingress/TLS: not yet configured (HTTP bootstrap mode currently active)
+- Ingress/TLS:
+  - Ingress class: `traefik`
+  - TLS issuer: `cert-manager` `ClusterIssuer/lab-selfsigned`
+  - TLS secret: `wikijs/wikijs-tls`
+- Wiki bootstrap documentation pages created via API:
+  - `/en/services/directory`
+  - `/en/services/wikijs`
+  - `/en/services/openbao`
+  - `/en/services/netbox`
+  - `/en/services/n8n`
+  - `/en/services/observability`
+  - `/en/services/argocd`
 
 ### Argo CD (GitOps)
 
@@ -323,7 +334,8 @@ Worker recovery note:
 - Namespace: `cert-manager`
 - Helm chart: `jetstack/cert-manager` (`v1.19.4`)
 - CRDs installed via chart values
-- Current state: deployed and ready; no issuer configured yet.
+- Current state: deployed and ready.
+- Configured issuer: `ClusterIssuer/lab-selfsigned` (used for Wiki.js ingress TLS).
 
 ### Prometheus
 

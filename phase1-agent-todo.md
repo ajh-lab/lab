@@ -1,6 +1,6 @@
 # Phase 1 Agent To-Do (LAB)
 
-Last updated: 2026-04-29 12:55 (America/Chicago)
+Last updated: 2026-04-29 13:56 (America/Chicago)
 
 Machine-readable queue files:
 
@@ -29,7 +29,7 @@ Build a durable internal control plane where AI agents can safely read context, 
 
 | ID | Priority | Status | Task | Definition of Done |
 |---|---|---|---|---|
-| P1-001 | P0 | In Progress | Stand up internal Wiki.js knowledge system | Wiki.js deployed with auth enabled, backed by PostgreSQL, reachable internally over HTTPS, and has initial spaces for `Architecture`, `Runbooks`, and `Operations Log`. Remaining: TLS/HTTPS and initial space seeding. |
+| P1-001 | P0 | Done | Stand up internal Wiki.js knowledge system | Wiki.js is deployed with auth enabled, backed by PostgreSQL, reachable internally over HTTPS, and has initial documentation index/pages seeded (services directory + linked service docs). |
 | P1-002 | P0 | Done | Provision internal PostgreSQL service host | Linux VM provisioned on ESXi, PostgreSQL hardened (non-default creds, backups, firewall), and documented connection details (no secrets) for Wiki.js and future internal apps. |
 | P1-003 | P0 | Done | Replace OpenBao dev mode with persistent configuration | OpenBao VM service (`lab-secrets01`) is persistent and active, secrets migrated to KV v2, and ESO now reads from VM OpenBao via scoped token (`external-secrets/openbao-eso-token`). |
 | P1-004 | P0 | Todo | Wire agents to controlled context sources | Agent runtime can read from NetBox API + Wiki API + `lab` repo, with explicit read/write boundaries documented. |
@@ -62,7 +62,6 @@ Build a durable internal control plane where AI agents can safely read context, 
 
 ## Ready Queue Seed (Suggested First Work Items)
 
-1. P1-001 Wiki.js hardening: HTTPS + initial spaces.
-2. P1-009 Internal image registry deployment (Harbor preferred).
-3. P1-008 Self-hosted GitHub runner deployment.
-4. P1-006 Jira project setup for agent queue intake.
+1. P1-009 Internal image registry deployment (Harbor preferred).
+2. P1-008 Self-hosted GitHub runner deployment.
+3. P1-006 Jira project setup for agent queue intake.
