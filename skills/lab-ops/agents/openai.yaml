@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lab Ops"
+  short_description: "Operate the home lab with OpenBao-first context"
+  default_prompt: "Use $lab-ops for this home lab operation."
