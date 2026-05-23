@@ -1,32 +1,59 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-04-29 13:56 (America/Chicago)
+Last updated: 2026-05-23 10:30 (America/Chicago)
 
 ## Purpose
 
 This repository is the baseline operational context for the home lab. It is intended to be AI-ingestable and kept current as infrastructure changes.
 
+## AI Workspace Model
+
+This `lab` repo is the primary AI workspace for operations, infrastructure, and ticket-driven delivery.
+
+Standard workflow conventions:
+
+1. Durable context and standards live in root context files.
+2. Active code work happens under `repositories/` (agent clones/uses target repos here).
+3. Temporary ticket execution artifacts live under `tmp/`.
+4. Each ticket gets its own folder and local context file:
+   - Folder: `tmp/<ticket-number>/`
+   - Context file: `tmp/<ticket-number>/<ticket-number>-context.md`
+   - Example: `tmp/DEVOPS-142/DEVOPS-142-context.md`
+
 ## Source of Truth Files
 
 - `network_devices.csv`: canonical network inventory and device metadata.
 - `.env`: credentials and secrets (never commit to git).
+- `automation/common/SecretResolver.psm1`: shared OpenBAO-first secret resolution module.
+- `automation/secrets/scripts/sync-env-to-openbao.ps1`: sync `.env` bootstrap values into OpenBAO KV v2.
+- `automation/agent/scripts/bootstrap-lab-context.ps1`: mandatory agent bootstrap entrypoint.
 - `k8s/helm/*` and `k8s/manifests/*`: deployment definitions for lab services.
 - `automation/n8n/*`: n8n workflow exports/templates and API helper scripts.
 - `automation/netbox/*`: NetBox IPAM + asset sync scripts.
 - `automation/unifi/*`: UniFi (UDM Pro) inventory fetch + NetBox sync scripts.
+- `automation/wikijs/*`: Wiki.js API automation scripts.
 - `automation/ai-workstation/*`: AI workstation automation and Strix Halo backend sync scripts.
+- `sub-context/ai-infrastructure-context.md`: infrastructure-specific supplemental context.
 - `phase1-agent-todo.md`: first-phase execution backlog for agent platform, knowledge system, and automation control plane.
 - `phase1-agent-queue.yaml` + `phase1-agent-queue.json`: machine-readable execution queue for agent task orchestration.
+- `repositories/`: workspace for repos the agent clones/pulls for implementation work.
+- `tmp/`: transient ticket working area (`tmp/<ticket-number>/<ticket-number>-context.md` pattern).
 
 ## Repo Layout
 
 ```text
 lab/
   ai-baseline-context.md
+  sub-context/
+    ai-infrastructure-context.md
   network_devices.csv
   .env                      # gitignored (secrets)
   .gitignore
   .kubeconfig-192.168.1.80.yaml
+  repositories/             # agent code workspace (cloned repos, feature work)
+  tmp/                      # ticket temp workspace
+    <ticket-number>/
+      <ticket-number>-context.md
   automation/
     n8n/
       README.md
@@ -48,10 +75,22 @@ lab/
       scripts/
         fetch-unifi-inventory.ps1
         sync-unifi-to-netbox.ps1
+    wikijs/
+      scripts/
+        upsert-registry-page.ps1
     ai-workstation/
       README.md
       scripts/
         sync-strix-halo-backend.ps1
+    common/
+      SecretResolver.psm1
+    secrets/
+      README.md
+      scripts/
+        sync-env-to-openbao.ps1
+    agent/
+      scripts/
+        bootstrap-lab-context.ps1
   k8s/
     helm/
       argocd/
@@ -104,6 +143,19 @@ Current columns:
 
 ## Current Environment Facts
 
+### Home Lab Layout Summary
+
+- Primary LAN: `192.168.1.0/24`
+- Gateway/router: UniFi Dream Machine Pro Max at `192.168.1.1`
+- Core switch management: Cisco Catalyst 2960X at `192.168.1.2`
+- k3s cluster control plane: `oma01rpicls01mstr01` at `192.168.1.80`
+- k3s worker nodes: `192.168.1.81-84`
+- Secrets backend: `lab-secrets01` at `192.168.1.25`, OpenBao API `http://192.168.1.25:8200`
+- PostgreSQL service host: `lab-pgsql01` at `192.168.1.216`
+- Container registry host: `lab-registry01` at `192.168.1.15:5000`
+- AI workstation: `ai-workstation-evox2` at `192.168.1.123`
+- Most k3s web services are exposed either by NodePort on `192.168.1.80` or Traefik ingress with `*.192.168.1.80.sslip.io` hostnames.
+
 ### Network
 
 - Primary LAN: `192.168.1.0/24`
@@ -124,7 +176,7 @@ Current columns:
 - k3s upgraded on 2026-04-12: `v1.28.8+k3s1` -> `v1.28.15+k3s1`
 - OS package updates applied on control-plane (Debian 12 + Raspberry Pi package refresh)
 
-Workers (all currently `NotReady`):
+Workers (all currently `Ready`):
 
 - `oma01rpicls01wknd01` (`192.168.1.81`)
 - `oma01rpicls01wknd02` (`192.168.1.82`)
@@ -134,7 +186,7 @@ Workers (all currently `NotReady`):
 Worker recovery note:
 
 - Worker inventory addressing was corrected to `192.168.1.81-84` on 2026-04-13.
-- Cluster readiness still needs validation after the address correction.
+- Worker `K3S_URL` references were corrected from `192.168.0.180` to `192.168.1.80` and agent services restarted (2026-04-30).
 
 ### Rancher
 
@@ -173,8 +225,13 @@ Worker recovery note:
   - API listener: `http://192.168.1.25:8200`
   - initialization: completed (Shamir 1/1), instance currently unsealed
   - secrets engine: `secret/` mounted as KV v2
-  - `.env` migration: `50` keys currently stored under `secret/lab/env/*`
-  - runtime secrets path in use: `secret/lab/runtime/*` (includes Wiki.js DB credentials)
+  - `.env` bootstrap snapshot path: `secret/homelab/bootstrap/env`
+  - curated runtime/service paths in use:
+    - `secret/homelab/services/n8n`
+    - `secret/homelab/services/netbox`
+    - `secret/homelab/services/unifi`
+    - `secret/homelab/registry/lab-registry01`
+    - `secret/lab/runtime/*` (legacy runtime path still in use for some services including Wiki.js DB credentials)
   - agent policies: `lab-context-read` (read/list env) and `lab-deploy-write` (read env + write runtime)
   - ESO policy/token: `eso-read-lab` with token stored in k8s secret `external-secrets/openbao-eso-token`
   - firewall: `8200/tcp` allowed from `192.168.1.0/24`
@@ -182,10 +239,27 @@ Worker recovery note:
   - SSH: `LAB_SECRETS01_*`
   - OpenBao: `LAB_SECRETS01_OPENBAO_*`
 
+### Container Registry Host
+
+- Host: `lab-registry01` (`192.168.1.15`, Ubuntu 24.04 LTS)
+- Networking: static `192.168.1.15/24`, gateway `192.168.1.1`
+- Runtime:
+  - Docker Engine `29.4.1`
+  - Docker Registry v2 container (`registry`) listening on `:5000`
+- Endpoint: `http://192.168.1.15:5000`
+- Storage/auth paths:
+  - data: `/opt/registry/data`
+  - auth file: `/opt/registry/auth/htpasswd`
+  - compose: `/opt/registry/docker-compose.yml`
+- Credential references:
+  - SSH: `LAB_REGISTRY01_*`
+  - Registry auth: `LAB_REGISTRY01_REGISTRY_*`
+
 ### AI Workstation
 
 - Host: `ai-workstation-evox2` (`192.168.1.123`, Fedora 43, AMD Strix Halo / Radeon 8060S)
 - SSH: key-based access validated from Windows; management user references in `.env` as `AI_WORKSTATION_*`
+- Sudo password source of truth: OpenBao KV v2 path `secret/homelab/bootstrap/env`, field `AI_WORKSTATION_PASSWORD`; do not store the password in git or Markdown.
 - Dedicated AI storage: `/mnt/ai` (btrfs subvolume, persistent via `/etc/fstab`)
 - AI data directories:
   - `/mnt/ai/models`
@@ -197,17 +271,36 @@ Worker recovery note:
   - `/mnt/ai/agent`
   - `/mnt/ai/voice`
   - `/mnt/ai/open-webui`
-- Runtime/services (2026-04-28):
+- Runtime/services (validated 2026-05-23):
   - `ollama` systemd service active (`0.21.2`)
   - `qdrant` active via Docker (`http://192.168.1.123:6333`)
   - `open-webui` active via Docker (`http://192.168.1.123:3000`)
   - local tool-calling agent active (`http://192.168.1.123:8777/health`)
   - cockpit socket active (`https://192.168.1.123:9090`)
-  - `hermes-gateway` user systemd service active
-  - `openclaw-gateway` user systemd service active (`OpenClaw 2026.4.26`, loopback `127.0.0.1:18789`, token-auth)
-- Workstation package updates applied on 2026-04-28 via `dnf upgrade --refresh` (security/kernel included).
-- Kernel note: new 6.19.x kernels are installed; workstation reboot is still required to run newest kernel.
+  - `hermes-gateway` user systemd service active (`Hermes Agent v0.13.0 / 2026.5.7`)
+    - Model: `hermes-qwen3-coder:30b-64k` via local Ollama OpenAI-compatible endpoint (`http://127.0.0.1:11434/v1`)
+    - Runtime model alias points to `qwen3-coder:30b-a3b-q8_0` with `PARAMETER num_ctx 65536`; Hermes config also sets `model.context_length=65536` and `model.ollama_num_ctx=65536`.
+    - Latency note: raw Ollama response for a trivial prompt is fast with the capped alias, but full Hermes browser/CLI chat remains dominated by tool-enabled agent prompt overhead. Simple chat without toolsets tested much faster than tool-enabled chat.
+    - OpenBao env injected through systemd drop-in with read-only policy `hermes-bootstrap-env-read`; helper command `openbao-env-get FIELD_NAME` reads fields from `secret/homelab/bootstrap/env`.
+    - Hermes sudo support: Hermes expects `SUDO_PASSWORD` in the process environment, not in `config.yaml`. Both Hermes services are started through `/home/helios/.local/bin/hermes-openbao-sudo-env`, which resolves `AI_WORKSTATION_PASSWORD` from OpenBao and exports it as `SUDO_PASSWORD` before launching Hermes.
+    - Hermes sudo drop-ins:
+      - `/home/helios/.config/systemd/user/hermes-gateway.service.d/30-sudo-password-openbao.conf`
+      - `/home/helios/.config/systemd/user/hermes-dashboard.service.d/30-sudo-password-openbao.conf`
+  - `hermes-dashboard` user systemd service active, bound to `127.0.0.1:9119` for SSH-tunneled browser access
+  - `lab-update-check.timer` user systemd timer active; runs weekly Saturday morning with jitter and writes update-check logs to `/mnt/ai/logs/system-updates/latest.log`. This checks for package updates only; it does not perform unattended upgrades.
+  - `openclaw-gateway` user systemd service installed but disabled/inactive as of 2026-05-09 while Hermes Discord connectivity is being tested (`OpenClaw 2026.5.7`, loopback `127.0.0.1:18789`, token-auth)
+  - OpenClaw Discord channel validated on 2026-05-09: bot token resolved as `Helios`, configured `helios` Discord channel readable, gateway restarted after stale process cleanup.
+- Workstation package updates applied on 2026-05-23 via `dnf5 upgrade --refresh` (kernel and userspace updates included).
+- Kernel note: `7.0.9-105.fc43` is installed; workstation is still running `7.0.8-100.fc43` until the next reboot.
 - Installed Ollama models:
+  - `hermes-qwen3-coder:30b-64k` (local alias, 64k context cap for Hermes)
+  - `hermes-qwen3-coder:latest-64k` (local alias, lower-precision 64k comparison)
+  - `qwen3-coder:30b-a3b-q8_0`
+  - `qwen3-coder:latest`
+  - `gpt-oss:120b`
+  - `gemma4:latest`
+  - `qwen2.5vl:7b`
+  - `nomic-embed-text:latest`
   - `qwen2.5:1.5b`
   - `llama3.2:1b`
   - `tinyllama:latest`
@@ -250,8 +343,21 @@ Worker recovery note:
 - Current sync state (2026-04-13):
   - `258` usable hosts from CSV upserted into NetBox IP addresses and tagged `network-csv-import`.
   - `7` physical devices in `dcim/devices` with `primary_ip4` linkage.
-  - `1` VM in `virtualization/virtual-machines` (`rancherweb01`) with `primary_ip4` linkage.
+  - `2` VMs in `virtualization/virtual-machines` with `primary_ip4` linkage:
+    - `rancherweb01`
+    - `lab-registry01`
   - Current VM cluster for lab guests: `homelab-vms`.
+
+### Container Registry (Docker Registry v2)
+
+- Host/VM: `lab-registry01` (`192.168.1.15`)
+- Endpoint: `http://192.168.1.15:5000`
+- Auth: basic auth (`htpasswd`)
+- OpenBao credentials path: `secret/homelab/registry/lab-registry01`
+- k3s integration:
+  - all nodes configured with `/etc/rancher/k3s/registries.yaml` for `192.168.1.15:5000`
+  - worker `K3S_URL` corrected to `https://192.168.1.80:6443` after subnet migration
+  - validation image: `192.168.1.15:5000/lab/hello-world:latest`
 
 ### UniFi / UDM API Automation
 
@@ -274,6 +380,19 @@ Worker recovery note:
 ### OpenBao (Secrets backend)
 
 - Primary OpenBao endpoint: `http://192.168.1.25:8200` (`lab-secrets01`, persistent file storage)
+- Primary KV mount: `secret/` (KV v2)
+- Bootstrap environment snapshot: `secret/homelab/bootstrap/env`
+- AI workstation sudo password field: `AI_WORKSTATION_PASSWORD`
+- Safe lookup commands on `ai-workstation-evox2`:
+  - Preferred helper: `openbao-env-get AI_WORKSTATION_PASSWORD`
+  - Direct OpenBao CLI form: `bao kv get -mount=secret -field=AI_WORKSTATION_PASSWORD homelab/bootstrap/env`
+- Hermes OpenBao access:
+  - User services: `hermes-gateway.service`, `hermes-dashboard.service`
+  - OpenBao token policy: `hermes-bootstrap-env-read`
+  - Env/drop-in source: `/home/helios/.config/systemd/user/*hermes*.service.d/20-openbao.conf`
+  - Sudo env wrapper: `/home/helios/.local/bin/hermes-openbao-sudo-env`
+  - Sudo password injection drop-ins: `/home/helios/.config/systemd/user/hermes-*.service.d/30-sudo-password-openbao.conf`
+  - Required exported runtime variable for Hermes terminal sudo: `SUDO_PASSWORD`
 - Legacy bootstrap endpoint still present in cluster:
   - Namespace: `openbao`
   - Deployed via manifest (`k8s/manifests/openbao/openbao-dev.yaml`)
@@ -318,6 +437,7 @@ Worker recovery note:
   - `/en/services/openbao`
   - `/en/services/netbox`
   - `/en/services/n8n`
+  - `/en/services/container-registry`
   - `/en/services/observability`
   - `/en/services/argocd`
 
@@ -385,7 +505,28 @@ Worker recovery note:
 
 ## Credential Handling
 
-Credentials are stored in `.env` and referenced by key name only.
+Secret resolution model is **OpenBAO-first with `.env` fallback**.
+
+1. `.env` remains the local bootstrap source and is kept gitignored.
+2. `automation/secrets/scripts/sync-env-to-openbao.ps1` syncs current `.env` values to OpenBAO.
+3. Automation scripts must use `automation/common/SecretResolver.psm1` and `Resolve-LabSecret`.
+4. Preferred reads are service-specific OpenBAO paths; fallback reads use `.env` only when necessary.
+
+### AI Workstation Sudo Credential
+
+- Secret path: `secret/homelab/bootstrap/env`
+- KV mount: `secret`
+- Field/key: `AI_WORKSTATION_PASSWORD`
+- Purpose: sudo password for the `helios` user on `ai-workstation-evox2`.
+- Do not copy the password into `ai-baseline-context.md`, Jira, Slack, command logs, or committed files.
+- To test resolution without printing the secret: `openbao-env-get AI_WORKSTATION_PASSWORD >/dev/null && echo OK`
+- Hermes integration: Hermes terminal sudo support reads `SUDO_PASSWORD` from its process environment. Do not put the password in `~/.hermes/config.yaml`; use the systemd wrapper/drop-ins that resolve the value from OpenBao at service start.
+- Troubleshooting if Hermes cannot sudo:
+  - Check OpenBao reachability from the workstation: `curl -sS http://192.168.1.25:8200/v1/sys/health`
+  - Check helper resolution: `openbao-env-get AI_WORKSTATION_PASSWORD >/dev/null && echo OK`
+  - Check Hermes service drop-ins: `systemctl --user cat hermes-gateway.service hermes-dashboard.service`
+  - Check wrapper path: `/home/helios/.local/bin/hermes-openbao-sudo-env`
+  - Restart services after secret or drop-in changes: `systemctl --user daemon-reload && systemctl --user restart hermes-gateway.service hermes-dashboard.service`
 
 Current key groups include:
 
@@ -408,19 +549,34 @@ Current key groups include:
 
 `.env` is excluded by `.gitignore`.
 
+## Agent Bootstrap (Mandatory)
+
+Before any operational task, run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File automation\agent\scripts\bootstrap-lab-context.ps1
+```
+
+Bootstrap behavior:
+
+1. Syncs `.env` bootstrap and curated service keys into OpenBAO.
+2. Verifies required runtime secrets can be resolved through `Resolve-LabSecret`.
+3. Fails fast if OpenBAO connectivity/policy is broken.
+
 ## Operational Notes for Future AI Agents
 
-1. Load inventory context from `network_devices.csv` first.
-2. Resolve device credentials via `.env` key references from `CredentialRef`.
-3. Validate management reachability before attempting remote ops.
-4. For k3s changes, verify Rancher webhook health first (`cattle-system/rancher-webhook`).
-5. Keep service definitions in `k8s/` aligned with runtime state after every change.
-6. For n8n workflow changes, export updated JSON to `automation/n8n/workflows/exports/` and keep reusable templates in `automation/n8n/workflows/templates/`.
-7. For inventory updates, run both NetBox sync scripts: first `sync-network-devices-to-netbox.ps1` (IPs/prefixes), then `sync-netbox-assets-from-csv.ps1` (devices/VMs + primary IP links).
-8. For UniFi context refresh, run `automation/unifi/scripts/fetch-unifi-inventory.ps1` and then `automation/unifi/scripts/sync-unifi-to-netbox.ps1 -FetchFresh`.
-9. For Strix Halo workstation inference backend operations, use `kyuz0/amd-strix-halo-toolboxes` and keep it synced with `automation/ai-workstation/scripts/sync-strix-halo-backend.ps1`.
-10. `Hermes-Test` should be treated as disposable validation only; durable planning and execution state belongs in this `lab` repo.
-11. For OpenClaw operations on the workstation, use `automation/ai-workstation/README.md` for install/status/security/runtime reference.
+1. Run `automation/agent/scripts/bootstrap-lab-context.ps1` first.
+2. Load inventory context from `network_devices.csv` first.
+3. Resolve credentials with `Resolve-LabSecret`; do not implement new direct `.env` reads in automation scripts.
+4. Validate management reachability before attempting remote ops.
+5. For k3s changes, verify Rancher webhook health first (`cattle-system/rancher-webhook`).
+6. Keep service definitions in `k8s/` aligned with runtime state after every change.
+7. For n8n workflow changes, export updated JSON to `automation/n8n/workflows/exports/` and keep reusable templates in `automation/n8n/workflows/templates/`.
+8. For inventory updates, run both NetBox sync scripts: first `sync-network-devices-to-netbox.ps1` (IPs/prefixes), then `sync-netbox-assets-from-csv.ps1` (devices/VMs + primary IP links).
+9. For UniFi context refresh, run `automation/unifi/scripts/fetch-unifi-inventory.ps1` and then `automation/unifi/scripts/sync-unifi-to-netbox.ps1 -FetchFresh`.
+10. For Strix Halo workstation inference backend operations, use `kyuz0/amd-strix-halo-toolboxes` and keep it synced with `automation/ai-workstation/scripts/sync-strix-halo-backend.ps1`.
+11. `Hermes-Test` should be treated as disposable validation only; durable planning and execution state belongs in this `lab` repo.
+12. For OpenClaw operations on the workstation, use `automation/ai-workstation/README.md` for install/status/security/runtime reference.
 
 ## Next Actions
 
@@ -428,3 +584,26 @@ Current key groups include:
 - Keep `network_devices.csv`, NetBox, and this baseline in sync after every environment change.
 - Reboot `ai-workstation-evox2` to activate newest installed Fedora kernel.
 - Execute `P1-013` to expand Prometheus + Grafana coverage for k3s nodes and core services.
+
+## OpenBrain Memory Service (Deployed 2026-05-01)
+
+- Namespace: `openbrain`
+- URL: `https://openbrain.192.168.1.80.sslip.io`
+- Components:
+  - External PostgreSQL + pgvector on `lab-pgsql01` (`192.168.1.216:5432`, DB `openbrain`)
+  - `openbrain-mcp` (MCP server)
+- Secrets source: OpenBao `secret/lab/runtime/openbrain`
+  - fields: `postgres_password`, `mcp_access_key`, `embedding_api_base`, `embedding_api_key`, `embedding_model`, `chat_api_base`, `chat_api_key`, `chat_model`
+- Model provider: Ollama on AI workstation (`AI_WORKSTATION_IP`)
+  - embeddings: `nomic-embed-text` (vector dim 768)
+  - chat metadata: `qwen3-coder:latest`
+- Deployment automation:
+  - `automation/openbrain/scripts/bootstrap-openbrain-secrets.ps1`
+  - `automation/openbrain/scripts/deploy-openbrain.ps1`
+  - `automation/openbrain/scripts/test-openbrain.ps1`
+  - manifests: `k8s/manifests/openbrain/*`
+  - image source: `k8s/openbrain/server/*`
+
+Operational notes:
+- OpenBrain compute runs in k3s (`openbrain-mcp`) while persistence is external on `lab-pgsql01`.
+- Current image publishing uses `ttl.sh` (24h TTL). Move to the internal registry once k3s nodes are configured for insecure registry pull or TLS-enabled registry endpoints.
