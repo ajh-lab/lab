@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openbrain
+  namespace: openbrain
+  annotations:
+    cert-manager.io/cluster-issuer: lab-selfsigned
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - openbrain.192.168.1.80.sslip.io
+      secretName: openbrain-tls
+  rules:
+    - host: openbrain.192.168.1.80.sslip.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openbrain-mcp
+                port:
+                  number: 8000

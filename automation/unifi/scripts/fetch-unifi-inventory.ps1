@@ -6,23 +6,6 @@
 
 $ErrorActionPreference = "Stop"
 
-function Get-EnvMap {
-  param([string]$Path)
-
-  if (-not (Test-Path -LiteralPath $Path)) {
-    throw "Env file not found: $Path"
-  }
-
-  $map = @{}
-  Get-Content -LiteralPath $Path | ForEach-Object {
-    if ($_ -match '^\s*#' -or $_ -match '^\s*$') { return }
-    if ($_ -match '^\s*([^=]+)=(.*)$') {
-      $map[$matches[1].Trim()] = $matches[2]
-    }
-  }
-  return $map
-}
-
 function Invoke-UnifiGet {
   param(
     [Parameter(Mandatory = $true)][string]$BaseUrl,
@@ -84,6 +67,9 @@ function Get-PagedItems {
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..\..')
+$secretModule = Join-Path $repoRoot "automation\common\SecretResolver.psm1"
+Import-Module $secretModule -Force
+
 if ([string]::IsNullOrWhiteSpace($EnvPath)) {
   $EnvPath = Join-Path $repoRoot '.env'
 }
@@ -91,11 +77,8 @@ if ([string]::IsNullOrWhiteSpace($OutputPath)) {
   $OutputPath = Join-Path $repoRoot 'automation\unifi\data\unifi-inventory-latest.json'
 }
 
-$envMap = Get-EnvMap -Path $EnvPath
-$apiKey = $envMap['UDM_PRO_API_KEY']
-if ([string]::IsNullOrWhiteSpace($apiKey)) {
-  throw "UDM_PRO_API_KEY is missing in $EnvPath"
-}
+$envMap = Get-LabEnvMap -Path $EnvPath
+$apiKey = Resolve-LabSecret -Key 'UDM_PRO_API_KEY' -EnvMap $envMap
 
 $udmHost = $envMap['UDM_PRO_HOST']
 if ([string]::IsNullOrWhiteSpace($udmHost)) {

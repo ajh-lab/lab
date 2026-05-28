@@ -11,6 +11,10 @@ secrets/
 # Local API inventory snapshots
 automation/unifi/data/*.json
 
+# Generated local scratch artifacts
+tmp/*
+!tmp/.gitkeep
+
 # Editor / OS
 .DS_Store
 Thumbs.db

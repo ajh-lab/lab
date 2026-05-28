@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openbrain-mcp
+  namespace: openbrain
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: openbrain-mcp
+  template:
+    metadata:
+      labels:
+        app: openbrain-mcp
+    spec:
+      containers:
+        - name: mcp
+          image: ttl.sh/lab-openbrain-arm64-20260501:24h
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: db-host
+            - name: DB_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: db-port
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: db-name
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: db-user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: db-password
+            - name: MCP_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: mcp-access-key
+            - name: EMBEDDING_API_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: embedding-api-base
+            - name: EMBEDDING_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: embedding-api-key
+            - name: EMBEDDING_MODEL
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: embedding-model
+            - name: CHAT_API_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: chat-api-base
+            - name: CHAT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: chat-api-key
+            - name: CHAT_MODEL
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: chat-model
+            - name: PORT
+              value: "8000"
+          readinessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi

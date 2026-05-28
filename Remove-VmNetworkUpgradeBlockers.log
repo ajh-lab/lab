@@ -1,0 +1,148 @@
+﻿**********************
+Windows PowerShell transcript start
+Start time: 20260528115636
+Username: DESKTOP-488G4G8\adamj
+RunAs User: DESKTOP-488G4G8\adamj
+Configuration Name: 
+Machine: DESKTOP-488G4G8 (Microsoft Windows NT 10.0.19045.0)
+Host Application: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Users\adamj\SourceControl\lab\Remove-VmNetworkUpgradeBlockers.ps1
+Process ID: 16808
+PSVersion: 5.1.19041.6456
+PSEdition: Desktop
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1.19041.6456
+BuildVersion: 10.0.19041.6456
+CLRVersion: 4.0.30319.42000
+WSManStackVersion: 3.0
+PSRemotingProtocolVersion: 2.3
+SerializationVersion: 1.1.0.1
+**********************
+Stopping VMware and VirtualBox services...
+Disabling VMware and VirtualBox network filter bindings...
+Removing VMware and VirtualBox virtual network adapters...
+Microsoft PnP Utility
+
+Failed to remove device:  ROOT\NET\0000
+The device instance does not exist in the hardware tree.
+Microsoft PnP Utility
+
+Failed to remove device:  ROOT\VMWARE\0000
+The device instance does not exist in the hardware tree.
+Microsoft PnP Utility
+
+Failed to remove device:  ROOT\VMWARE\0001
+The device instance does not exist in the hardware tree.
+Removing VMware and VirtualBox network driver packages...
+Microsoft PnP Utility
+
+Driver package uninstalled.
+Failed to delete driver package: The specified file is not an installed OEM INF.
+Microsoft PnP Utility
+
+Driver package uninstalled.
+Failed to delete driver package: The specified file is not an installed OEM INF.
+Microsoft PnP Utility
+
+Driver package uninstalled.
+Failed to delete driver package: The specified file is not an installed OEM INF.
+Microsoft PnP Utility
+
+Driver package uninstalled.
+Failed to delete driver package: The specified file is not an installed OEM INF.
+Disabling remaining VMware and VirtualBox kernel drivers...
+
+SERVICE_NAME: VBoxNetLwf
+        TYPE               : 1  KERNEL_DRIVER
+        STATE              : 1  STOPPED
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+[SC] ChangeServiceConfig SUCCESS
+
+SERVICE_NAME: VBoxSup
+        TYPE               : 1  KERNEL_DRIVER
+        STATE              : 1  STOPPED
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+[SC] ChangeServiceConfig SUCCESS
+
+SERVICE_NAME: VBoxUSBMon
+        TYPE               : 1  KERNEL_DRIVER
+        STATE              : 1  STOPPED
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+[SC] ChangeServiceConfig SUCCESS
+
+SERVICE_NAME: hcmon
+        TYPE               : 1  KERNEL_DRIVER
+        STATE              : 1  STOPPED
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+[SC] ChangeServiceConfig SUCCESS
+[SC] ControlService FAILED 1052:
+
+The requested control is not valid for this service.
+
+[SC] ChangeServiceConfig SUCCESS
+
+SERVICE_NAME: VMnetBridge
+        TYPE               : 1  KERNEL_DRIVER
+        STATE              : 1  STOPPED
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+[SC] ChangeServiceConfig SUCCESS
+
+SERVICE_NAME: VMnetuserif
+        TYPE               : 1  KERNEL_DRIVER
+        STATE              : 1  STOPPED
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+[SC] ChangeServiceConfig SUCCESS
+[SC] ControlService FAILED 1062:
+
+The service has not been started.
+
+[SC] ChangeServiceConfig SUCCESS
+
+SERVICE_NAME: vmx86
+        TYPE               : 1  KERNEL_DRIVER
+        STATE              : 1  STOPPED
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+[SC] ChangeServiceConfig SUCCESS
+Removing remaining VMware and VirtualBox PnP devices and driver packages...
+Microsoft PnP Utility
+
+Removing device:          ROOT\VMWVMCIHOSTDEV\0000
+Device removed successfully.
+Microsoft PnP Utility
+
+Driver package uninstalled.
+Driver package deleted successfully.
+Microsoft PnP Utility
+
+Driver package uninstalled.
+Driver package deleted successfully.
+Microsoft PnP Utility
+
+Driver package uninstalled.
+Driver package deleted successfully.
+Current VMware/VirtualBox network adapters:
+Current VMware/VirtualBox PnP devices:
+Log written to C:\Users\adamj\SourceControl\lab\Remove-VmNetworkUpgradeBlockers.log
+**********************
+Windows PowerShell transcript end
+End time: 20260528115638
+**********************

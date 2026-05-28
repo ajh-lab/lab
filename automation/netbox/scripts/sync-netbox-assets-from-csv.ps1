@@ -8,20 +8,6 @@
 
 $ErrorActionPreference = "Stop"
 
-function Get-EnvMap {
-  param([string]$Path)
-  if (-not (Test-Path -LiteralPath $Path)) {
-    throw "Env file not found: $Path"
-  }
-
-  $map = @{}
-  Get-Content -LiteralPath $Path | ForEach-Object {
-    if ($_ -match '^\s*#' -or $_ -match '^\s*$') { return }
-    if ($_ -match '^\s*([^=]+)=(.*)$') { $map[$matches[1].Trim()] = $matches[2] }
-  }
-  return $map
-}
-
 function Encode-Q {
   param([string]$Value)
   return [uri]::EscapeDataString($Value)
@@ -268,14 +254,16 @@ function Classify-Row {
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..\..')
+$secretModule = Join-Path $repoRoot "automation\common\SecretResolver.psm1"
+Import-Module $secretModule -Force
+
 if ([string]::IsNullOrWhiteSpace($CsvPath)) { $CsvPath = Join-Path $repoRoot 'network_devices.csv' }
 if ([string]::IsNullOrWhiteSpace($EnvPath)) { $EnvPath = Join-Path $repoRoot '.env' }
 
 if (-not (Test-Path -LiteralPath $CsvPath)) { throw "CSV not found: $CsvPath" }
 
-$envMap = Get-EnvMap -Path $EnvPath
-$token = $envMap['NETBOX_ADMIN_API_TOKEN']
-if ([string]::IsNullOrWhiteSpace($token)) { throw "NETBOX_ADMIN_API_TOKEN missing in $EnvPath" }
+$envMap = Get-LabEnvMap -Path $EnvPath
+$token = Resolve-LabSecret -Key 'NETBOX_ADMIN_API_TOKEN' -EnvMap $envMap
 
 $script:BaseUrl = $NetBoxBaseUrl
 $script:Headers = @{ Authorization = "Token $token" }

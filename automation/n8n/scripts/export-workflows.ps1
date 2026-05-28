@@ -6,21 +6,6 @@
 
 $ErrorActionPreference = "Stop"
 
-function Get-EnvMap([string]$Path) {
-  if (-not (Test-Path -LiteralPath $Path)) {
-    throw "Env file not found: $Path"
-  }
-
-  $map = @{}
-  Get-Content -LiteralPath $Path | ForEach-Object {
-    if ($_ -match '^\s*#' -or $_ -match '^\s*$') { return }
-    if ($_ -match '^\s*([^=]+)=(.*)$') {
-      $map[$matches[1].Trim()] = $matches[2]
-    }
-  }
-  return $map
-}
-
 function Get-SafeName([string]$Name) {
   $safe = ($Name -replace '[^a-zA-Z0-9._-]', '-')
   $safe = ($safe -replace '-{2,}', '-').Trim('-')
@@ -29,6 +14,9 @@ function Get-SafeName([string]$Name) {
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
+$secretModule = Join-Path $repoRoot "automation\common\SecretResolver.psm1"
+Import-Module $secretModule -Force
+
 if ([string]::IsNullOrWhiteSpace($EnvPath)) {
   $EnvPath = Join-Path $repoRoot ".env"
 }
@@ -38,11 +26,8 @@ if ([string]::IsNullOrWhiteSpace($OutputDir)) {
 
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
 
-$envMap = Get-EnvMap -Path $EnvPath
-$apiKey = $envMap["N8N_API_KEY"]
-if ([string]::IsNullOrWhiteSpace($apiKey)) {
-  throw "N8N_API_KEY is missing in $EnvPath"
-}
+$envMap = Get-LabEnvMap -Path $EnvPath
+$apiKey = Resolve-LabSecret -Key "N8N_API_KEY" -EnvMap $envMap
 
 $headers = @{ "X-N8N-API-KEY" = $apiKey }
 $list = Invoke-RestMethod -Method Get -Uri "$BaseUrl/api/v1/workflows" -Headers $headers

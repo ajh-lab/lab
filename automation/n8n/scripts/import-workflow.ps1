@@ -7,35 +7,20 @@
 
 $ErrorActionPreference = "Stop"
 
-function Get-EnvMap([string]$Path) {
-  if (-not (Test-Path -LiteralPath $Path)) {
-    throw "Env file not found: $Path"
-  }
-
-  $map = @{}
-  Get-Content -LiteralPath $Path | ForEach-Object {
-    if ($_ -match '^\s*#' -or $_ -match '^\s*$') { return }
-    if ($_ -match '^\s*([^=]+)=(.*)$') {
-      $map[$matches[1].Trim()] = $matches[2]
-    }
-  }
-  return $map
-}
-
 if (-not (Test-Path -LiteralPath $InputFile)) {
   throw "Workflow JSON not found: $InputFile"
 }
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
+$secretModule = Join-Path $repoRoot "automation\common\SecretResolver.psm1"
+Import-Module $secretModule -Force
+
 if ([string]::IsNullOrWhiteSpace($EnvPath)) {
   $EnvPath = Join-Path $repoRoot ".env"
 }
 
-$envMap = Get-EnvMap -Path $EnvPath
-$apiKey = $envMap["N8N_API_KEY"]
-if ([string]::IsNullOrWhiteSpace($apiKey)) {
-  throw "N8N_API_KEY is missing in $EnvPath"
-}
+$envMap = Get-LabEnvMap -Path $EnvPath
+$apiKey = Resolve-LabSecret -Key "N8N_API_KEY" -EnvMap $envMap
 
 $raw = Get-Content -LiteralPath $InputFile -Raw | ConvertFrom-Json
 $payload = [ordered]@{
