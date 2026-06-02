@@ -67,6 +67,8 @@ $content = @'
 - ARC controller namespace: `arc-systems`
 - Runner namespace: `arc-runners`
 - Runner mode: ARC runner scale set with Docker-in-Docker sidecar
+- GitHub organization: `ajh-lab`
+- GitHub runner group: `Private Lab Runners`
 
 ## Runner Targets
 - Primary shared target: `lab-org-arm64-dind`
@@ -106,7 +108,7 @@ That is required because the lab registry serves HTTP on the LAN.
 ## ArgoCD Applications
 - `arc-controller`: deployed and healthy
 - `arc-lab-k3s-arm64-dind`: repo-scoped fallback runner, deployed and healthy
-- `arc-ajh-lab-arm64-dind`: org-scoped shared runner, defined in Git but not applied until the org runner credential is available
+- `arc-ajh-lab-arm64-dind`: org-scoped shared runner, deployed and healthy
 
 ## Required Secrets
 Kubernetes secrets in `arc-runners`:
@@ -120,12 +122,10 @@ GitHub Actions secrets:
 - `LAB_REGISTRY_USERNAME`
 - `LAB_REGISTRY_PASSWORD`
 
-## Current Credential Requirement
-The available GitHub token currently has `gist`, `read:org`, `repo`, and `workflow` scopes. GitHub rejects organization runner APIs and organization Actions secrets with HTTP 403 until an org-capable credential is provided.
+## Credential Maintenance
+The ARC organization credential is stored in `arc-runners/arc-github-org-config`. For a classic PAT, the token needs org runner permission, commonly `admin:org`, plus the repo/workflow scopes needed for the repositories it serves. For a fine-grained token or GitHub App, grant organization self-hosted runner read/write permission and the organization settings permissions GitHub requires for ARC registration.
 
-For a classic PAT, refresh or create a token with `admin:org` in addition to the existing repo/workflow scopes. For a fine-grained token or GitHub App, grant organization self-hosted runner read/write permission and the organization settings permissions GitHub requires for ARC registration.
-
-After the credential is available, create or update:
+To rotate the credential:
 
 ```powershell
 kubectl create secret generic arc-github-org-config `
@@ -135,7 +135,7 @@ kubectl create secret generic arc-github-org-config `
   -o yaml | kubectl apply -f -
 ```
 
-Then apply the org runner ArgoCD application:
+Then re-sync or re-apply the org runner ArgoCD application:
 
 ```powershell
 kubectl apply --server-side -f argocd/applications/arc-ajh-lab-arm64-dind-runner-scale-set.yaml
@@ -166,10 +166,35 @@ query ($query: String!, $locale: String!) {
   }
 }
 '@
-$existingSearch = Invoke-WikiGql -Query $searchExistingQuery -Variables @{ query = "github actions runner arc"; locale = $locale }
-$match = @($existingSearch.pages.search.results) | Where-Object { $_.path -eq $path } | Select-Object -First 1
+
+$match = $null
+$pathQuery = @'
+query ($path: String!, $locale: String!) {
+  pages {
+    singleByPath(path: $path, locale: $locale) {
+      id
+      path
+      title
+    }
+  }
+}
+'@
+
+try {
+  $existingByPath = Invoke-WikiGql -Query $pathQuery -Variables @{ path = $path; locale = $locale }
+  if ($existingByPath.pages.singleByPath -and $existingByPath.pages.singleByPath.id) {
+    $match = $existingByPath.pages.singleByPath
+  }
+} catch {
+  Write-Host "wiki_path_lookup=unavailable"
+}
+
 if ($null -eq $match) {
-  $match = @($existingSearch.pages.search.results) | Where-Object { $_.title -eq $title } | Select-Object -First 1
+  $existingSearch = Invoke-WikiGql -Query $searchExistingQuery -Variables @{ query = "github actions runner arc"; locale = $locale }
+  $match = @($existingSearch.pages.search.results) | Where-Object { $_.path -eq $path } | Select-Object -First 1
+  if ($null -eq $match) {
+    $match = @($existingSearch.pages.search.results) | Where-Object { $_.title -eq $title } | Select-Object -First 1
+  }
 }
 
 if ($null -ne $match -and $match.id) {
