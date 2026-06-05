@@ -154,6 +154,7 @@ Current columns:
 - PostgreSQL service host: `lab-pgsql01` at `192.168.1.216`
 - Container registry host: `lab-registry01` at `192.168.1.15:5000`
 - AI workstation: `ai-workstation-evox2` at `192.168.1.123`
+- SPT/Fika server VM: `spt01` at `192.168.1.85`
 - Most k3s web services are exposed either by NodePort on `192.168.1.80` or Traefik ingress with `*.192.168.1.80.sslip.io` hostnames.
 
 ### Network
@@ -305,6 +306,62 @@ Worker recovery note:
   - `llama3.2:1b`
   - `tinyllama:latest`
 - `llama.cpp` built and installed from source with Vulkan support (`/usr/local/bin/llama-cli`)
+
+### SPT/Fika Server
+
+- Host: `spt01` (`192.168.1.85`, Windows 10 Pro VM)
+- Purpose: Dedicated SPT/Fika backend and Fika headless host for Single Player Tarkov co-op hosting.
+- VM sizing note: ESXi VM CPU was reduced from 8 vCPU to 4 vCPU / 1 socket / 4 cores to reduce host CPU pressure.
+- Network:
+  - Primary LAN IP: `192.168.1.85/24`
+  - Gateway: `192.168.1.1`
+  - SPT/Fika backend endpoint: `https://192.168.1.85:6969`
+  - Fika headless endpoint check: `https://192.168.1.85:6969/fika/headless/get`
+  - OpenSSH Server: `22/tcp`
+  - WinRM: `5985/tcp`
+- Documentation:
+  - Wiki.js page: `https://wikijs.192.168.1.80.sslip.io/en/services/spt01`
+  - Wiki upsert automation: `automation/wikijs/scripts/upsert-spt01-page.ps1`
+- Credentials:
+  - Bootstrap `.env` keys: `SPT01_HOST`, `SPT01_USER`, `SPT01_PASSWORD`
+  - Dedicated OpenBao KV v2 path: `secret/homelab/vms/spt01`
+  - Dedicated OpenBao fields: `host`, `username`, `password`, `ssh_user`, `ssh_host`
+  - Do not put the SPT01 password in docs, Git, Wiki.js, Slack, Discord, or command logs.
+- Installed paths on `spt01`:
+  - SPT/Fika root: `C:\SPT`
+  - SPT backend: `C:\SPT\SPT\SPT.Server.exe`
+  - Original EFT files: `C:\Battlestate Games\Escape From Tarkov`
+  - Fika headless manager: `C:\SPT\FikaHeadlessManager.exe`
+  - Operator automation: `C:\SPT\automation`
+  - Disabled copied desktop mods: `C:\SPT\_disabled-headless\baseline-20260605-141312`
+- Active baseline mods:
+  - BepInEx plugins: `Fika`, `spt`
+  - Server mods: `fika-server`
+- Operator scripts:
+  - Interactive desktop menu: `C:\SPT\automation\Manage-SPT01-Fika.ps1`
+  - Desktop launcher: `C:\Users\helios\Desktop\SPT01 Fika Server Manager.lnk`
+  - Non-interactive action script: `C:\SPT\automation\Invoke-SPT01-FikaAction.ps1`
+  - Repo sources:
+    - `automation/spt01/Manage-SPT01-Fika.ps1`
+    - `automation/spt01/Invoke-SPT01-FikaAction.ps1`
+    - `automation/spt01/SPT01-Fika-Server-Manager.cmd`
+- Scheduled tasks on `spt01`:
+  - `SPT01-SPT-Server`: starts `C:\SPT\SPT\SPT.Server.exe` at `helios` logon.
+  - `SPT01-Fika-Headless`: runs `C:\SPT\automation\Start-FikaHeadlessAfterServer.ps1`, waits for SPT backend readiness, then starts `C:\SPT\FikaHeadlessManager.exe`.
+- Hermes/AI workstation control path:
+  - OpenSSH Server is installed on `spt01`; default SSH shell is Windows PowerShell 5.1.
+  - `helios@ai-workstation-evox2` is authorized for key-based SSH to `helios@192.168.1.85`.
+  - Validated from `ai-workstation-evox2`:
+    - `ssh helios@192.168.1.85 hostname`
+    - `ssh helios@192.168.1.85 whoami`
+  - Hermes-safe command pattern:
+    - `ssh helios@192.168.1.85 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT01-FikaAction.ps1 -Action Status"`
+    - Replace `Status` with `Start`, `Stop`, or `Restart` as needed.
+  - Use the non-interactive action script for Discord/Hermes requests; do not use the interactive menu script from Hermes.
+- Current validation state:
+  - SSH from `ai-workstation-evox2` to `spt01` works with key-based auth.
+  - The non-interactive `Status` action returns JSON over SSH.
+  - Fika headless installation is complete, but baseline validation should continue from the active minimal mod set before reintroducing mods.
 
 ### Strix Halo Backend (Required)
 
@@ -541,6 +598,7 @@ Current key groups include:
 - `LAB_WIKIJS_DB_*`
 - `N8N_*`
 - `NETBOX_*`
+- `SPT01_*`
 - `UDM_PRO_*`
 - `OPENBAO_ROOT_TOKEN`
 - `ARGOCD_ADMIN_*`
@@ -577,6 +635,7 @@ Bootstrap behavior:
 10. For Strix Halo workstation inference backend operations, use `kyuz0/amd-strix-halo-toolboxes` and keep it synced with `automation/ai-workstation/scripts/sync-strix-halo-backend.ps1`.
 11. `Hermes-Test` should be treated as disposable validation only; durable planning and execution state belongs in this `lab` repo.
 12. For OpenClaw operations on the workstation, use `automation/ai-workstation/README.md` for install/status/security/runtime reference.
+13. For SPT/Fika control requests, use the `SPT/Fika Server` section above and prefer `ssh helios@192.168.1.85 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT01-FikaAction.ps1 -Action Status|Start|Stop|Restart"` from `ai-workstation-evox2`; do not use the interactive desktop menu from Hermes/Discord.
 
 ## Next Actions
 
