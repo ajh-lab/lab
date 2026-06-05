@@ -351,6 +351,7 @@ Worker recovery note:
 - Hermes/AI workstation control path:
   - OpenSSH Server is installed on `spt01`; default SSH shell is Windows PowerShell 5.1.
   - `helios@ai-workstation-evox2` is authorized for key-based SSH to `helios@192.168.1.85`.
+  - If access from this Windows workstation to `ai-workstation-evox2` fails, use the `AI_WORKSTATION_*` keys from `.env` / OpenBao bootstrap (`secret/homelab/bootstrap/env`) and the AI Workstation Sudo Credential section below.
   - Validated from `ai-workstation-evox2`:
     - `ssh helios@192.168.1.85 hostname`
     - `ssh helios@192.168.1.85 whoami`
