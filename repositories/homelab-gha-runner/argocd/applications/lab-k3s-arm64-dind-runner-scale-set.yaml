@@ -1,0 +1,110 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: arc-lab-k3s-arm64-dind
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: ghcr.io/actions/actions-runner-controller-charts
+    chart: gha-runner-scale-set
+    targetRevision: 0.14.2
+    helm:
+      releaseName: lab-k3s-arm64-dind
+      valuesObject:
+        githubConfigUrl: "https://github.com/ajh-lab/homelab-gha-runner"
+        githubConfigSecret: arc-github-config
+        runnerScaleSetName: "lab-k3s-arm64-dind"
+        scaleSetLabels:
+          - lab
+          - k3s
+          - rpi5
+          - arm64
+          - dind
+          - docker
+          - arc
+        minRunners: 1
+        maxRunners: 2
+        controllerServiceAccount:
+          namespace: arc-systems
+          name: arc-gha-rs-controller
+        template:
+          spec:
+            imagePullSecrets:
+              - name: lab-registry-pull
+            nodeSelector:
+              kubernetes.io/arch: arm64
+            initContainers:
+              - name: init-dind-externals
+                image: 192.168.1.15:5000/lab/github-actions-runner:0.1.0
+                imagePullPolicy: Always
+                command: ["cp", "-r", "/home/runner/externals/.", "/home/runner/tmpDir/"]
+                volumeMounts:
+                  - name: dind-externals
+                    mountPath: /home/runner/tmpDir
+            containers:
+              - name: dind
+                image: docker:29-dind
+                args:
+                  - dockerd
+                  - --host=unix:///var/run/docker.sock
+                  - --group=$(DOCKER_GROUP_GID)
+                  - --insecure-registry=192.168.1.15:5000
+                env:
+                  - name: DOCKER_GROUP_GID
+                    value: "123"
+                securityContext:
+                  privileged: true
+                startupProbe:
+                  exec:
+                    command:
+                      - docker
+                      - info
+                  initialDelaySeconds: 0
+                  failureThreshold: 24
+                  periodSeconds: 5
+                volumeMounts:
+                  - name: work
+                    mountPath: /home/runner/_work
+                  - name: dind-sock
+                    mountPath: /var/run
+                  - name: dind-externals
+                    mountPath: /home/runner/externals
+              - name: runner
+                image: 192.168.1.15:5000/lab/github-actions-runner:0.1.0
+                imagePullPolicy: Always
+                command: ["/home/runner/run.sh"]
+                env:
+                  - name: DOCKER_HOST
+                    value: unix:///var/run/docker.sock
+                  - name: RUNNER_WAIT_FOR_DOCKER_IN_SECONDS
+                    value: "120"
+                resources:
+                  requests:
+                    cpu: "500m"
+                    memory: "1Gi"
+                  limits:
+                    cpu: "2"
+                    memory: "4Gi"
+                volumeMounts:
+                  - name: work
+                    mountPath: /home/runner/_work
+                  - name: dind-sock
+                    mountPath: /var/run
+            volumes:
+              - name: work
+                emptyDir: {}
+              - name: dind-sock
+                emptyDir: {}
+              - name: dind-externals
+                emptyDir: {}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: arc-runners
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

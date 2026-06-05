@@ -1,0 +1,53 @@
+name: Build runner image
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - Dockerfile
+      - .github/workflows/build-runner-image.yml
+      - buildkitd.toml
+
+env:
+  REGISTRY: 192.168.1.15:5000
+  IMAGE_NAME: lab/github-actions-runner
+  RUNNER_IMAGE_TAG: "0.1.0"
+
+jobs:
+  build:
+    name: Build and push ARM64 runner image
+    runs-on: lab-org-arm64-dind
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show runner environment
+        run: |
+          uname -a
+          docker version
+          docker buildx version
+
+      - name: Login to lab registry
+        env:
+          REGISTRY_USERNAME: ${{ secrets.LAB_REGISTRY_USERNAME }}
+          REGISTRY_PASSWORD: ${{ secrets.LAB_REGISTRY_PASSWORD }}
+        run: |
+          printf '%s' "$REGISTRY_PASSWORD" | docker login "$REGISTRY" --username "$REGISTRY_USERNAME" --password-stdin
+
+      - name: Build image
+        run: |
+          docker buildx create --use --name homelab-gha-runner-builder --config buildkitd.toml || docker buildx use homelab-gha-runner-builder
+          docker buildx build \
+            --platform linux/arm64 \
+            --tag "$REGISTRY/$IMAGE_NAME:$RUNNER_IMAGE_TAG" \
+            --tag "$REGISTRY/$IMAGE_NAME:latest" \
+            --push \
+            .
+
+      - name: Inspect pushed image
+        run: |
+          docker buildx imagetools inspect "$REGISTRY/$IMAGE_NAME:$RUNNER_IMAGE_TAG"
