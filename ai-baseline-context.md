@@ -154,7 +154,7 @@ Current columns:
 - PostgreSQL service host: `lab-pgsql01` at `192.168.1.216`
 - Container registry host: `lab-registry01` at `192.168.1.15:5000`
 - AI workstation: `ai-workstation-evox2` at `192.168.1.123`
-- SPT/Fika server VM: `spt01` at `192.168.1.85`
+- SPT/Fika server host: `SPT02` at `192.168.1.86`
 - Most k3s web services are exposed either by NodePort on `192.168.1.80` or Traefik ingress with `*.192.168.1.80.sslip.io` hostnames.
 
 ### Network
@@ -309,60 +309,130 @@ Worker recovery note:
 
 ### SPT/Fika Server
 
-- Host: `spt01` (`192.168.1.85`, Windows 10 Pro VM)
+- Host: `spt02` (`192.168.1.86`, Windows 10 Pro physical host)
 - Purpose: Dedicated SPT/Fika backend and Fika headless host for Single Player Tarkov co-op hosting.
-- VM sizing note: ESXi VM CPU was reduced from 8 vCPU to 4 vCPU / 1 socket / 4 cores to reduce host CPU pressure.
+- Migration note: `spt02` replaces the previous `spt01` ESXi VM because the VM was too slow for reliable Fika headless hosting.
 - Network:
-  - Primary LAN IP: `192.168.1.85/24`
+  - Primary LAN IP: `192.168.1.86/24`
   - Gateway: `192.168.1.1`
-  - SPT/Fika backend endpoint: `https://192.168.1.85:6969`
-  - Fika headless endpoint check: `https://192.168.1.85:6969/fika/headless/get`
+  - SPT/Fika backend endpoint: `https://192.168.1.86:6969`
+  - Fika headless endpoint check: `https://192.168.1.86:6969/fika/headless/get`
   - OpenSSH Server: `22/tcp`
   - WinRM: `5985/tcp`
+- Remote player VPN:
+  - UDM WireGuard server: `SPT-Fika-WireGuard`
+  - VPN subnet/server address: `192.168.86.1/24`
+  - WireGuard listener: `51820/udp` on WAN
+  - DNS pushed to VPN clients: `192.168.1.1`
+  - Add player client profiles in UniFi Network under Settings > VPN > VPN Server > `SPT-Fika-WireGuard` > Add Client, then share the generated WireGuard config out of band.
+  - Router firewall rules on UDM classic `LAN_IN`:
+    - `SPT Fika VPN allow backend TCP 6969`: `192.168.86.0/24` -> `192.168.1.86:6969/tcp`
+    - `SPT Fika VPN allow raid UDP 25565`: `192.168.86.0/24` -> `192.168.1.86:25565/udp`
+    - `SPT Fika VPN drop other LAN access`: drops `192.168.86.0/24` -> `192.168.1.0/24`
+  - SPT02 Windows Firewall allows Fika ports only from `192.168.1.0/24` and `192.168.86.0/24`.
+  - Do not expose SPT/Fika with direct WAN port forwards.
+- Host power/network stability:
+  - Windows sleep, hibernate, disk idle sleep, and hybrid sleep should remain disabled for server hosting.
+  - NIC power saving should remain disabled so Windows does not drop the network adapter during idle periods.
 - Documentation:
-  - Wiki.js page: `https://wikijs.192.168.1.80.sslip.io/en/services/spt01`
-  - Wiki upsert automation: `automation/wikijs/scripts/upsert-spt01-page.ps1`
+  - Wiki.js page: `https://wikijs.192.168.1.80.sslip.io/en/services/spt02`
+  - Wiki upsert automation: `automation/wikijs/scripts/upsert-spt-fika-page.ps1`
 - Credentials:
-  - Bootstrap `.env` keys: `SPT01_HOST`, `SPT01_USER`, `SPT01_PASSWORD`
-  - Dedicated OpenBao KV v2 path: `secret/homelab/vms/spt01`
+  - Bootstrap `.env` keys: use `SPT02_HOST` for the host when present; current automation can still resolve the shared SPT admin credentials from `SPT01_USER` and `SPT01_PASSWORD` because SPT02 was built with the same local administrator account.
+  - Dedicated OpenBao KV v2 path: `secret/homelab/vms/spt02`
   - Dedicated OpenBao fields: `host`, `username`, `password`, `ssh_user`, `ssh_host`
-  - Do not put the SPT01 password in docs, Git, Wiki.js, Slack, Discord, or command logs.
-- Installed paths on `spt01`:
+  - Do not put the SPT02 password in docs, Git, Wiki.js, Slack, Discord, or command logs.
+- Installed paths on `SPT02`:
   - SPT/Fika root: `C:\SPT`
   - SPT backend: `C:\SPT\SPT\SPT.Server.exe`
   - Original EFT files: `C:\Battlestate Games\Escape From Tarkov`
   - Fika headless manager: `C:\SPT\FikaHeadlessManager.exe`
   - Operator automation: `C:\SPT\automation`
-  - Disabled copied desktop mods: `C:\SPT\_disabled-headless\baseline-20260605-141312`
-- Active baseline mods:
+  - Disabled copied desktop mods:
+    - `C:\SPT\_disabled-headless\baseline-20260605-141312`
+    - `C:\SPT\_disabled-headless\baseline-cleanup-20260605-151018`
+    - `C:\SPT\_disabled-headless\baseline-profile-cache-cleanup-20260605-151323`
+  - Active baseline mods:
   - BepInEx plugins: `Fika`, `spt`
-  - Server mods: `fika-server`
+  - Added BepInEx plugins:
+    - `HomelabFikaHeadlessCrcFix` (`C:\SPT\BepInEx\plugins\HomelabFikaHeadlessCrcFix`)
+    - `JBOBYH`, `RaiRai.ColorConverterAPI.dll`, `QuestsExtended`, `TTC.dll`, `UnityToolkit`, `WTT-ClientCommonLib`, and `WTT-ContentBackportClient`
+  - BepInEx patchers: `spt-prepatch.dll`
+  - Server mods include `fika-server`, `[SVM] Server Value Modifier`, `TTC`, `QuestsExtended`, WTT content/common libraries, Stat Rewards, Fika Discord Presence, and the other active mods listed in `docs/spt-fika-runbook.md`.
+  - SAIN/BigBrain were disabled on 2026-06-07 while troubleshooting bots spawning but not moving/reacting, then restored after later profile/mod cleanup:
+    - SPT02 quarantine: `C:\SPT\_disabled-headless\sain-bigbrain-disabled-20260607-182745`
+    - Local client quarantine: `C:\SPT\_disabled-client-baseline\sain-bigbrain-disabled-20260607-182719`
+    - Disabled components: `Solarint-SAIN-ServerMod`, `SAIN`, `DrakiaXYZ-BigBrain.dll`, `DrakiaXYZ-Waypoints`, and related BepInEx config files.
+  - SamSWAT Fire Support disabled on 2026-06-07 during bot behavior isolation because Forge marks it Fika-incompatible:
+    - SPT02 quarantine: `C:\SPT\_disabled-headless\firesupport-disabled-20260607-184211`
+    - Local client quarantine: `C:\SPT\_disabled-client-baseline\firesupport-disabled-20260607-184148`
+  - WTT-Artem disabled on 2026-06-07 during bot behavior isolation after logs traced item deserialization errors to Artem helmet/vest custom item IDs:
+    - SPT02 quarantine: `C:\SPT\_disabled-headless\wtt-artem-disabled-20260607-192633`
+    - No active local `WTT-Artem` folder was present to move.
+  - Local `Chadnovski` profile cleanup on 2026-06-07:
+    - Backup: `C:\SPT\_migration-backups\profile-cleanup-artem-20260607-1948\6a1f4c94ed07eef6542364cd.json`
+    - Removed stale Artem item instance `6a224d1f643943abf019d3c3` with missing template `6673b1ac5cae0610f1079d76` from local `C:\SPT\SPT\user\profiles\6a1f4c94ed07eef6542364cd.json`.
+    - This stale local profile item caused Fika profile deserialization errors on the headless host when entering Factory after `WTT-Artem` was removed.
+  - `WTT-PackNStrap` was previously disabled because it generated unsupported `CustomContainerTemplate` taxonomy data when only the server mod was restored. It was re-enabled on 2026-06-08 after adding `UseItemsFromAnywhere.dll` and restoring the PackNStrap/BeltSlot BepInEx plugins on SPT02/headless and local `C:\SPT`; backend and headless startup validated.
+  - SVM source restored from `C:\SPT\_disabled-headless\baseline-20260605-141312\SPT\user\mods\[SVM] Server Value Modifier`.
+  - SVM active preset: `Noname`.
+  - Discord Raid Map is disabled on SPT02/headless as of 2026-06-08:
+    - Disabled path: `C:\SPT\_disabled-headless\discord-raid-map-headless-unstable-20260608-105554`
+    - Config path: `C:\SPT\BepInEx\config\com.fiodor.discordraidmap.cfg`
+    - Patch source path on SPT02: `C:\SPT\_mod-sources\DiscordRaidMap`
+    - A local lab patch was tested that changed the plugin version to `1.0.1` and added `Initial Delay Seconds = 30` so the first Discord map render/upload waits until after the Fika headless raid creation window.
+    - The patched build loaded, but the SPT02 headless client still crashed during raid startup, so the mod was moved back out of active `BepInEx\plugins`.
+    - Uses the shared Discord webhook URL. The webhook secret must not be written to Git, Wiki.js, Discord messages, or command logs.
+  - MoreBotsAPI / Black Division are disabled on SPT02/headless and local `C:\SPT` as of 2026-06-08:
+    - SPT02 quarantine: `C:\SPT\_disabled-headless\morebots-blackdiv-raidinit-crash-20260608-124634`
+    - Local client quarantine: `C:\SPT\_disabled-client-baseline\morebots-blackdiv-raidinit-crash-20260608-125316`
+    - Disabled components include `MoreBotsAPI`, `MoreBotsPrepatch.dll`, `MoreBotsServer`, `BlackDiv`, `BlackDiv.dll`, and `BlackDivServer`.
+    - Reason: the SPT02 headless client restarted/crashed during Reserve raid initialization, and `BepInEx\LogOutput_prev.log` showed `System.NullReferenceException` in `MoreBotsAPI.Patches.BotsControllerInitPatch.PatchPostfix` during bot controller initialization.
+  - TTC installed on SPT02 and local `C:\SPT` on 2026-06-07:
+    - Forge page: `https://forge.sp-tarkov.com/mod/2226/ttc-tarkov-trading-cards`
+    - Installed TTC version: `3.0.8`
+    - Dependencies installed: Color Converter API, Quests Extended, Item Preview QoL.
+    - Forge lists Fika compatibility as unknown; validated state is backend/headless startup only, not full raid behavior.
+    - Install backups: local `C:\SPT\_migration-backups\ttc-install-20260607-154320`; SPT02 `C:\SPT\_migration-backups\ttc-install-20260607-154342`.
+  - Desktop player profile `Chadnovski` is active on SPT02 again as of 2026-06-08. It was re-imported from local `C:\SPT\SPT\user\profiles\6a1f4c94ed07eef6542364cd.json` to SPT02 active profiles, replacing the prior SPT02 copy. The replaced SPT02 profile and Discord Raid Map state were backed up under `C:\SPT\_mod-install-backups\discord-raid-map-profile-import-20260608-100754`.
+  - The generated headless profile was backed up and cleaned of invalid scav inventory items left over from copied desktop mods.
+  - `C:\SPT\SPT\SPT_Data\configs\core.json` has `removeModItemsFromProfile` and `removeInvalidTradersFromProfile` enabled to strip invalid modded items/trader data if a dirty profile is loaded again.
 - Operator scripts:
-  - Interactive desktop menu: `C:\SPT\automation\Manage-SPT01-Fika.ps1`
-  - Desktop launcher: `C:\Users\helios\Desktop\SPT01 Fika Server Manager.lnk`
-  - Non-interactive action script: `C:\SPT\automation\Invoke-SPT01-FikaAction.ps1`
+  - Interactive desktop menu: `C:\SPT\automation\Manage-SPT02-Fika.ps1`
+  - Desktop launcher: `C:\Users\helios\Desktop\SPT02 Fika Server Manager.lnk`
+  - Non-interactive action script: `C:\SPT\automation\Invoke-SPT02-FikaAction.ps1`
+  - Delayed headless launcher: `C:\SPT\automation\Start-FikaHeadlessAfterServer.ps1`
   - Repo sources:
-    - `automation/spt01/Manage-SPT01-Fika.ps1`
-    - `automation/spt01/Invoke-SPT01-FikaAction.ps1`
-    - `automation/spt01/SPT01-Fika-Server-Manager.cmd`
-- Scheduled tasks on `spt01`:
-  - `SPT01-SPT-Server`: starts `C:\SPT\SPT\SPT.Server.exe` at `helios` logon.
-  - `SPT01-Fika-Headless`: runs `C:\SPT\automation\Start-FikaHeadlessAfterServer.ps1`, waits for SPT backend readiness, then starts `C:\SPT\FikaHeadlessManager.exe`.
+    - `automation/spt02/Manage-SPT02-Fika.ps1`
+    - `automation/spt02/Invoke-SPT02-FikaAction.ps1`
+    - `automation/spt02/Start-FikaHeadlessAfterServer.ps1`
+    - `automation/spt02/SPT02-Fika-Server-Manager.cmd`
+    - `automation/spt-client/Install-SPTFikaPlayerClient.ps1` interactive player setup, SPT02 mod-package install, timestamped mod backup/restore, and mod-package build utility.
+- Scheduled tasks on `spt02`:
+  - `SPT02-SPT-Server`: starts `C:\SPT\SPT\SPT.Server.exe` at `helios` logon.
+  - `SPT02-Fika-Headless`: runs `C:\SPT\automation\Start-FikaHeadlessAfterServer.ps1`, waits for `https://127.0.0.1:6969/fika/headless/get`, then starts `C:\SPT\FikaHeadlessManager.exe`.
 - Hermes/AI workstation control path:
-  - OpenSSH Server is installed on `spt01`; default SSH shell is Windows PowerShell 5.1.
-  - `helios@ai-workstation-evox2` is authorized for key-based SSH to `helios@192.168.1.85`.
+  - OpenSSH Server is installed on `spt02`; default SSH shell is Windows PowerShell 5.1.
+  - `helios@ai-workstation-evox2` is authorized for key-based SSH to `helios@192.168.1.86`.
   - If access from this Windows workstation to `ai-workstation-evox2` fails, use the `AI_WORKSTATION_*` keys from `.env` / OpenBao bootstrap (`secret/homelab/bootstrap/env`) and the AI Workstation Sudo Credential section below.
   - Validated from `ai-workstation-evox2`:
-    - `ssh helios@192.168.1.85 hostname`
-    - `ssh helios@192.168.1.85 whoami`
+    - `ssh helios@192.168.1.86 hostname`
+    - `ssh helios@192.168.1.86 whoami`
   - Hermes-safe command pattern:
-    - `ssh helios@192.168.1.85 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT01-FikaAction.ps1 -Action Status"`
+    - `ssh helios@192.168.1.86 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT02-FikaAction.ps1 -Action Status"`
     - Replace `Status` with `Start`, `Stop`, or `Restart` as needed.
   - Use the non-interactive action script for Discord/Hermes requests; do not use the interactive menu script from Hermes.
 - Current validation state:
-  - SSH from `ai-workstation-evox2` to `spt01` works with key-based auth.
+  - SSH from `ai-workstation-evox2` to `spt02` works with key-based auth.
   - The non-interactive `Status` action returns JSON over SSH.
-  - Fika headless installation is complete, but baseline validation should continue from the active minimal mod set before reintroducing mods.
+  - SPT starts cleanly with the current active SPT02 mod set.
+  - The old `/client/game/version/validate` readiness probe was removed because it caused empty-body route cast errors in SPT logs.
+  - `FikaHeadlessManager.exe` and `EscapeFromTarkov.exe` remain running after startup, and `/fika/headless/get` returns the registered headless profile after the EFT headless client finishes loading.
+  - Validated through `ai-workstation-evox2` SSH on 2026-06-07: `Invoke-SPT02-FikaAction.ps1 -Action Restart` restarted the stack and returned backend-ready status.
+  - 2026-06-07 bot movement isolation: SAIN/BigBrain/Waypoints were removed from SPT02 and local `C:\SPT` after bots still spawned but did not move/react with the full SAIN/BigBrain/Waypoints stack active.
+  - 2026-06-07 TTC validation: `[TTC] Tarkov Trading Cards` `3.0.8` installed on SPT02 and local `C:\SPT`; SPT backend loaded TTC, created cards/quests/Kolya trader data, generated loot, and Fika headless registered after restart without TTC startup errors.
+  - 2026-06-08 mod additions installed on SPT02 and local `C:\SPT`: `StatRewards` 1.1.1, `tarkin-ladders` 1.0.2, `FikaDiscordPresence` 1.0.2, `BlackDivServer`/Black Division 1.1.1, `MoreBotsServer`/MoreBotsAPI 2.0.1, and `DrakiaXYZ-BigBrain.dll` 1.4.0. `BlackDivServer`/Black Division and `MoreBotsServer`/MoreBotsAPI were later disabled the same day after the headless raid-init crash described above.
+  - Fika Discord Presence webhook and Fika API key are configured only on SPT02 in `C:\SPT\SPT\user\mods\FikaDiscordPresence\config.json`. The webhook URL and API key are secrets; do not write them to Git, Wiki.js, Discord messages, or command logs. The local `C:\SPT` copy remains installed but should not be configured with the webhook to avoid duplicate Discord status posts.
 
 ### Strix Halo Backend (Required)
 
@@ -599,7 +669,7 @@ Current key groups include:
 - `LAB_WIKIJS_DB_*`
 - `N8N_*`
 - `NETBOX_*`
-- `SPT01_*`
+- `SPT02_*`
 - `UDM_PRO_*`
 - `OPENBAO_ROOT_TOKEN`
 - `ARGOCD_ADMIN_*`
@@ -636,7 +706,7 @@ Bootstrap behavior:
 10. For Strix Halo workstation inference backend operations, use `kyuz0/amd-strix-halo-toolboxes` and keep it synced with `automation/ai-workstation/scripts/sync-strix-halo-backend.ps1`.
 11. `Hermes-Test` should be treated as disposable validation only; durable planning and execution state belongs in this `lab` repo.
 12. For OpenClaw operations on the workstation, use `automation/ai-workstation/README.md` for install/status/security/runtime reference.
-13. For SPT/Fika control requests, use the `SPT/Fika Server` section above and prefer `ssh helios@192.168.1.85 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT01-FikaAction.ps1 -Action Status|Start|Stop|Restart"` from `ai-workstation-evox2`; do not use the interactive desktop menu from Hermes/Discord.
+13. For SPT/Fika control requests, use the `SPT/Fika Server` section above and prefer `ssh helios@192.168.1.86 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT02-FikaAction.ps1 -Action Status|Start|Stop|Restart"` from `ai-workstation-evox2`; do not use the interactive desktop menu from Hermes/Discord.
 
 ## Next Actions
 
