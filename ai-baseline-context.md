@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-05-23 10:30 (America/Chicago)
+Last updated: 2026-06-20 13:15 (America/Chicago)
 
 ## Purpose
 
@@ -374,6 +374,15 @@ Worker recovery note:
     - Removed stale Artem item instance `6a224d1f643943abf019d3c3` with missing template `6673b1ac5cae0610f1079d76` from local `C:\SPT\SPT\user\profiles\6a1f4c94ed07eef6542364cd.json`.
     - This stale local profile item caused Fika profile deserialization errors on the headless host when entering Factory after `WTT-Artem` was removed.
   - `WTT-PackNStrap` was previously disabled because it generated unsupported `CustomContainerTemplate` taxonomy data when only the server mod was restored. It was re-enabled on 2026-06-08 after adding `UseItemsFromAnywhere.dll` and restoring the PackNStrap/BeltSlot BepInEx plugins on SPT02/headless and local `C:\SPT`; backend and headless startup validated.
+  - `MergeConsumablesFika.dll` was installed on SPT02/headless and local `C:\SPT` on 2026-06-08 after live raid logs showed Fika inventory conversion exceptions in `ItemControllerExecutePacket` / `ObservedInventoryController.CreateOperationFromDescriptor`. Keep `MergeConsumables.dll`, `MergeConsumablesFika.dll`, and `MergeConsumablesServer` together so custom merge operations use the dedicated Fika sync packet instead of Fika's generic inventory operation path.
+  - `LootNET` 1.0.6 was installed on SPT02/headless and local `C:\SPT` on 2026-06-08:
+    - SPT02/local client plugin: `C:\SPT\BepInEx\plugins\LootNet`
+    - SPT02/local server mod: `C:\SPT\SPT\user\mods\LootNetServer`
+    - Forge page: `https://forge.sp-tarkov.com/mod/2679/lootnet`
+    - Install backup path on both hosts: `C:\SPT\_mod-install-backups\lootnet-1.0.6-20260608-220720`
+    - SPT02 startup validated after install: `LootNet v1.0.6 loaded`, `LootNet: loaded 6503 flea prices`, Fika plugin validation completed, and the headless websocket registered.
+  - `automation/spt-client/Install-SPTFikaPlayerClient.ps1` validates expected SPT02 mod package components after setup/modpack install. The expected list includes LootNET, MergeConsumables Fika sync, WTT PackNStrap/content/Armory, Color Converter API, TTC, Climbable Ladders, Stat Rewards, Caliber Split Ammo Cases, Collector Backport Patch, Tarkov Rare Collectibles, Medical SICC Case, Handy Toolbox, and Disciples Ballistic Case Plus. Rebuild the player mod package after adding/changing required client/server mods.
+  - On 2026-06-09, these server-side item/container mods were installed on SPT02 and local `C:\SPT`, then SPT02 backend startup was validated without mod-specific load errors: `CaliberSplitAmmoCases` 2.0.2, `CollectorBackportPatch` 0.1.1, `yellowdoge-tarkovrarecollectibles` 1.1.5, `MedicalSICCcase` 5.0.3, `Handy` 1.0.0, and `RepublicanJesus-DiscipleBallisticCasePlus` 1.0.0.
   - SVM source restored from `C:\SPT\_disabled-headless\baseline-20260605-141312\SPT\user\mods\[SVM] Server Value Modifier`.
   - SVM active preset: `Noname`.
   - Discord Raid Map is disabled on SPT02/headless as of 2026-06-08:
@@ -445,6 +454,73 @@ Worker recovery note:
   - `automation/ai-workstation/scripts/sync-strix-halo-backend.ps1`
 
 ## Platform Services (Live)
+
+### PulseTrader (Planned / Not Yet Deployed)
+
+- Purpose: safety-constrained Kalshi BTC 15-minute market experiment platform for observe/paper-first market watching, deterministic risk gating, and a modern dark second-monitor dashboard.
+- Current deployment status: **not deployed to k3s yet** as of 2026-06-20. No `pulsetrader` namespace, ArgoCD Application, Service, Ingress, or live URL exists in the cluster yet.
+- GitHub repository: `https://github.com/AJHeitzman/PulseTrader`
+- Local lab checkout: `repositories/PulseTrader`
+- AI workstation checkout: `/mnt/ai/agent/PulseTrader`
+- Hermes Kanban board: `pulsetrader` (`PulseTrader`)
+- Current committed implementation state:
+  - Initial FastAPI API scaffold.
+  - Safe runtime config defaults: `MODE=observe`, `LIVE_TRADING_ENABLED=false`.
+  - Mock current market endpoint for early API scaffolding and tests.
+  - Advisory-only agent analysis interface.
+  - Documentation for modern dark UI design and post-deploy verification.
+- Important data-provider rule:
+  - Mock providers are only for tests, local offline development, deterministic demos, and CI.
+  - Deployed observe/paper mode should use real read-only Kalshi/BTC market data APIs when configured.
+  - UI must consume PulseTrader backend API endpoints and must not own provider selection.
+- Safety model:
+  - Default mode is observe only.
+  - Live trading must remain disabled unless intentionally configured by the owner.
+  - Any future live-limited order path must go through deterministic risk gate code.
+  - LLM/Hermes/agent analysis is advisory only and must not hold Kalshi credentials, place orders, modify risk state, or bypass risk checks.
+  - Market orders are forbidden by project policy.
+- CI/CD target state captured in Hermes cards:
+  - GitHub Actions PR checks must run on the lab self-hosted runner in k3s/ARC, not GitHub-hosted runners.
+  - PR checks should include Python tests, safety/risk tests, frontend install/build/typecheck/test where applicable, manifest validation, Dockerfile validation, and practical secret-leak checks.
+  - GitHub Actions image workflow should build API, worker, and UI images after tests pass.
+  - Images should push to the lab registry at `192.168.1.15:5000`, using immutable commit SHA tags.
+  - Expected image naming convention: `192.168.1.15:5000/lab/pulsetrader-api`, `192.168.1.15:5000/lab/pulsetrader-worker`, and `192.168.1.15:5000/lab/pulsetrader-ui` unless revised during implementation.
+  - Registry credentials should come from OpenBao/GitHub Actions secrets, not committed files.
+  - CD should use ArgoCD in the k3s lab, with an ArgoCD Application targeting the PulseTrader repo and k3s manifests.
+- Planned k3s/GitOps target:
+  - Namespace: `pulsetrader`
+  - ArgoCD Application: `pulsetrader`
+  - Expected dashboard URL: `https://pulsetrader.192.168.1.80.sslip.io` unless the deployment card chooses a different lab hostname.
+  - Deployment should include API, worker, and UI processes with readiness/liveness probes, resource requests/limits, and safe ConfigMap defaults.
+  - Traefik ingress should follow the existing lab `*.192.168.1.80.sslip.io` pattern.
+- Planned OpenBao/ESO work:
+  - Define PulseTrader runtime secret paths, likely `secret/homelab/services/pulsetrader` and/or `secret/lab/runtime/pulsetrader`.
+  - Store Kalshi read-only credentials, optional future live credentials, provider config, and any registry/k8s secret references in OpenBao.
+  - Add ESO manifests only if pods require runtime secrets.
+  - Observe/paper mode must remain runnable without live Kalshi credentials.
+- Planned Wiki.js page:
+  - `https://wikijs.192.168.1.80.sslip.io/en/services/pulsetrader`
+  - The page should include repo URL, ArgoCD app, namespace, service URL, registry images, safety defaults, provider policy, secret policy, CI/CD workflow, and rollback/post-deploy checklist links.
+- Planned NetBox work:
+  - Model PulseTrader only after deployment details are real. Do not invent IPs.
+  - Capture service dependencies on k3s, ArgoCD, lab registry, OpenBao, Wiki.js, and optional PostgreSQL if persistence is added later.
+- Key PulseTrader Kanban cards added on 2026-06-20:
+  - `[CI/CD] Configure GitHub Actions PR checks on lab self-hosted runner`
+  - `[CI/CD] Build PulseTrader images in GitHub Actions`
+  - `[CI/CD] Push images to lab registry`
+  - `[CI/CD] Wire registry credentials through OpenBao and GitHub Actions secrets`
+  - `[CD] Create ArgoCD Application for PulseTrader`
+  - `[CD] Finalize k3s manifests for lab deployment`
+  - `[CD] Deploy and verify PulseTrader through ArgoCD`
+  - `[Docs/Ops] Publish PulseTrader Wiki.js service page`
+  - `[Docs/Ops] Update NetBox for PulseTrader service`
+  - `[Docs/Ops] Create OpenBao runtime secret plan for PulseTrader`
+  - `[Docs/Ops] Update lab baseline context after PulseTrader deployment`
+
+Operational note for future agents:
+- Do not treat PulseTrader as live until the k3s namespace, ArgoCD app, services, ingress, Wiki.js page, OpenBao paths, and NetBox updates have been verified and reflected back into this baseline.
+- Before implementing PulseTrader CI/CD, inspect the existing ARC runner apps/namespaces (`arc-systems`, `arc-runners`) and use the correct self-hosted runner labels for this lab.
+- Before publishing deployment manifests, replace placeholder repo URLs/hosts with `https://github.com/AJHeitzman/PulseTrader.git` and the lab hostname/registry values above.
 
 ### n8n
 
