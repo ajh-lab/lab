@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-06-26 12:25 (America/Chicago)
+Last updated: 2026-06-26 12:56 (America/Chicago)
 
 ## Purpose
 
@@ -308,6 +308,58 @@ Worker recovery note:
   - `tinyllama:latest`
 - `llama.cpp` built and installed from source with Vulkan support (`/usr/local/bin/llama-cli`)
 
+### Kalshi Research Bot (Bootstrap Deployment)
+
+- Purpose: standalone AI-assisted Kalshi market research and Discord advisory service.
+- Scope: advisory only; no automatic betting, no order placement, and no live trading credentials in the AI agent.
+- GitHub repository: `https://github.com/ajh-lab/kalshi-research-bot`
+- Local lab checkout: `repositories/kalshi-research-bot`
+- AI workstation checkout: `/mnt/ai/agent/kalshi-research-bot`
+- Hermes Kanban board: `kalshi-research-bot` (`Kalshi Research Bot`)
+- Worker profile target: `default`
+- Live URL: `http://kalshi-research-bot.192.168.1.80.sslip.io`
+- Health URL: `http://kalshi-research-bot.192.168.1.80.sslip.io/health`
+- Wiki.js page: `https://wikijs.192.168.1.80.sslip.io/en/services/kalshi-research-bot`
+- NetBox: modeled as IPAM application service `kalshi-research-bot` attached to k3s control-plane device `oma01rpicls01mstr01`; it is not modeled as a VM.
+- ArgoCD Application: `argocd/kalshi-research-bot`
+  - Source: `https://github.com/ajh-lab/kalshi-research-bot.git`, `targetRevision: main`, path `deploy/k8s`
+  - Sync: automated prune/self-heal enabled
+  - Revision validated on bootstrap: `aa0fe79812e6cb2b359771415967775d2f9edfd9`
+- k3s resources:
+  - Namespace: `kalshi-research-bot`
+  - Deployment: `kalshi-research-bot-api`
+  - Service: `kalshi-research-bot-api` (`ClusterIP`, port `80`)
+  - Ingress: `kalshi-research-bot`, host `kalshi-research-bot.192.168.1.80.sslip.io`, class `traefik`
+  - CronJob: `kalshi-research-bot-worker`, schedule `17 * * * *`
+- Container image:
+  - Registry: `192.168.1.15:5000`
+  - Image repository: `192.168.1.15:5000/lab/kalshi-research-bot`
+  - Bootstrap tags pushed by GitHub Actions: `sha-b335077b68abdc9f4c1ff532ba326da5f5df7350`, `latest`
+- CI/CD:
+  - GitHub Actions workflow target: `lab-org-arm64-dind`
+  - PR checks run lint, tests, manifest validation, secret scan, and Docker build smoke test.
+  - Main build publishes immutable `sha-<commit>` tags to the lab registry and updates `deploy/k8s/kustomization.yaml`.
+  - GitHub repository secrets required: `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`.
+- Secrets:
+  - Discord webhook source: OpenBao `secret/homelab/services/kalshi-research-agent`, field `discord_webhook_url`
+  - Kubernetes runtime secret: `kalshi-research-bot/kalshi-research-bot-runtime`
+  - Registry pull secret: `kalshi-research-bot/lab-registry-pull`
+  - Future service runtime path: `secret/homelab/services/kalshi-research-bot`
+  - ESO policy `eso-read-lab` includes read access for the webhook path, future service path, and registry credential path.
+- Runtime status validated on 2026-06-26:
+  - ArgoCD: `Synced` / `Healthy`
+  - Deployment: `1/1 Ready`
+  - ExternalSecrets: `SecretSynced`
+  - `/health` returns `{"status":"ok"}`
+  - `/api/v1/config` reports `discord_webhook_configured=true` without exposing the webhook.
+- Current implementation state:
+  - Bootstrap API and no-op scheduled worker are deployed.
+  - Real Kalshi market discovery, PostgreSQL persistence, evidence collection, local AI advisory analysis, Discord advisory formatting, outcome tracking, and final docs are queued on the Hermes board for the local `default` profile.
+- Verification commands:
+  - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n argocd get application kalshi-research-bot -o wide`
+  - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n kalshi-research-bot get deploy,pods,svc,ingress,cronjob,externalsecret -o wide`
+  - `curl -sS http://kalshi-research-bot.192.168.1.80.sslip.io/health`
+
 ### SPT/Fika Server
 
 - Host: `spt02` (`192.168.1.86`, Windows 10 Pro physical host)
@@ -586,9 +638,9 @@ Operational note for future agents:
 - Host/VM: `lab-registry01` (`192.168.1.15`)
 - Endpoint: `http://192.168.1.15:5000`
 - Reachability note:
-  - As of 2026-06-26, `http://192.168.1.15:5000/v2/_catalog` timed out from the Windows workstation.
-  - During PulseTrader deployment work on 2026-06-21, `192.168.1.15` was also unreachable from `ai-workstation-evox2` and from a k3s test pod.
-  - Do not assume the internal registry is available until revalidated.
+  - During PulseTrader deployment work on 2026-06-21, `192.168.1.15` was unreachable from `ai-workstation-evox2` and from a k3s test pod.
+  - On 2026-06-26, the registry was reachable from the Windows workstation and GitHub Actions pushed `192.168.1.15:5000/lab/kalshi-research-bot`.
+  - The catalog endpoint requires authentication and returns HTTP 401 without registry credentials.
 - Auth: basic auth (`htpasswd`)
 - OpenBao credentials path: `secret/homelab/registry/lab-registry01`
 - k3s integration:
