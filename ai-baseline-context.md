@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-06-20 13:15 (America/Chicago)
+Last updated: 2026-06-26 12:25 (America/Chicago)
 
 ## Purpose
 
@@ -236,6 +236,7 @@ Worker recovery note:
   - agent policies: `lab-context-read` (read/list env) and `lab-deploy-write` (read env + write runtime)
   - ESO policy/token: `eso-read-lab` with token stored in k8s secret `external-secrets/openbao-eso-token`
   - firewall: `8200/tcp` allowed from `192.168.1.0/24`
+- Recovery note 2026-06-26: `lab-secrets01` had been powered off. After it was powered back on, OpenBao was reachable but sealed. The instance was unsealed with the stored Shamir key, `ClusterSecretStore/openbao-store` returned to `Valid`, and all known ExternalSecret resources returned to `SecretSynced`.
 - Credential references:
   - SSH: `LAB_SECRETS01_*`
   - OpenBao: `LAB_SECRETS01_OPENBAO_*`
@@ -617,11 +618,12 @@ Operational note for future agents:
 
 - Primary OpenBao endpoint: `http://192.168.1.25:8200` (`lab-secrets01`, persistent file storage)
 - Reachability note:
-  - As of 2026-06-26, `http://192.168.1.25:8200/v1/sys/health` timed out from the Windows workstation.
-  - During PulseTrader deployment work on 2026-06-21, `192.168.1.25:8200` was unreachable from k3s and caused `ClusterSecretStore/openbao-store` to report `ValidationFailed`.
-  - Do not assume OpenBao/ESO-backed secrets are available until revalidated.
+  - On 2026-06-26, `lab-secrets01` was found powered off. After power-on, `http://192.168.1.25:8200/v1/sys/health` returned sealed status until the Shamir unseal key was applied.
+  - After unseal on 2026-06-26, `ClusterSecretStore/openbao-store` validated successfully and ESO-backed secrets synced again.
+  - If the VM is powered off or rebooted again, expect OpenBao to require manual unseal before ESO can read secrets.
 - Primary KV mount: `secret/` (KV v2)
 - Bootstrap environment snapshot: `secret/homelab/bootstrap/env`
+- Kalshi research agent Discord webhook path: `secret/homelab/services/kalshi-research-agent`, field `discord_webhook_url`
 - AI workstation sudo password field: `AI_WORKSTATION_PASSWORD`
 - Safe lookup commands on `ai-workstation-evox2`:
   - Preferred helper: `openbao-env-get AI_WORKSTATION_PASSWORD`
