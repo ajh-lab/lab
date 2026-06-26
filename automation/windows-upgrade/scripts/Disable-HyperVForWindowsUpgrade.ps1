@@ -1,5 +1,8 @@
 $ErrorActionPreference = 'Continue'
-$LogPath = Join-Path $PSScriptRoot 'Disable-HyperVForWindowsUpgrade.log'
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..\..')
+$OutputDir = Join-Path $RepoRoot 'tmp\windows-upgrade'
+New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+$LogPath = Join-Path $OutputDir 'Disable-HyperVForWindowsUpgrade.log'
 
 function Write-Log {
     param([string]$Message)

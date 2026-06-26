@@ -6,7 +6,10 @@ if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administra
   exit 1
 }
 
-$logPath = Join-Path $PSScriptRoot 'Remove-VmNetworkUpgradeBlockers.log'
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..\..')
+$OutputDir = Join-Path $RepoRoot 'tmp\windows-upgrade'
+New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+$logPath = Join-Path $OutputDir 'Remove-VmNetworkUpgradeBlockers.log'
 Start-Transcript -Path $logPath -Force | Out-Null
 
 Write-Host 'Stopping VMware and VirtualBox services...'

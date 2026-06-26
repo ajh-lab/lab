@@ -14,6 +14,7 @@ automation/unifi/data/*.json
 # Generated local scratch artifacts
 tmp/*
 !tmp/.gitkeep
+!tmp/README.md
 
 # Editor / OS
 .DS_Store

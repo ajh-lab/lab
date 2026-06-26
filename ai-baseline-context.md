@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-06-26 12:56 (America/Chicago)
+Last updated: 2026-06-26 17:44 (America/Chicago)
 
 ## Purpose
 
@@ -19,6 +19,7 @@ Standard workflow conventions:
    - Folder: `tmp/<ticket-number>/`
    - Context file: `tmp/<ticket-number>/<ticket-number>-context.md`
    - Example: `tmp/DEVOPS-142/DEVOPS-142-context.md`
+5. Disposable agent-generated files, one-off scratch scripts, command outputs, and experiments must be created under `tmp/<task-or-topic>/`, not in the repository root.
 
 ## Source of Truth Files
 
@@ -33,11 +34,15 @@ Standard workflow conventions:
 - `automation/unifi/*`: UniFi (UDM Pro) inventory fetch + NetBox sync scripts.
 - `automation/wikijs/*`: Wiki.js API automation scripts.
 - `automation/ai-workstation/*`: AI workstation automation and Strix Halo backend sync scripts.
+- `automation/hermes/*`: Hermes Kanban query/recovery helpers for local agents; prefer these over dashboard discovery or direct SQLite edits.
+- `automation/windows-upgrade/*`: Windows upgrade remediation helpers; generated outputs should go to `tmp/windows-upgrade/`.
+- `docs/windows-upgrade/*`: archived Windows upgrade troubleshooting logs/results.
 - `sub-context/ai-infrastructure-context.md`: infrastructure-specific supplemental context.
 - `phase1-agent-todo.md`: first-phase execution backlog for agent platform, knowledge system, and automation control plane.
 - `phase1-agent-queue.yaml` + `phase1-agent-queue.json`: machine-readable execution queue for agent task orchestration.
 - `repositories/`: workspace for repos the agent clones/pulls for implementation work.
 - `tmp/`: transient ticket working area (`tmp/<ticket-number>/<ticket-number>-context.md` pattern).
+- `tmp/README.md`: scratch workspace rules; contents of `tmp/` are ignored unless explicitly allow-listed.
 
 ## Repo Layout
 
@@ -52,8 +57,12 @@ lab/
   .kubeconfig-192.168.1.80.yaml
   repositories/             # agent code workspace (cloned repos, feature work)
   tmp/                      # ticket temp workspace
+    README.md
     <ticket-number>/
       <ticket-number>-context.md
+  docs/
+    windows-upgrade/
+      2026-05-28/           # archived Windows upgrade remediation outputs
   automation/
     n8n/
       README.md
@@ -82,6 +91,19 @@ lab/
       README.md
       scripts/
         sync-strix-halo-backend.ps1
+    hermes/
+      README.md
+      scripts/
+        query_kanban.py
+        reset_card.py
+    windows-upgrade/
+      README.md
+      scripts/
+        Cleanup-StaleNetworkUpgradeBlockers.ps1
+        Disable-HyperVForWindowsUpgrade.ps1
+        Export-RollbackEventSummaries.ps1
+        Get-UpgradeFeatureState.ps1
+        Remove-VmNetworkUpgradeBlockers.ps1
     common/
       SecretResolver.psm1
     secrets/
@@ -289,6 +311,12 @@ Worker recovery note:
       - `/home/helios/.config/systemd/user/hermes-gateway.service.d/30-sudo-password-openbao.conf`
       - `/home/helios/.config/systemd/user/hermes-dashboard.service.d/30-sudo-password-openbao.conf`
   - `hermes-dashboard` user systemd service active, bound to `127.0.0.1:9119` for SSH-tunneled browser access
+  - Hermes Kanban helper scripts for Windows-hosted agents:
+    - Read-only board/card query: `automation/hermes/scripts/query_kanban.py`
+    - Safe card recovery/comment helper: `automation/hermes/scripts/reset_card.py`
+    - Usage reference: `automation/hermes/README.md`
+    - These helpers SSH to `helios@192.168.1.123` and call the Hermes CLI on the workstation.
+    - Agents should use these scripts instead of probing the Hermes dashboard or editing `/home/helios/.hermes/kanban/.../kanban.db` directly.
   - `lab-update-check.timer` user systemd timer active; runs weekly Saturday morning with jitter and writes update-check logs to `/mnt/ai/logs/system-updates/latest.log`. This checks for package updates only; it does not perform unattended upgrades.
   - `openclaw-gateway` user systemd service installed but disabled/inactive as of 2026-05-09 while Hermes Discord connectivity is being tested (`OpenClaw 2026.5.7`, loopback `127.0.0.1:18789`, token-auth)
   - OpenClaw Discord channel validated on 2026-05-09: bot token resolved as `Helios`, configured `helios` Discord channel readable, gateway restarted after stale process cleanup.
@@ -317,6 +345,13 @@ Worker recovery note:
 - AI workstation checkout: `/mnt/ai/agent/kalshi-research-bot`
 - Hermes Kanban board: `kalshi-research-bot` (`Kalshi Research Bot`)
 - Worker profile target: `default`
+- Board helper commands for Cline/DeepSeek/Codex from this repo:
+  - `python .\automation\hermes\scripts\query_kanban.py list`
+  - `python .\automation\hermes\scripts\query_kanban.py list --status blocked`
+  - `python .\automation\hermes\scripts\query_kanban.py show <task_id>`
+  - `python .\automation\hermes\scripts\query_kanban.py runs <task_id>`
+  - `python .\automation\hermes\scripts\query_kanban.py log <task_id> --tail 30000`
+  - For safe recovery, use `python .\automation\hermes\scripts\reset_card.py <task_id> --action unblock|reclaim|promote|comment --reason "<reason>"`; mutations require `--yes`.
 - Live URL: `http://kalshi-research-bot.192.168.1.80.sslip.io`
 - Health URL: `http://kalshi-research-bot.192.168.1.80.sslip.io/health`
 - Wiki.js page: `https://wikijs.192.168.1.80.sslip.io/en/services/kalshi-research-bot`
@@ -873,6 +908,8 @@ Bootstrap behavior:
 11. `Hermes-Test` should be treated as disposable validation only; durable planning and execution state belongs in this `lab` repo.
 12. For OpenClaw operations on the workstation, use `automation/ai-workstation/README.md` for install/status/security/runtime reference.
 13. For SPT/Fika control requests, use the `SPT/Fika Server` section above and prefer `ssh helios@192.168.1.86 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT02-FikaAction.ps1 -Action Status|Start|Stop|Restart"` from `ai-workstation-evox2`; do not use the interactive desktop menu from Hermes/Discord.
+14. For Hermes Kanban work from this Windows repo, use `automation/hermes/scripts/query_kanban.py` for board/card visibility and `automation/hermes/scripts/reset_card.py` for safe official recovery actions. Do not edit Hermes Kanban SQLite databases directly unless the owner explicitly asks for low-level repair.
+15. Do not create ad hoc files in the repository root. Use `tmp/<task-or-topic>/` for scratch files and move durable scripts/docs into `automation/` or `docs/` before finishing work.
 
 ## Next Actions
 

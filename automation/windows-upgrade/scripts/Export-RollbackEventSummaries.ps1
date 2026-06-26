@@ -1,6 +1,9 @@
 $ErrorActionPreference = 'Continue'
 $Base = 'C:\$WINDOWS.~BT\Sources\Rollback\evtlogs'
-$Out = Join-Path $PSScriptRoot 'RollbackEventSummary.txt'
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..\..')
+$OutputDir = Join-Path $RepoRoot 'tmp\windows-upgrade'
+New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+$Out = Join-Path $OutputDir 'RollbackEventSummary.txt'
 
 function Write-Out {
     param([string]$Message)

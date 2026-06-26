@@ -1,5 +1,8 @@
 $ErrorActionPreference = 'Continue'
-$Out = Join-Path $PSScriptRoot 'UpgradeFeatureState.txt'
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..\..\..')
+$OutputDir = Join-Path $RepoRoot 'tmp\windows-upgrade'
+New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
+$Out = Join-Path $OutputDir 'UpgradeFeatureState.txt'
 
 if (Test-Path -LiteralPath $Out) {
     Remove-Item -LiteralPath $Out -Force
