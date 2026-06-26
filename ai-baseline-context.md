@@ -455,20 +455,47 @@ Worker recovery note:
 
 ## Platform Services (Live)
 
-### PulseTrader (Planned / Not Yet Deployed)
+### PulseTrader (Live Bootstrap Deployment)
 
 - Purpose: safety-constrained Kalshi BTC 15-minute market experiment platform for observe/paper-first market watching, deterministic risk gating, and a modern dark second-monitor dashboard.
-- Current deployment status: **not deployed to k3s yet** as of 2026-06-20. No `pulsetrader` namespace, ArgoCD Application, Service, Ingress, or live URL exists in the cluster yet.
+- Current deployment status: **live bootstrap deployment in k3s** as of 2026-06-26 verification.
 - GitHub repository: `https://github.com/AJHeitzman/PulseTrader`
 - Local lab checkout: `repositories/PulseTrader`
 - AI workstation checkout: `/mnt/ai/agent/PulseTrader`
 - Hermes Kanban board: `pulsetrader` (`PulseTrader`)
+- Live URL: `http://pulsetrader.192.168.1.80.sslip.io/`
+- ArgoCD Application: `argocd/pulsetrader`
+  - Status verified 2026-06-26: `Synced` / `Healthy`
+  - Revision verified 2026-06-26: `793f11c79c06826f22179831d983e9e38c2cbc58`
+  - Source: `https://github.com/AJHeitzman/PulseTrader.git`, `targetRevision: main`, path `deploy/k8s`
+- k3s resources:
+  - Namespace: `pulsetrader`
+  - Deployment: `pulsetrader-api` (`1/1 Ready` on 2026-06-26)
+  - Service: `pulsetrader-api` (`ClusterIP`, port `80`)
+  - Ingress: `pulsetrader`, host `pulsetrader.192.168.1.80.sslip.io`, class `traefik`
+- Runtime verification commands:
+  - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n argocd get applications.argoproj.io pulsetrader -o wide`
+  - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n pulsetrader get pods,deploy,svc,ingress -o wide`
+  - `curl -sS http://pulsetrader.192.168.1.80.sslip.io/`
+  - `curl -sS http://pulsetrader.192.168.1.80.sslip.io/health`
+  - `curl -sS http://pulsetrader.192.168.1.80.sslip.io/api/v1/config`
+- Verified API responses on 2026-06-26:
+  - `/` returns `{"service":"pulsetrader","status":"ok","mode":"observe","docs":"/docs"}`
+  - `/health` returns `{"status":"ok"}`
+  - `/api/v1/config` returns `mode=observe` and `live_trading_enabled=false`
 - Current committed implementation state:
   - Initial FastAPI API scaffold.
   - Safe runtime config defaults: `MODE=observe`, `LIVE_TRADING_ENABLED=false`.
   - Mock current market endpoint for early API scaffolding and tests.
   - Advisory-only agent analysis interface.
   - Documentation for modern dark UI design and post-deploy verification.
+- Bootstrap deployment implementation notes:
+  - The current live deployment is an API-only bootstrap to get PulseTrader reachable while lab image registry and OpenBao are unavailable.
+  - The bootstrap manifest uses public multi-arch images (`python:3.11-slim`, `alpine/git`) instead of `192.168.1.15:5000`.
+  - The pod clones the private PulseTrader GitHub repo at startup using Kubernetes secret `pulsetrader/pulsetrader-git-credentials`. Do not commit that token or print it in logs.
+  - ArgoCD accesses the private PulseTrader repository via repository secret `argocd/repo-pulsetrader`. Do not commit or expose the token.
+  - Startup was stabilized in commit `793f11c` by using plain `uvicorn`, adding a startup probe, and raising the bootstrap memory limit.
+  - This bootstrap is not the desired final production shape; replace it with CI-built immutable images once the lab registry and CI path are healthy.
 - Important data-provider rule:
   - Mock providers are only for tests, local offline development, deterministic demos, and CI.
   - Deployed observe/paper mode should use real read-only Kalshi/BTC market data APIs when configured.
@@ -487,12 +514,11 @@ Worker recovery note:
   - Expected image naming convention: `192.168.1.15:5000/lab/pulsetrader-api`, `192.168.1.15:5000/lab/pulsetrader-worker`, and `192.168.1.15:5000/lab/pulsetrader-ui` unless revised during implementation.
   - Registry credentials should come from OpenBao/GitHub Actions secrets, not committed files.
   - CD should use ArgoCD in the k3s lab, with an ArgoCD Application targeting the PulseTrader repo and k3s manifests.
-- Planned k3s/GitOps target:
-  - Namespace: `pulsetrader`
-  - ArgoCD Application: `pulsetrader`
-  - Expected dashboard URL: `https://pulsetrader.192.168.1.80.sslip.io` unless the deployment card chooses a different lab hostname.
+- Final k3s/GitOps target:
+  - Keep namespace `pulsetrader`, ArgoCD Application `pulsetrader`, and host `pulsetrader.192.168.1.80.sslip.io`.
+  - Move from bootstrap source-clone pod to CI-built API, worker, and UI images with immutable SHA tags.
   - Deployment should include API, worker, and UI processes with readiness/liveness probes, resource requests/limits, and safe ConfigMap defaults.
-  - Traefik ingress should follow the existing lab `*.192.168.1.80.sslip.io` pattern.
+  - Add TLS when the service is promoted beyond bootstrap; current ingress is HTTP only.
 - Planned OpenBao/ESO work:
   - Define PulseTrader runtime secret paths, likely `secret/homelab/services/pulsetrader` and/or `secret/lab/runtime/pulsetrader`.
   - Store Kalshi read-only credentials, optional future live credentials, provider config, and any registry/k8s secret references in OpenBao.
@@ -502,8 +528,8 @@ Worker recovery note:
   - `https://wikijs.192.168.1.80.sslip.io/en/services/pulsetrader`
   - The page should include repo URL, ArgoCD app, namespace, service URL, registry images, safety defaults, provider policy, secret policy, CI/CD workflow, and rollback/post-deploy checklist links.
 - Planned NetBox work:
-  - Model PulseTrader only after deployment details are real. Do not invent IPs.
-  - Capture service dependencies on k3s, ArgoCD, lab registry, OpenBao, Wiki.js, and optional PostgreSQL if persistence is added later.
+  - Model PulseTrader as a service/application, not a VM with a dedicated IP.
+  - Capture service dependencies on k3s, ArgoCD, GitHub, temporary Kubernetes Git credentials, lab registry, OpenBao, Wiki.js, and optional PostgreSQL if persistence is added later.
 - Key PulseTrader Kanban cards added on 2026-06-20:
   - `[CI/CD] Configure GitHub Actions PR checks on lab self-hosted runner`
   - `[CI/CD] Build PulseTrader images in GitHub Actions`
@@ -518,9 +544,11 @@ Worker recovery note:
   - `[Docs/Ops] Update lab baseline context after PulseTrader deployment`
 
 Operational note for future agents:
-- Do not treat PulseTrader as live until the k3s namespace, ArgoCD app, services, ingress, Wiki.js page, OpenBao paths, and NetBox updates have been verified and reflected back into this baseline.
+- PulseTrader is live as an API-only bootstrap. Do not overstate it as production complete until UI/worker images, lab registry publishing, OpenBao/ESO-backed runtime secrets, Wiki.js, and NetBox updates are complete.
 - Before implementing PulseTrader CI/CD, inspect the existing ARC runner apps/namespaces (`arc-systems`, `arc-runners`) and use the correct self-hosted runner labels for this lab.
 - Before publishing deployment manifests, replace placeholder repo URLs/hosts with `https://github.com/AJHeitzman/PulseTrader.git` and the lab hostname/registry values above.
+- Be careful with the Hermes Kanban board: earlier PulseTrader deployment cards were marked done after local manifest inspection without real cluster verification. Always verify ArgoCD status, k3s resources, and HTTP endpoints before completing deploy cards.
+- AI workstation caveat: `/usr/local/bin/kubectl` on `ai-workstation-evox2` was observed to be the wrong architecture for that Fedora x86_64 host during PulseTrader deploy work. Use this Windows workstation's kubeconfig (`.kubeconfig-192.168.1.80.yaml`) for cluster verification unless kubectl on the AI workstation has been fixed.
 
 ### n8n
 
@@ -556,6 +584,10 @@ Operational note for future agents:
 
 - Host/VM: `lab-registry01` (`192.168.1.15`)
 - Endpoint: `http://192.168.1.15:5000`
+- Reachability note:
+  - As of 2026-06-26, `http://192.168.1.15:5000/v2/_catalog` timed out from the Windows workstation.
+  - During PulseTrader deployment work on 2026-06-21, `192.168.1.15` was also unreachable from `ai-workstation-evox2` and from a k3s test pod.
+  - Do not assume the internal registry is available until revalidated.
 - Auth: basic auth (`htpasswd`)
 - OpenBao credentials path: `secret/homelab/registry/lab-registry01`
 - k3s integration:
@@ -584,6 +616,10 @@ Operational note for future agents:
 ### OpenBao (Secrets backend)
 
 - Primary OpenBao endpoint: `http://192.168.1.25:8200` (`lab-secrets01`, persistent file storage)
+- Reachability note:
+  - As of 2026-06-26, `http://192.168.1.25:8200/v1/sys/health` timed out from the Windows workstation.
+  - During PulseTrader deployment work on 2026-06-21, `192.168.1.25:8200` was unreachable from k3s and caused `ClusterSecretStore/openbao-store` to report `ValidationFailed`.
+  - Do not assume OpenBao/ESO-backed secrets are available until revalidated.
 - Primary KV mount: `secret/` (KV v2)
 - Bootstrap environment snapshot: `secret/homelab/bootstrap/env`
 - AI workstation sudo password field: `AI_WORKSTATION_PASSWORD`
