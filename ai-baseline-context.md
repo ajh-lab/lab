@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-06-26 17:44 (America/Chicago)
+Last updated: 2026-06-26 19:47 (America/Chicago)
 
 ## Purpose
 
@@ -359,7 +359,7 @@ Worker recovery note:
 - ArgoCD Application: `argocd/kalshi-research-bot`
   - Source: `https://github.com/ajh-lab/kalshi-research-bot.git`, `targetRevision: main`, path `deploy/k8s`
   - Sync: automated prune/self-heal enabled
-  - Revision validated on bootstrap: `aa0fe79812e6cb2b359771415967775d2f9edfd9`
+  - Revision validated after public-market-data fix: `dd7427e6424d648f912857098bbae35299942486`
 - k3s resources:
   - Namespace: `kalshi-research-bot`
   - Deployment: `kalshi-research-bot-api`
@@ -369,6 +369,7 @@ Worker recovery note:
 - Container image:
   - Registry: `192.168.1.15:5000`
   - Image repository: `192.168.1.15:5000/lab/kalshi-research-bot`
+  - Current deployed tag: `sha-75db49260d41c420e1b1f2a8245b7b222e1c04bf`
   - Bootstrap tags pushed by GitHub Actions: `sha-b335077b68abdc9f4c1ff532ba326da5f5df7350`, `latest`
 - CI/CD:
   - GitHub Actions workflow target: `lab-org-arm64-dind`
@@ -377,6 +378,8 @@ Worker recovery note:
   - GitHub repository secrets required: `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`.
 - Secrets:
   - Discord webhook source: OpenBao `secret/homelab/services/kalshi-research-agent`, field `discord_webhook_url`
+  - Kalshi service config source: OpenBao `secret/homelab/services/kalshi-research-bot`, fields `kalshi_api_base`, `kalshi_api_key_id`
+  - Kalshi private key is intentionally not stored or injected for the current implementation because the worker uses public market-data endpoints and must remain advisory-only.
   - Kubernetes runtime secret: `kalshi-research-bot/kalshi-research-bot-runtime`
   - Registry pull secret: `kalshi-research-bot/lab-registry-pull`
   - Future service runtime path: `secret/homelab/services/kalshi-research-bot`
@@ -387,9 +390,11 @@ Worker recovery note:
   - ExternalSecrets: `SecretSynced`
   - `/health` returns `{"status":"ok"}`
   - `/api/v1/config` reports `discord_webhook_configured=true` without exposing the webhook.
+  - Manual worker verification job on image `sha-75db49260d41c420e1b1f2a8245b7b222e1c04bf` completed with `status=ok`; no `DATABASE_URL` or Kalshi private key was required.
 - Current implementation state:
-  - Bootstrap API and no-op scheduled worker are deployed.
-  - Real Kalshi market discovery, PostgreSQL persistence, evidence collection, local AI advisory analysis, Discord advisory formatting, outcome tracking, and final docs are queued on the Hermes board for the local `default` profile.
+  - API and scheduled worker are deployed through ArgoCD using CI-built lab-registry images.
+  - Worker uses public Kalshi market-data endpoint `https://external-api.kalshi.com/trade-api/v2`.
+  - PostgreSQL persistence remains optional until `DATABASE_URL` is configured.
 - Verification commands:
   - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n argocd get application kalshi-research-bot -o wide`
   - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n kalshi-research-bot get deploy,pods,svc,ingress,cronjob,externalsecret -o wide`
