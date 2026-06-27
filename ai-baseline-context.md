@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-06-26 19:47 (America/Chicago)
+Last updated: 2026-06-26 19:49 (America/Chicago)
 
 ## Purpose
 
@@ -378,8 +378,8 @@ Worker recovery note:
   - GitHub repository secrets required: `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`.
 - Secrets:
   - Discord webhook source: OpenBao `secret/homelab/services/kalshi-research-agent`, field `discord_webhook_url`
-  - Kalshi service config source: OpenBao `secret/homelab/services/kalshi-research-bot`, fields `kalshi_api_base`, `kalshi_api_key_id`
-  - Kalshi private key is intentionally not stored or injected for the current implementation because the worker uses public market-data endpoints and must remain advisory-only.
+  - Kalshi service config source: OpenBao `secret/homelab/services/kalshi-research-bot`, fields `kalshi_api_base`, `kalshi_api_key_id`, `kalshi_api_private_key`
+  - Kalshi private key is stored in OpenBao for future authenticated read-only work, but is intentionally not synced into the Kubernetes runtime secret for the current implementation because the worker uses public market-data endpoints and must remain advisory-only.
   - Kubernetes runtime secret: `kalshi-research-bot/kalshi-research-bot-runtime`
   - Registry pull secret: `kalshi-research-bot/lab-registry-pull`
   - Future service runtime path: `secret/homelab/services/kalshi-research-bot`
