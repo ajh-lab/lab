@@ -359,7 +359,7 @@ Worker recovery note:
 - ArgoCD Application: `argocd/kalshi-research-bot`
   - Source: `https://github.com/ajh-lab/kalshi-research-bot.git`, `targetRevision: main`, path `deploy/k8s`
   - Sync: automated prune/self-heal enabled
-  - Revision validated after public-market-data fix: `dd7427e6424d648f912857098bbae35299942486`
+  - Revision validated after DB/runtime link deployment: `aba4882cdf1ab04e5df7a0840851382d00cf78dd`
 - k3s resources:
   - Namespace: `kalshi-research-bot`
   - Deployment: `kalshi-research-bot-api`
@@ -369,7 +369,7 @@ Worker recovery note:
 - Container image:
   - Registry: `192.168.1.15:5000`
   - Image repository: `192.168.1.15:5000/lab/kalshi-research-bot`
-  - Current deployed tag: `sha-75db49260d41c420e1b1f2a8245b7b222e1c04bf`
+  - Current deployed tag: `sha-4dc156142362dc04a717f8656231c96011416933`
   - Bootstrap tags pushed by GitHub Actions: `sha-b335077b68abdc9f4c1ff532ba326da5f5df7350`, `latest`
 - CI/CD:
   - GitHub Actions workflow target: `lab-org-arm64-dind`
@@ -378,11 +378,11 @@ Worker recovery note:
   - GitHub repository secrets required: `REGISTRY_USERNAME`, `REGISTRY_PASSWORD`.
 - Secrets:
   - Discord webhook source: OpenBao `secret/homelab/services/kalshi-research-agent`, field `discord_webhook_url`
-  - Kalshi service config source: OpenBao `secret/homelab/services/kalshi-research-bot`, fields `kalshi_api_base`, `kalshi_api_key_id`, `kalshi_api_private_key`
+  - Kalshi service config source: OpenBao `secret/homelab/services/kalshi-research-bot`, fields `kalshi_api_base`, `kalshi_api_key_id`, `kalshi_api_private_key`, `database_url`, `database_host`, `database_port`, `database_name`, `database_user`
   - Kalshi private key is stored in OpenBao for future authenticated read-only work, but is intentionally not synced into the Kubernetes runtime secret for the current implementation because the worker uses public market-data endpoints and must remain advisory-only.
   - Kubernetes runtime secret: `kalshi-research-bot/kalshi-research-bot-runtime`
   - Registry pull secret: `kalshi-research-bot/lab-registry-pull`
-  - Future service runtime path: `secret/homelab/services/kalshi-research-bot`
+  - Service runtime path: `secret/homelab/services/kalshi-research-bot`
   - ESO policy `eso-read-lab` includes read access for the webhook path, future service path, and registry credential path.
 - Runtime status validated on 2026-06-26:
   - ArgoCD: `Synced` / `Healthy`
@@ -390,11 +390,14 @@ Worker recovery note:
   - ExternalSecrets: `SecretSynced`
   - `/health` returns `{"status":"ok"}`
   - `/api/v1/config` reports `discord_webhook_configured=true` without exposing the webhook.
-  - Manual worker verification job on image `sha-75db49260d41c420e1b1f2a8245b7b222e1c04bf` completed with `status=ok`; no `DATABASE_URL` or Kalshi private key was required.
+  - Manual worker verification job on image `sha-4dc156142362dc04a717f8656231c96011416933` completed with `status=ok`, `db_enabled=true`, and `discord_posts_created=1`.
 - Current implementation state:
   - API and scheduled worker are deployed through ArgoCD using CI-built lab-registry images.
   - Worker uses public Kalshi market-data endpoint `https://external-api.kalshi.com/trade-api/v2`.
-  - PostgreSQL persistence remains optional until `DATABASE_URL` is configured.
+  - Worker targets sports markets with a 168-hour lookahead and deployed `MAX_MARKETS_PER_RUN=1`.
+  - Discord advisory messages include a clickable Kalshi market link.
+  - PostgreSQL persistence is enabled through ESO-injected `DATABASE_URL`; database `kalshi_research_bot` and role `kalshi_research_bot` live on `lab-pgsql01` (`192.168.1.216`).
+  - Persisted tables verified on 2026-06-26: `market_snapshots`, `research_sources`, `recommendations`, `discord_posts`, and `run_audit_logs`.
 - Verification commands:
   - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n argocd get application kalshi-research-bot -o wide`
   - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n kalshi-research-bot get deploy,pods,svc,ingress,cronjob,externalsecret -o wide`
