@@ -527,6 +527,13 @@ Worker recovery note:
     - `ssh helios@192.168.1.86 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT02-FikaAction.ps1 -Action Status"`
     - Replace `Status` with `Start`, `Stop`, or `Restart` as needed.
   - Use the non-interactive action script for Discord/Hermes requests; do not use the interactive menu script from Hermes.
+  - Restricted Discord control channel design:
+    - General Hermes/Helios Discord access is restricted to the existing CloudBucket `#helios` channel (`1498544802898251786`) with `DISCORD_ALLOWED_CHANNELS` on `ai-workstation-evox2`.
+    - SPT/Fika delegated user administration must use the deterministic control bot in `automation/discord-spt-control/`, not the general Hermes LLM chat surface.
+    - The control bot accepts only `status`, `start`, `restart`, and `help` in its configured private Discord channel, then maps those strings to `Invoke-SPT02-FikaAction.ps1` actions over SSH. It does not pass user text to Hermes or any LLM.
+    - ai-workstation install path: `/home/helios/.local/share/lab/spt-discord-control`; systemd user unit: `spt-discord-control.service`; non-secret config: `/home/helios/.config/spt-discord-control/config.env`.
+    - As of 2026-07-03, the service code and venv are installed on `ai-workstation-evox2` but the service is disabled until a private CloudBucket channel ID is provided. The Helios Discord bot token lacked `Manage Channels`, so Codex could not create `#spt-fika-admin` through the Discord API.
+    - Recommended Discord channel setup: create a private channel such as `#spt-fika-admin`, deny `@everyone` view access, grant the Helios bot view/send/read-history permissions, and grant only selected SPT admins access.
 - Current validation state:
   - SSH from `ai-workstation-evox2` to `spt02` works with key-based auth.
   - The non-interactive `Status` action returns JSON over SSH.

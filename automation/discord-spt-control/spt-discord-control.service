@@ -1,0 +1,17 @@
+[Unit]
+Description=Restricted Discord control bot for SPT/Fika on SPT02
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/.local/share/lab/spt-discord-control
+EnvironmentFile=%h/.config/spt-discord-control/config.env
+ExecStart=%h/.local/share/lab/spt-discord-control/run_spt_discord_control.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

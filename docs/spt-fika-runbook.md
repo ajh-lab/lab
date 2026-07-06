@@ -591,7 +591,7 @@ The headless scheduled task waits for the SPT backend readiness endpoint before 
 
 Hermes on `ai-workstation-evox2` can run the non-interactive SSH command against SPT02. This enables Discord-driven or Hermes web UI-driven operations.
 
-Expected operator intents:
+For trusted operators using the normal Hermes channel, expected operator intents are:
 
 - Start SPT/Fika
 - Stop SPT/Fika
@@ -612,6 +612,42 @@ Example Discord prompt:
 
 ```text
 @Helios please restart the SPT/Fika stack on SPT02 using the documented non-interactive SSH command, then report whether the backend is ready and whether the Fika headless endpoint shows a registered headless client.
+```
+
+### Restricted Discord SPT Admin Channel
+
+Do not put untrusted or semi-trusted SPT players in the general Helios channel.
+Use the deterministic SPT Discord control bot instead:
+
+- Repo source: `automation/discord-spt-control/`
+- ai-workstation install path: `/home/helios/.local/share/lab/spt-discord-control`
+- systemd user service: `spt-discord-control.service`
+- config file: `/home/helios/.config/spt-discord-control/config.env`
+- accepted commands: `status`, `start`, `restart`, `help`
+
+The control bot does not call Hermes or any LLM. It only maps those fixed
+commands to `Invoke-SPT02-FikaAction.ps1` over SSH and posts a concise status
+summary back to the configured channel.
+
+As of 2026-07-03, the service code and Python venv are installed on
+`ai-workstation-evox2`, but the service is disabled because the private Discord
+channel is not yet available. The Helios Discord bot token returned `Missing
+Permissions` when Codex tried to create `#spt-fika-admin`; create the channel
+manually or temporarily grant the bot `Manage Channels`.
+
+Recommended Discord channel setup:
+
+- Name: `#spt-fika-admin`
+- Hide it from `@everyone`
+- Grant Helios bot view/send/read-history permissions
+- Grant only selected SPT admins access
+
+After the channel exists, set `SPT_DISCORD_CHANNEL_ID` in
+`/home/helios/.config/spt-discord-control/config.env`, then run:
+
+```bash
+systemctl --user enable --now spt-discord-control.service
+systemctl --user status spt-discord-control.service --no-pager
 ```
 
 ## Troubleshooting
