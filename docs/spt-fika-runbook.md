@@ -155,17 +155,18 @@ The script is interactive and uses colored prompts plus a progress bar. It can:
 - Optionally install WireGuard for VPN users.
 - Launch the official SPT installer from the selected install folder.
 - Download or prompt for `Fika-Installer.exe`, then launch it from the SPT root.
-- Back up existing non-baseline mods/plugins into a timestamped folder before applying the SPT02 mod package.
+- Back up existing non-baseline mods/plugins into a timestamped folder before applying the SPT02 mod set.
 - Restore a previous mod setup from those timestamped backups, so users can flip between their normal local mod setup and the SPT02-compatible setup.
-- Apply an operator-provided SPT02 client mod package.
+- Prompt for a Forge API token, then download pinned required SPT02 player mods directly from Forge.
+- Validate that the applied SPT02 mod set contains the expected current components, including BarterItemsStacks, LootNET, MergeConsumables Fika sync, WTT PackNStrap, WTT content, Color Converter API, TTC, Climbable Ladders, Stat Rewards, Caliber Split Ammo Cases, Collector Backport Patch, Tarkov Rare Collectibles, Medical SICC Case, Handy Toolbox, and Disciples Ballistic Case Plus.
 - Print the launcher values the player must use:
   - SPT Game Path: the selected local SPT root.
   - URL: `https://192.168.1.86:6969`.
 
 Interactive menu options:
 
-1. Full setup: install/check SPT, install/check Fika, then apply SPT02 mods.
-2. Mods only: back up current mods and apply the SPT02 mod package.
+1. Full setup: install/check SPT, install/check Fika, then download/apply SPT02 mods.
+2. Mods only: back up current mods and download/apply SPT02 mods.
 3. Restore a previous mod setup.
 4. Build a player mod package from an existing SPT install.
 5. Exit.
@@ -194,7 +195,38 @@ The Fika installer also remains interactive. Project Fika's install guide says t
 - https://wiki.project-fika.com/installing-fika
 - https://wiki.project-fika.com/installing-fika/installation
 
-To build the mod package from a known-good local SPT install, run:
+The SPT02 mod install step uses the authenticated Forge API to resolve pinned versions and download the Forge-provided archive links. The script prompts for the Forge API token when needed and does not write it to disk. Downloaded mod archives are cached under the selected SPT root at `_forge-download-cache` unless `-ModDownloadCache` is supplied. ZIP archives use PowerShell extraction; other archive formats use 7-Zip if available or WinRAR as a fallback. The pinned player mod list currently includes:
+
+- BarterItemsStacks `1.3.2`
+- LootNET `1.0.6`
+- MergeConsumables `1.5.4`
+- MergeConsumables - Fika sync `1.0.1`
+- Use Items Anywhere `1.3.2`
+- WTT CommonLib `2.0.20`
+- WTT Content Backport `1.0.7`
+- WTT Armory `2.0.5`
+- WTT Pack 'n' Strap `2.0.4`
+- Color Converter API `1.1.1`
+- Tarkov Trading Cards `3.0.8`
+- Climbable Ladders `1.0.2`
+- Stat Rewards `1.1.1`
+- Caliber Split Ammo Cases `2.0.2`
+- Collector Backport Patch `0.1.1`
+- Tarkov Rare Collectibles `1.1.5`
+- Medical SICC Case (MICC) - UPDATED `5.0.3`
+- Handy Toolbox `1.0.0`
+- Disciples Ballistic Case Plus `1.0.0`
+
+For unattended automation only, the script also accepts `-ForgeApiToken`; do not put that token in Git, Wiki.js, Discord, or command logs.
+
+To apply only the SPT02 mod set to an existing SPT/Fika install:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+.\automation\spt-client\Install-SPTFikaPlayerClient.ps1 -Mode Mods
+```
+
+The old package workflow is kept as a fallback for a known-good local export, but normal player setup should use direct Forge downloads. To build a legacy mod package from a known-good local SPT install, run:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
@@ -210,18 +242,11 @@ server-mods\
 manifest.json
 ```
 
-The setup mode can then consume that ZIP on a player PC:
+The setup mode can still consume that ZIP on a player PC if `-ModPackagePath` is supplied:
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 .\automation\spt-client\Install-SPTFikaPlayerClient.ps1 -Mode Setup -ModPackagePath "C:\Users\Public\Downloads\spt02-client-modpack.zip"
-```
-
-To apply only the SPT02 mod package to an existing SPT/Fika install:
-
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-.\automation\spt-client\Install-SPTFikaPlayerClient.ps1 -Mode Mods -ModPackagePath "C:\Users\Public\Downloads\spt02-client-modpack.zip"
 ```
 
 To restore a previous local mod setup:
@@ -232,6 +257,8 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 ```
 
 Do not build the package from a folder that contains currently disabled troubleshooting mods. The script intentionally excludes the baseline `Fika` and `spt` plugins from the package because the Fika installer should install those. It also excludes the headless-only `HomelabFikaHeadlessCrcFix` plugin.
+
+After adding or changing required client/server mods, update the pinned Forge download list in `automation/spt-client/Install-SPTFikaPlayerClient.ps1` and the expected component validation list. Rebuild a legacy package only if the Forge download path is unavailable for a specific mod.
 
 ### Baseline Mod Quarantine Script
 
@@ -385,19 +412,25 @@ These are the active folders currently present on SPT02 under `C:\SPT\SPT\user\m
 | `BalancedMeds` | [BALANCED MEDS](https://forge.sp-tarkov.com/mod/179/balanced-meds) | 4.0.61 | Changes medical item uses and healing behavior. | Profile-impacting item stat mod. Test carefully with other medical/consumable mods. |
 | `BarterItemsStacks` | [BarterItemsStacks](https://forge.sp-tarkov.com/mod/2480/barteritemsstacks) | 1.3.2 | Changes stack sizes for barter items and generates a configurable `config.jsonc`. | Forge lists Fika compatibility as unknown. Installed on SPT02 and local `C:\SPT`; SPT backend restarted cleanly and generated config without BarterItemsStacks errors. Players should install the matching client DLL when using this modded setup. |
 | `BoxesAtRef` | [Boxes At Ref (BARF) - NG](https://forge.sp-tarkov.com/mod/2483/boxes-at-ref-barf-ng) | 2.0.0 | Adds Arena loot boxes and related items to Ref. | Server-side trader/item mod. |
+| `CaliberSplitAmmoCases` | [Caliber Split Ammo Cases](https://forge.sp-tarkov.com/mod/2277/caliber-split-ammo-cases) | 2.0.2 | Adds caliber-specific ammo cases for organizing ammunition, including support for WTT content. | Installed on SPT02 and local `C:\SPT` on 2026-06-09. Forge has a Fika-compatible version available; SPT02 backend startup validated and generated 34 custom ammo cases without mod-specific errors. |
 | `CaliberSplitMagazineCases` | [Caliber Split Magazine Cases](https://forge.sp-tarkov.com/mod/2278/caliber-split-magazine-cases) | 2.0.1 | Adds caliber-specific magazine cases for organizing magazines. | Forge has a Fika-compatible version available. |
+| `CollectorBackportPatch` | [Updated collector quest and streamer case (EFT 1.0 Backport)](https://forge.sp-tarkov.com/mod/2615/updated-collector-quest-and-streamer-case-eft-10-backport) | 0.1.1 | Adds EFT 1.0 streamer items to the Collector quest and Streamer Case with WTT Content Backport support. | Installed on SPT02 and local `C:\SPT` on 2026-06-09. Requires WTT Content Backport, which is already installed. Forge lists Fika compatibility as unknown; backend startup validated and the patch applied cleanly. |
 | `EFCL-WelcomeGifts` | [Welcome Gifts](https://forge.sp-tarkov.com/mod/740/welcome-gifts) | 4.0.0 | Adds BSG gift packages into SPT. | Requires WTT CommonLib. |
 | `EventAutoProfileBackup` | [Event Auto Profile Backup](https://forge.sp-tarkov.com/mod/1973/event-auto-profile-backup) | 2.0.0 | Creates event-driven profile backups during client/server lifecycle events. | Good operational safety net before adding/removing profile-impacting mods. |
 | `MC-MXLR` | [Marlin MXLR .308 ME Lever-Action Rifle](https://forge.sp-tarkov.com/mod/2484/marlin-mxlr-308-me-lever-action-rifle) | 1.2.0 | Adds the Marlin MXLR .308 ME lever-action rifle from EFT 1.0. | Forge lists Fika compatibility as unknown. Test weapon/content sync. |
-| `MergeConsumablesServer` | [MergeConsumables](https://forge.sp-tarkov.com/mod/1657/mergeconsumables) | 1.5.4 | Allows merging limited-use consumables such as meds and food. | Use with [MergeConsumables - Fika sync](https://forge.sp-tarkov.com/addon/4/mergeconsumables-fika-sync) when clients need Fika sync behavior. |
+| `MedicalSICCcase` | [Medical SICC Case (MICC) - UPDATED](https://forge.sp-tarkov.com/mod/1564/medical-sicc-case-micc-updated) | 5.0.3 | Adds an updated Medical SICC container for medical barter items. | Installed on SPT02 and local `C:\SPT` on 2026-06-09. Forge lists SPT 4.0.13 compatibility; backend startup validated and configured the internal grid without mod-specific errors. |
+| `MergeConsumablesServer` | [MergeConsumables](https://forge.sp-tarkov.com/mod/1657/mergeconsumables) | 1.5.4 | Allows merging limited-use consumables such as meds and food. | `MergeConsumables.dll` and [MergeConsumables - Fika sync](https://forge.sp-tarkov.com/addon/4/mergeconsumables-fika-sync) are installed on SPT02/headless and local `C:\SPT` to prevent custom merge operations from falling through Fika's generic inventory packet path. |
+| `LootNetServer` | [LootNET](https://forge.sp-tarkov.com/mod/2679/lootnet) | 1.0.6 | Adds a raid loot value summary and in-raid loot value tracking. | Installed on SPT02/headless and local `C:\SPT` on 2026-06-08. Forge lists a Fika-compatible version available; SPT02 backend and headless startup validated after install. |
 | `MoreCheckmarksBackend` | [MoreCheckmarks](https://forge.sp-tarkov.com/mod/861/morecheckmarks) | 2.1.0 | Adds richer item checkmarks/tooltips for quest, hideout, barter, wishlist, and other item needs. | Forge has a Fika-compatible version available. Requires matching client plugin for UI value. |
 | `mpstark-dynamicmaps` | [Dynamic Maps](https://forge.sp-tarkov.com/mod/1431/dynamic-maps) | 1.1.3 | Replaces in-game map screens with dynamic map data such as extracts, quests, markers, and other overlays. | Server component must be installed for Fika usage; players need the matching client plugin. |
 | `RaidReview` | [Raid Review](https://forge.sp-tarkov.com/mod/1479/raid-review) | 1.1.1 | Web-based post-raid review/replay system with positional data, kills, looting, and heatmap-style analysis. | Forge has a Fika-compatible version available. Watch for database/runtime errors after updates. |
+| `RepublicanJesus-DiscipleBallisticCasePlus` | [Disciples Ballistic Case Plus](https://forge.sp-tarkov.com/mod/2385/disciples-ballistic-case-plus) | 1.0.0 | Expands what can be stored in the ballistic plate case, including SLAAP plates and related gear. | Installed on SPT02 and local `C:\SPT` on 2026-06-09. Forge lists Fika compatibility as unknown; backend startup validated and the ballistic case filter update completed. |
 | `Sicc Case Fix` | [Sicc Case Fix](https://forge.sp-tarkov.com/mod/2687/sicc-case-fix) | 1.0.1 | Fixes SICC case handling for prestige 3 and 4 dog tags. | Small server-side item compatibility fix. |
 | `SNACC` | [SNACC Pack](https://forge.sp-tarkov.com/mod/2448/snacc-pack) | 1.0.0 | Adds a food/drink storage pouch. | Requires WTT CommonLib. Forge has a Fika-compatible version available. |
 | `SPTModViewer` | [SPTModViewer](https://forge.sp-tarkov.com/mod/2514/sptmodviewer) | 0.3.0 | Tracks installed mod status relative to Forge metadata. | Troubleshooting helper. Forge has a Fika-compatible version available. |
 | `utjan.AirFilterOnlyDrainsInRaid` | [Air Filter Only Drains In Raid](https://forge.sp-tarkov.com/mod/2532/air-filter-only-drains-in-raid) | 1.0.0 | Makes hideout air filters drain only during PMC raids. | Server/client hideout QoL mod. |
-| `WTT-PackNStrap` | [WTT - Pack 'N Strap](https://forge.sp-tarkov.com/mod/1278/wtt-pack-n-strap) | 2.0.4 | Adds belt/container functionality and related inventory content. | Re-enabled on 2026-06-08 after installing `UseItemsFromAnywhere.dll` and restoring PackNStrap/BeltSlot BepInEx plugins on SPT02 and local. Backend and headless startup validated. |
+| `WTT-PackNStrap` | [WTT - Pack 'N Strap](https://forge.sp-tarkov.com/mod/1278/wtt-pack-n-strap) | 2.0.4 | Adds belt/container functionality and related inventory content. | Re-enabled on 2026-06-08 after installing `UseItemsFromAnywhere.dll` and restoring `BepInEx\plugins\WTT-PackNStrap\WTT-PackNStrap.dll` plus `Trenchfoot-BeltSlot.dll` on SPT02/headless and local. Clients missing those DLLs can fail `/client/items` with `No C# type for taxonomy node ... CustomContainerTemplate`. Backend and headless startup validated. |
+| `yellowdoge-tarkovrarecollectibles` | [Tarkov Rare Collectibles](https://forge.sp-tarkov.com/mod/2318/tarkov-rare-collectibles) | 1.1.5 | Adds 15 rare high-value collectible loot items with custom bundles and loot/trader integration. | Installed on SPT02 and local `C:\SPT` on 2026-06-09. Forge lists Fika compatibility as unknown; backend startup validated and item loading completed without mod-specific errors. |
 
 ### Active SPT02 Headless Plugins
 
@@ -410,6 +443,8 @@ Current active headless BepInEx plugins:
 - `spt`
 - `HomelabFikaHeadlessCrcFix`
 - `JBOBYH`
+- `LootNet`
+- `MergeConsumables`
 - `RaiRai.ColorConverterAPI.dll`
 - `QuestsExtended`
 - `SAIN`
@@ -456,7 +491,9 @@ These are intentionally disabled because they caused Fika/headless startup probl
 | `SkillsExtended` BepInEx client plugin | Threw a missing field error on the headless/client side |
 | `netVnum.Pause.dll` | Not appropriate for co-op raid hosting |
 
-`WTT-PackNStrap` previously generated an unsupported `CustomContainerTemplate` taxonomy error when only the server mod was restored. On 2026-06-08 it was re-enabled successfully after installing `UseItemsFromAnywhere.dll` and restoring both `WTT-PackNStrap.dll` and `Trenchfoot-BeltSlot.dll` under `BepInEx\plugins\WTT-PackNStrap` on SPT02/headless and the local client.
+`WTT-PackNStrap` previously generated an unsupported `CustomContainerTemplate` taxonomy error when only the server mod was restored. On 2026-06-08 it was re-enabled successfully after installing `UseItemsFromAnywhere.dll` and restoring both `WTT-PackNStrap.dll` and `Trenchfoot-BeltSlot.dll` under `BepInEx\plugins\WTT-PackNStrap` on SPT02/headless and the local client. Player clients must have those same BepInEx plugin files, otherwise `/client/items` can fail during login with `No C# type for taxonomy node ... CustomContainerTemplate`.
+
+On 2026-06-08, `MergeConsumablesFika.dll` was added under `BepInEx\plugins\MergeConsumables` on SPT02/headless and local `C:\SPT`. The change was made after Fika logged `ItemControllerExecutePacket::Exception thrown` from `ObservedInventoryController.CreateOperationFromDescriptor`; the Fika sync addon intercepts MergeConsumables custom merge operations and sends a dedicated Fika packet instead of using the generic inventory operation path.
 
 The server-side `SkillsExtended` mod remains enabled on SPT02 for profile compatibility.
 

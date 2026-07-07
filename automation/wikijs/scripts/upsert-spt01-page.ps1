@@ -1,5 +1,6 @@
 param(
-  [string]$EnvPath = ""
+  [string]$EnvPath = "",
+  [string]$ContentPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -8,35 +9,41 @@ $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..\..")
 if ([string]::IsNullOrWhiteSpace($EnvPath)) {
   $EnvPath = Join-Path $repoRoot ".env"
 }
+if ([string]::IsNullOrWhiteSpace($ContentPath)) {
+  $ContentPath = Join-Path $repoRoot "docs\spt-fika-runbook.md"
+}
 
 if (-not (Test-Path -LiteralPath $EnvPath)) {
   throw "Missing env file: $EnvPath"
 }
-
-$envMap = @{}
-Get-Content -LiteralPath $EnvPath | ForEach-Object {
-  if ($_ -match '^\s*#' -or $_ -notmatch '=') { return }
-  $k, $v = $_ -split '=', 2
-  $envMap[$k.Trim()] = $v.Trim().Trim('"')
+if (-not (Test-Path -LiteralPath $ContentPath)) {
+  throw "Missing content file: $ContentPath"
 }
 
-$apiKey = $envMap["WIKIJS_ADMIN_API_KEY"]
+Import-Module (Join-Path $repoRoot "automation\common\SecretResolver.psm1") -Force
+
+$envMap = Get-LabEnvMap -Path $EnvPath
+$apiKey = Resolve-LabSecret -Key "WIKIJS_ADMIN_API_KEY" -EnvMap $envMap
 if ([string]::IsNullOrWhiteSpace($apiKey)) {
-  throw "WIKIJS_ADMIN_API_KEY missing in .env"
+  throw "WIKIJS_ADMIN_API_KEY could not be resolved"
 }
 
 $uri = "https://wikijs.192.168.1.80.sslip.io/graphql"
+$locale = "en"
+$tags = @("services", "gaming", "spt", "fika", "windows", "vm", "vpn")
+
 [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
 
 function Invoke-WikiGql {
   param(
     [Parameter(Mandatory = $true)][string]$Query,
-    [hashtable]$Variables
+    [hashtable]$Variables = @{},
+    [int]$TimeoutSec = 120
   )
 
-  $body = @{ query = $Query; variables = $Variables } | ConvertTo-Json -Depth 20
+  $body = @{ query = $Query; variables = $Variables } | ConvertTo-Json -Depth 30
   try {
-    $resp = Invoke-RestMethod -Method POST -Uri $uri -Headers @{ Authorization = "Bearer $apiKey" } -ContentType "application/json" -Body $body
+    $resp = Invoke-RestMethod -Method POST -Uri $uri -Headers @{ Authorization = "Bearer $apiKey" } -ContentType "application/json" -Body $body -TimeoutSec $TimeoutSec
   } catch {
     if ($_.Exception.Response -and $_.Exception.Response.GetResponseStream()) {
       $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
@@ -46,99 +53,41 @@ function Invoke-WikiGql {
     throw
   }
   if ($resp.errors) {
-    throw ($resp.errors | ConvertTo-Json -Depth 20)
+    throw ($resp.errors | ConvertTo-Json -Depth 30)
   }
   return $resp.data
 }
 
-$path = "services/spt01"
-$locale = "en"
-$tags = @("services", "gaming", "spt", "fika", "ubuntu", "vm")
-$title = "SPT/Fika Server (spt01)"
-$description = "Windows 10 VM for hosting SPT/Fika Escape From Tarkov co-op service"
-$content = @'
-# SPT/Fika Server (spt01)
+function Get-WikiPageByPath {
+  param([Parameter(Mandatory = $true)][string]$Path)
 
-## Overview
-- Hostname: `spt01`
-- Role: SPT/Fika server host
-- Platform: Windows 10 VM
-- IP: `192.168.1.85`
-- Gateway: `192.168.1.1`
-- Network: `192.168.1.0/24`
-- NetBox object: VM in `homelab-vms`
-
-## Credentials
-- Source of truth: OpenBao path `secret/homelab/vms/spt01`
-- Bootstrap `.env` references: `SPT01_HOST`, `SPT01_USER`, `SPT01_PASSWORD`
-- Do not store passwords in Wiki.js, Git, NetBox comments, or command logs.
-
-## Network Access
-- Intended access pattern: remote users connect through UDM WireGuard VPN.
-- Keep SPT/Fika service ports scoped to this host only.
-- Do not expose SPT/Fika directly with WAN port forwards unless explicitly approved.
-- Current management status: WinRM was not reachable from the lab workstation during the 2026-06-05 automation run.
-
-## Planned Service
-- SPT backend and Fika co-op hosting.
-- Expected service ports to validate before firewall rules:
-  - `6969/tcp`
-  - `25565/udp`
-
-## Current Build State
-- `C:\SPT` was copied from the gaming workstation to `SPT01`.
-- Original EFT files were copied to `C:\Battlestate Games\Escape From Tarkov`.
-- Fika Installer `v1.1.7` was downloaded to `C:\SPT\Fika-Installer.exe`.
-- Fika server/client components were installed into `C:\SPT`.
-- .NET 9 runtime and ASP.NET Core 9 runtime were installed for `SPT.Server.exe`.
-- Fika config was generated and set to advertise `https://192.168.1.85:6969`.
-- Fika headless installation completed from `C:\SPT`.
-- Startup tasks:
-  - `SPT01-SPT-Server` starts `C:\SPT\SPT\SPT.Server.exe` at `helios` logon.
-  - `SPT01-Fika-Headless` runs `C:\SPT\automation\Start-FikaHeadlessAfterServer.ps1`, which waits for `https://127.0.0.1:6969/client/game/version/validate` before launching `C:\SPT\FikaHeadlessManager.exe`.
-- Current validation: the delayed helper starts after SPT is ready, but Fika currently reports an empty headless list at `/fika/headless/get`; the manager appears to exit without leaving an `EscapeFromTarkov` headless process running.
-- Baseline mod cleanup completed:
-  - Active BepInEx plugins: `Fika`, `spt`
-  - Active server mods: `fika-server`
-  - Disabled copied desktop mods path: `C:\SPT\_disabled-headless\baseline-20260605-141312`
-- Operator control script:
-  - Script: `C:\SPT\automation\Manage-SPT01-Fika.ps1`
-  - Non-interactive action script: `C:\SPT\automation\Invoke-SPT01-FikaAction.ps1 -Action Status|Start|Stop|Restart`
-  - Launcher: `C:\Users\helios\Desktop\SPT01 Fika Server Manager.lnk`
-  - Menu options: start, stop, restart, refresh status, exit.
-  - Repo sources:
-    - `automation/spt01/Manage-SPT01-Fika.ps1`
-    - `automation/spt01/Invoke-SPT01-FikaAction.ps1`
-- OpenSSH/Hermes access:
-  - OpenSSH Server is installed on `SPT01` and listens on `22/tcp`.
-  - Default SSH shell is Windows PowerShell 5.1.
-  - `helios@ai-workstation-evox2` is authorized for key-based SSH to `helios@192.168.1.85`.
-  - Hermes command pattern from AI workstation: `ssh helios@192.168.1.85 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT01-FikaAction.ps1 -Action Status"`
-
-## Setup Notes
-- Static IP should be reserved in UniFi for the VM MAC address.
-- If WinRM is not reachable, verify the VM virtual NIC is connected to the LAN-backed port group/network, confirm the Windows static address is applied, set the network profile to Private, and enable PowerShell Remoting.
-- Once reachable, install service prerequisites, deploy SPT/Fika files, configure the server to listen on `192.168.1.85`, and create a Windows scheduled task or service wrapper for persistence.
-'@
-
-$searchExistingQuery = @'
-query ($query: String!, $locale: String!) {
+  $query = @'
+query {
   pages {
-    search(query: $query, locale: $locale, path: "") {
-      results { id path title }
+    list(orderBy: UPDATED, orderByDirection: DESC) {
+      id
+      path
+      title
     }
   }
 }
 '@
 
-$existingSearch = Invoke-WikiGql -Query $searchExistingQuery -Variables @{ query = "spt01"; locale = $locale }
-$match = @($existingSearch.pages.search.results) | Where-Object { $_.path -eq $path } | Select-Object -First 1
-if ($null -eq $match) {
-  $match = @($existingSearch.pages.search.results) | Where-Object { $_.title -eq $title } | Select-Object -First 1
+  $result = Invoke-WikiGql -Query $query
+  return @($result.pages.list) | Where-Object { $_.path -eq $Path } | Select-Object -First 1
 }
 
-if ($null -ne $match -and $match.id) {
-  $updateQuery = @'
+function Set-WikiPage {
+  param(
+    [Parameter(Mandatory = $true)][string]$Path,
+    [Parameter(Mandatory = $true)][string]$Title,
+    [Parameter(Mandatory = $true)][string]$Description,
+    [Parameter(Mandatory = $true)][string]$Content
+  )
+
+  $existing = Get-WikiPageByPath -Path $Path
+  if ($null -ne $existing -and $existing.id) {
+    $updateQuery = @'
 mutation ($id: Int!, $content: String!, $description: String!, $editor: String!, $isPublished: Boolean!, $isPrivate: Boolean!, $locale: String!, $path: String!, $tags: [String]!, $title: String!) {
   pages {
     update(id: $id, content: $content, description: $description, editor: $editor, isPublished: $isPublished, isPrivate: $isPrivate, locale: $locale, path: $path, tags: $tags, title: $title) {
@@ -149,25 +98,26 @@ mutation ($id: Int!, $content: String!, $description: String!, $editor: String!,
 }
 '@
 
-  $result = Invoke-WikiGql -Query $updateQuery -Variables @{
-    id = [int]$match.id
-    content = $content
-    description = $description
-    editor = "markdown"
-    isPublished = $true
-    isPrivate = $false
-    locale = $locale
-    path = $path
-    tags = $tags
-    title = $title
+    $result = Invoke-WikiGql -Query $updateQuery -Variables @{
+      id = [int]$existing.id
+      content = $Content
+      description = $Description
+      editor = "markdown"
+      isPublished = $true
+      isPrivate = $false
+      locale = $locale
+      path = $Path
+      tags = $tags
+      title = $Title
+    }
+
+    if (-not $result.pages.update.responseResult.succeeded) {
+      throw "Wiki update failed for /en/$Path`: $($result.pages.update.responseResult.message)"
+    }
+    Write-Host ("wiki_action=updated path=/en/{0}" -f $result.pages.update.page.path)
+    return
   }
 
-  if (-not $result.pages.update.responseResult.succeeded) {
-    throw "Wiki update failed: $($result.pages.update.responseResult.message)"
-  }
-
-  Write-Host ("wiki_action=updated path=/en/{0}" -f $result.pages.update.page.path)
-} else {
   $createQuery = @'
 mutation ($content: String!, $description: String!, $editor: String!, $isPublished: Boolean!, $isPrivate: Boolean!, $locale: String!, $path: String!, $tags: [String]!, $title: String!) {
   pages {
@@ -180,20 +130,63 @@ mutation ($content: String!, $description: String!, $editor: String!, $isPublish
 '@
 
   $result = Invoke-WikiGql -Query $createQuery -Variables @{
-    content = $content
-    description = $description
+    content = $Content
+    description = $Description
     editor = "markdown"
     isPublished = $true
     isPrivate = $false
     locale = $locale
-    path = $path
+    path = $Path
     tags = $tags
-    title = $title
+    title = $Title
   }
 
   if (-not $result.pages.create.responseResult.succeeded) {
-    throw "Wiki create failed: $($result.pages.create.responseResult.message)"
+    throw "Wiki create failed for /en/$Path`: $($result.pages.create.responseResult.message)"
   }
-
   Write-Host ("wiki_action=created path=/en/{0}" -f $result.pages.create.page.path)
 }
+
+$fullContent = Get-Content -LiteralPath $ContentPath -Raw
+$marker = "## Current Mod State"
+$markerIndex = $fullContent.IndexOf($marker)
+if ($markerIndex -lt 0) {
+  throw "Unable to split Wiki content because marker was not found: $marker"
+}
+
+$mainContent = $fullContent.Substring(0, $markerIndex).TrimEnd()
+$mainContent = @(
+  $mainContent
+  ""
+  "## Related Operations"
+  ""
+  "Mod state, remote management, Hermes/Discord operations, and troubleshooting are documented in [SPT/Fika Mods And Operations](/en/runbooks/spt-fika-server-operations)."
+) -join "`r`n"
+
+$operationsContent = @(
+  "# SPT/Fika Mods And Operations"
+  ""
+  "Back to [SPT/Fika Server Runbook](/en/runbooks/spt-fika-server)."
+  ""
+  $fullContent.Substring($markerIndex).TrimStart()
+) -join "`r`n"
+
+$serviceIndex = @'
+# SPT/Fika Server (spt01)
+
+SPT01 is the Windows 10 VM that hosts the lab SPT/Fika Escape From Tarkov co-op backend and optional Fika headless raid host.
+
+- Main runbook: [SPT/Fika Server Runbook](/en/runbooks/spt-fika-server)
+- Mods and operations: [SPT/Fika Mods And Operations](/en/runbooks/spt-fika-server-operations)
+- Service VM: `SPT01`
+- IP address: `192.168.1.85`
+- SPT backend URL: `https://192.168.1.85:6969`
+- VPN server: UDM Pro WireGuard server `SPT-Fika-WireGuard`
+- VPN subnet: `192.168.86.0/24`
+
+Do not store SPT01 passwords, VPN private keys, Discord webhook URLs, or API tokens in Wiki.js.
+'@
+
+Set-WikiPage -Path "runbooks/spt-fika-server" -Title "SPT/Fika Server Runbook" -Description "Architecture, VPN, player setup, hosting modes, and baseline SPT/Fika configuration" -Content $mainContent
+Set-WikiPage -Path "runbooks/spt-fika-server-operations" -Title "SPT/Fika Mods And Operations" -Description "SPT/Fika mod state, remote management, Hermes operations, and troubleshooting" -Content $operationsContent
+Set-WikiPage -Path "services/spt01" -Title "SPT/Fika Server (spt01)" -Description "Windows 10 VM for hosting SPT/Fika Escape From Tarkov co-op service" -Content $serviceIndex

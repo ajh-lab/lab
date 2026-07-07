@@ -3,6 +3,8 @@ param(
   [string]$Mode = "Interactive",
   [string]$SptRoot = "",
   [string]$ModPackagePath = "",
+  [string]$ForgeApiToken = "",
+  [string]$ModDownloadCache = "",
   [string]$ServerUrl = "https://192.168.1.86:6969",
   [switch]$SkipPrerequisites,
   [switch]$NoElevate
@@ -12,6 +14,59 @@ $ErrorActionPreference = "Stop"
 
 $Script:StepIndex = 0
 $Script:StepTotal = 8
+$Script:ForgeApiTokenPlainText = ""
+$Script:LastLogPath = ""
+$Script:Spt02ExpectedModItems = @(
+  @{ Path = "BepInEx\plugins\BarterItemsStacksClient.dll"; Name = "BarterItemsStacks client plugin" },
+  @{ Path = "SPT\user\mods\BarterItemsStacks"; Name = "BarterItemsStacks server mod" },
+  @{ Path = "BepInEx\plugins\LootNet\LootNet.dll"; Name = "LootNET client plugin" },
+  @{ Path = "SPT\user\mods\LootNetServer\LootNetServer.dll"; Name = "LootNET server mod" },
+  @{ Path = "BepInEx\plugins\MergeConsumables\MergeConsumables.dll"; Name = "MergeConsumables client plugin" },
+  @{ Path = "BepInEx\plugins\MergeConsumables\MergeConsumablesFika.dll"; Name = "MergeConsumables Fika sync addon" },
+  @{ Path = "SPT\user\mods\MergeConsumablesServer\MergeConsumablesServer.dll"; Name = "MergeConsumables server mod" },
+  @{ Path = "BepInEx\plugins\UseItemsFromAnywhere.dll"; Name = "Use Items Anywhere client plugin" },
+  @{ Path = "BepInEx\plugins\WTT-PackNStrap\WTT-PackNStrap.dll"; Name = "WTT PackNStrap client plugin" },
+  @{ Path = "BepInEx\plugins\WTT-PackNStrap\Trenchfoot-BeltSlot.dll"; Name = "WTT PackNStrap BeltSlot client plugin" },
+  @{ Path = "SPT\user\mods\WTT-PackNStrap"; Name = "WTT PackNStrap server mod" },
+  @{ Path = "BepInEx\plugins\WTT-ClientCommonLib"; Name = "WTT ClientCommonLib plugin" },
+  @{ Path = "SPT\user\mods\WTT-ServerCommonLib"; Name = "WTT ServerCommonLib mod" },
+  @{ Path = "BepInEx\plugins\WTT-ContentBackportClient"; Name = "WTT Content Backport client plugin" },
+  @{ Path = "SPT\user\mods\WTT-ContentBackport"; Name = "WTT Content Backport server mod" },
+  @{ Path = "BepInEx\plugins\WTT-ArmoryClient"; Name = "WTT Armory client plugin" },
+  @{ Path = "SPT\user\mods\WTT-Armory"; Name = "WTT Armory server mod" },
+  @{ Path = "BepInEx\plugins\RaiRai.ColorConverterAPI.dll"; Name = "Color Converter API client plugin" },
+  @{ Path = "BepInEx\plugins\TTC.dll"; Name = "Tarkov Trading Cards client plugin" },
+  @{ Path = "SPT\user\mods\TTC"; Name = "Tarkov Trading Cards server mod" },
+  @{ Path = "BepInEx\plugins\tarkin-ladders"; Name = "Climbable Ladders client plugin" },
+  @{ Path = "SPT\user\mods\StatRewards"; Name = "Stat Rewards server mod" },
+  @{ Path = "SPT\user\mods\CaliberSplitAmmoCases"; Name = "Caliber Split Ammo Cases server mod" },
+  @{ Path = "SPT\user\mods\CollectorBackportPatch"; Name = "Collector Backport Patch server mod" },
+  @{ Path = "SPT\user\mods\yellowdoge-tarkovrarecollectibles"; Name = "Tarkov Rare Collectibles server mod" },
+  @{ Path = "SPT\user\mods\MedicalSICCcase"; Name = "Medical SICC Case server mod" },
+  @{ Path = "SPT\user\mods\Handy"; Name = "Handy Toolbox server mod" },
+  @{ Path = "SPT\user\mods\RepublicanJesus-DiscipleBallisticCasePlus"; Name = "Disciples Ballistic Case Plus server mod" }
+)
+$Script:Spt02RequiredForgeDownloads = @(
+  @{ Type = "mod"; Id = 2480; Name = "BarterItemsStacks"; Version = "1.3.2"; PageUrl = "https://forge.sp-tarkov.com/mod/2480/barteritemsstacks" },
+  @{ Type = "mod"; Id = 2679; Name = "LootNET"; Version = "1.0.6"; PageUrl = "https://forge.sp-tarkov.com/mod/2679/lootnet" },
+  @{ Type = "mod"; Id = 1657; Name = "MergeConsumables"; Version = "1.5.4"; PageUrl = "https://forge.sp-tarkov.com/mod/1657/mergeconsumables" },
+  @{ Type = "addon"; Id = 4; Name = "MergeConsumables - Fika sync"; Version = "1.0.1"; PageUrl = "https://forge.sp-tarkov.com/addon/4/mergeconsumables-fika-sync" },
+  @{ Type = "mod"; Id = 2386; Name = "Use Items Anywhere"; Version = "1.3.2"; PageUrl = "https://forge.sp-tarkov.com/mod/2386/use-items-anywhere" },
+  @{ Type = "mod"; Id = 2310; Name = "WTT - CommonLib"; Version = "2.0.20"; PageUrl = "https://forge.sp-tarkov.com/mod/2310/wtt-commonlib" },
+  @{ Type = "mod"; Id = 2512; Name = "WTT - Content Backport"; Version = "1.0.7"; PageUrl = "https://forge.sp-tarkov.com/mod/2512/wtt-content-backport" },
+  @{ Type = "mod"; Id = 2246; Name = "WTT - Armory"; Version = "2.0.5"; PageUrl = "https://forge.sp-tarkov.com/mod/2246/wtt-armory" },
+  @{ Type = "mod"; Id = 1278; Name = "WTT - Pack 'n' Strap"; Version = "2.0.4"; PageUrl = "https://forge.sp-tarkov.com/mod/1278/wtt-pack-n-strap" },
+  @{ Type = "mod"; Id = 1090; Name = "Color Converter API"; Version = "1.1.1"; PageUrl = "https://forge.sp-tarkov.com/mod/1090/color-converter-api" },
+  @{ Type = "mod"; Id = 2226; Name = "[TTC] Tarkov Trading Cards"; Version = "3.0.8"; PageUrl = "https://forge.sp-tarkov.com/mod/2226/ttc-tarkov-trading-cards" },
+  @{ Type = "mod"; Id = 2649; Name = "Climbable Ladders"; Version = "1.0.2"; PageUrl = "https://forge.sp-tarkov.com/mod/2649/climbable-ladders" },
+  @{ Type = "mod"; Id = 2655; Name = "Stat Rewards"; Version = "1.1.1"; PageUrl = "https://forge.sp-tarkov.com/mod/2655/stat-rewards" },
+  @{ Type = "mod"; Id = 2277; Name = "Caliber Split Ammo Cases"; Version = "2.0.2"; PageUrl = "https://forge.sp-tarkov.com/mod/2277/caliber-split-ammo-cases" },
+  @{ Type = "mod"; Id = 2615; Name = "Collector Backport Patch"; Version = "0.1.1"; PageUrl = "https://forge.sp-tarkov.com/mod/2615/updated-collector-quest-and-streamer-case-eft-10-backport" },
+  @{ Type = "mod"; Id = 2318; Name = "Tarkov Rare Collectibles"; Version = "1.1.5"; PageUrl = "https://forge.sp-tarkov.com/mod/2318/tarkov-rare-collectibles" },
+  @{ Type = "mod"; Id = 1564; Name = "Medical SICC Case (MICC) - UPDATED"; Version = "5.0.3"; PageUrl = "https://forge.sp-tarkov.com/mod/1564/medical-sicc-case-micc-updated" },
+  @{ Type = "mod"; Id = 2446; Name = "Handy Toolbox"; Version = "1.0.0"; PageUrl = "https://forge.sp-tarkov.com/mod/2446/handy-toolbox" },
+  @{ Type = "mod"; Id = 2385; Name = "Disciples Ballistic Case Plus"; Version = "1.0.0"; PageUrl = "https://forge.sp-tarkov.com/mod/2385/disciples-ballistic-case-plus" }
+)
 
 function Write-UiLine {
   param(
@@ -207,7 +262,7 @@ function Install-Prerequisites {
     @{ Id = "Microsoft.VCRedist.2015+.x64"; Name = "Microsoft Visual C++ Redistributable 2015-2022 x64" },
     @{ Id = "Microsoft.DotNet.DesktopRuntime.8"; Name = ".NET Desktop Runtime 8" },
     @{ Id = "Microsoft.DotNet.DesktopRuntime.9"; Name = ".NET Desktop Runtime 9" },
-    @{ Id = "7zip.7zip"; Name = "7-Zip" }
+    @{ Id = "7zip.7zip"; Name = "7-Zip, used for non-ZIP mod archives when WinRAR is not installed" }
   )
 
   foreach ($package in $packages) {
@@ -260,6 +315,274 @@ function Get-LatestGitHubAsset {
     throw "No release asset matching '$AssetPattern' found for $Repo."
   }
   return $asset.browser_download_url
+}
+
+function Convert-SecureStringToPlainText {
+  param([securestring]$SecureString)
+  if (-not $SecureString) {
+    return ""
+  }
+  $ptr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecureString)
+  try {
+    return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr)
+  } finally {
+    [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr)
+  }
+}
+
+function Normalize-ForgeApiToken {
+  param([string]$Token)
+  if ([string]::IsNullOrWhiteSpace($Token)) {
+    return ""
+  }
+
+  $clean = $Token.Trim()
+  $clean = $clean -replace '^\s*Bearer\s+', ''
+  $clean = $clean -replace '[\x00-\x1F\x7F]', ''
+  return $clean.Trim()
+}
+
+function Get-ForgeApiTokenPlainText {
+  if (-not [string]::IsNullOrWhiteSpace($Script:ForgeApiTokenPlainText)) {
+    return $Script:ForgeApiTokenPlainText
+  }
+  if (-not [string]::IsNullOrWhiteSpace($ForgeApiToken)) {
+    $Script:ForgeApiTokenPlainText = Normalize-ForgeApiToken -Token $ForgeApiToken
+    return $Script:ForgeApiTokenPlainText
+  }
+
+  Write-UiLine "Forge direct downloads require a Forge API token." Yellow
+  Write-UiLine "Create one in Forge, copy the token to the Windows clipboard, then press Enter." Gray
+  Write-UiLine "The script pauses transcript logging before reading the clipboard." Yellow
+
+  $restartTranscript = $false
+  if (-not [string]::IsNullOrWhiteSpace($Script:LastLogPath)) {
+    try {
+      Stop-Transcript | Out-Null
+      $restartTranscript = $true
+    } catch {
+      $restartTranscript = $false
+    }
+  }
+
+  try {
+    Read-Host "Copy the SPT Forge API token to the clipboard, then press Enter" | Out-Null
+    try {
+      $clipboardToken = Get-Clipboard -Raw
+    } catch {
+      throw "Unable to read the clipboard for the Forge API token. Copy the token to the clipboard and rerun the script. Details: $($_.Exception.Message)"
+    }
+    $token = Normalize-ForgeApiToken -Token $clipboardToken
+  } finally {
+    if ($restartTranscript) {
+      Start-Transcript -Path $Script:LastLogPath -Append | Out-Null
+    }
+  }
+
+  if ([string]::IsNullOrWhiteSpace($token)) {
+    throw "SPT Forge API token is required to download mods directly from Forge."
+  }
+  $Script:ForgeApiTokenPlainText = $token.Trim()
+  return $Script:ForgeApiTokenPlainText
+}
+
+function Invoke-ForgeApi {
+  param([string]$Uri)
+  $token = Get-ForgeApiTokenPlainText
+  if ($token -match '[\x00-\x20\x7F]') {
+    $Script:ForgeApiTokenPlainText = ""
+    throw "The Forge API token contains whitespace or hidden control characters after cleanup. Copy only the token value, without surrounding quotes or line breaks."
+  }
+  try {
+    return Invoke-RestMethod -Uri $Uri -Headers @{
+      Authorization = "Bearer $token"
+      Accept = "application/json"
+    } -UseBasicParsing
+  } catch {
+    $message = $_.Exception.Message
+    if ($_.Exception.Response -and $_.Exception.Response.StatusCode.value__ -eq 401) {
+      $Script:ForgeApiTokenPlainText = ""
+      throw "Forge API authentication failed. Rerun the script and paste a valid Forge API token. Details: $message"
+    }
+    throw "Forge API request failed: $Uri. Details: $message"
+  }
+}
+
+function Get-ForgeVersionDownload {
+  param([hashtable]$Download)
+
+  $kind = $Download.Type
+  if ($kind -notin @("mod", "addon")) {
+    throw "Unsupported Forge download type '$kind' for $($Download.Name)."
+  }
+
+  $uri = "https://forge.sp-tarkov.com/api/v0/$kind/$($Download.Id)/versions?per_page=50&sort=-published_at"
+  $response = Invoke-ForgeApi -Uri $uri
+  $versions = @($response.data)
+  if ($versions.Count -eq 0) {
+    throw "Forge returned no versions for $($Download.Name). Page: $($Download.PageUrl)"
+  }
+
+  $version = $versions | Where-Object { $_.version -eq $Download.Version } | Select-Object -First 1
+  if (-not $version) {
+    $available = ($versions | Select-Object -First 8 -ExpandProperty version) -join ", "
+    throw "Forge did not return pinned version $($Download.Version) for $($Download.Name). Available versions include: $available. Page: $($Download.PageUrl)"
+  }
+  if ([string]::IsNullOrWhiteSpace($version.link)) {
+    throw "Forge version $($Download.Version) for $($Download.Name) did not include a download link. Page: $($Download.PageUrl)"
+  }
+
+  return [pscustomobject]@{
+    Name = $Download.Name
+    Type = $Download.Type
+    Id = $Download.Id
+    Version = $version.version
+    Link = $version.link
+    ContentLength = $version.content_length
+    FikaCompatibility = $version.fika_compatibility
+    PageUrl = $Download.PageUrl
+  }
+}
+
+function Get-ArchiveExtensionFromUrl {
+  param([string]$Url)
+  $path = ([uri]$Url).AbsolutePath
+  $fileName = [IO.Path]::GetFileName($path)
+  if ($fileName -match '\.tar\.gz$') {
+    return ".tar.gz"
+  }
+  $extension = [IO.Path]::GetExtension($fileName)
+  if ([string]::IsNullOrWhiteSpace($extension)) {
+    return ".zip"
+  }
+  return $extension
+}
+
+function Get-7ZipPath {
+  $candidates = @(
+    (Join-Path $env:ProgramFiles "7-Zip\7z.exe"),
+    (Join-Path ${env:ProgramFiles(x86)} "7-Zip\7z.exe"),
+    "7z.exe"
+  )
+  foreach ($candidate in $candidates) {
+    if ([string]::IsNullOrWhiteSpace($candidate)) {
+      continue
+    }
+    $cmd = Get-Command $candidate -ErrorAction SilentlyContinue
+    if ($cmd) {
+      return $cmd.Source
+    }
+    if (Test-Path -LiteralPath $candidate) {
+      return $candidate
+    }
+  }
+  return ""
+}
+
+function Get-WinRarPath {
+  $candidates = @(
+    (Join-Path $env:ProgramFiles "WinRAR\WinRAR.exe"),
+    (Join-Path ${env:ProgramFiles(x86)} "WinRAR\WinRAR.exe"),
+    (Join-Path $env:ProgramFiles "WinRAR\Rar.exe"),
+    (Join-Path ${env:ProgramFiles(x86)} "WinRAR\Rar.exe"),
+    "WinRAR.exe",
+    "Rar.exe"
+  )
+  foreach ($candidate in $candidates) {
+    if ([string]::IsNullOrWhiteSpace($candidate)) {
+      continue
+    }
+    $cmd = Get-Command $candidate -ErrorAction SilentlyContinue
+    if ($cmd) {
+      return $cmd.Source
+    }
+    if (Test-Path -LiteralPath $candidate) {
+      return $candidate
+    }
+  }
+  return ""
+}
+
+function Expand-ModArchive {
+  param(
+    [string]$ArchivePath,
+    [string]$Destination
+  )
+
+  $extension = [IO.Path]::GetExtension($ArchivePath).ToLowerInvariant()
+  if ($ArchivePath.ToLowerInvariant().EndsWith(".tar.gz")) {
+    $extension = ".tar.gz"
+  }
+
+  if ($extension -eq ".zip") {
+    Expand-Archive -LiteralPath $ArchivePath -DestinationPath $Destination -Force
+    return
+  }
+
+  $sevenZip = Get-7ZipPath
+  if (-not [string]::IsNullOrWhiteSpace($sevenZip)) {
+    & $sevenZip x "-o$Destination" "-y" $ArchivePath | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      throw "7-Zip failed to extract $ArchivePath."
+    }
+    return
+  }
+
+  $winRar = Get-WinRarPath
+  if (-not [string]::IsNullOrWhiteSpace($winRar)) {
+    & $winRar x "-ibck" "-o+" $ArchivePath "$Destination\" | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+      throw "WinRAR failed to extract $ArchivePath."
+    }
+    return
+  }
+
+  throw "7-Zip or WinRAR is required to extract $ArchivePath. Install 7-Zip, install WinRAR, or rerun prerequisite installation."
+}
+
+function Copy-ModArchiveContentsToSptRoot {
+  param(
+    [string]$Stage,
+    [string]$Root
+  )
+
+  $installed = 0
+  $candidateRoots = @($Stage)
+  $candidateRoots += @(Get-ChildItem -LiteralPath $Stage -Directory -Force | Select-Object -ExpandProperty FullName)
+
+  foreach ($candidate in $candidateRoots | Select-Object -Unique) {
+    $bepInEx = Join-Path $candidate "BepInEx"
+    if (Test-Path -LiteralPath $bepInEx) {
+      Copy-PackageChildren -Source $bepInEx -Destination (Join-Path $Root "BepInEx") | Out-Null
+      $installed++
+    }
+
+    $sptUserMods = Join-Path $candidate "SPT\user\mods"
+    if (Test-Path -LiteralPath $sptUserMods) {
+      Copy-PackageChildren -Source $sptUserMods -Destination (Join-Path $Root "SPT\user\mods") | Out-Null
+      $installed++
+    }
+
+    $legacyUserMods = Join-Path $candidate "user\mods"
+    if (Test-Path -LiteralPath $legacyUserMods) {
+      Copy-PackageChildren -Source $legacyUserMods -Destination (Join-Path $Root "SPT\user\mods") | Out-Null
+      $installed++
+    }
+
+    $plugins = Join-Path $candidate "plugins"
+    if (Test-Path -LiteralPath $plugins) {
+      Copy-PackageChildren -Source $plugins -Destination (Join-Path $Root "BepInEx\plugins") | Out-Null
+      $installed++
+    }
+
+    $serverMods = Join-Path $candidate "server-mods"
+    if (Test-Path -LiteralPath $serverMods) {
+      Copy-PackageChildren -Source $serverMods -Destination (Join-Path $Root "SPT\user\mods") | Out-Null
+      $installed++
+    }
+  }
+
+  return ($installed -gt 0)
 }
 
 function Install-Spt {
@@ -592,6 +915,124 @@ function Install-ModPackage {
   Write-UiLine "Installed mod package into $Root." Green
 }
 
+function Get-SafeFileName {
+  param([string]$Name)
+  $safe = $Name
+  foreach ($char in [IO.Path]::GetInvalidFileNameChars()) {
+    $safe = $safe.Replace($char, "-")
+  }
+  return ($safe -replace "\s+", "-").Trim("-")
+}
+
+function Install-Spt02ForgeMods {
+  param([string]$Root)
+
+  if (-not [string]::IsNullOrWhiteSpace($ModPackagePath)) {
+    Write-UiLine "Legacy mod package path was supplied; installing that package instead of downloading from Forge." Yellow
+    Install-ModPackage -Root $Root -PackagePath $ModPackagePath
+    return
+  }
+
+  $cacheRoot = $ModDownloadCache
+  if ([string]::IsNullOrWhiteSpace($cacheRoot)) {
+    $cacheRoot = Join-Path $Root "_forge-download-cache"
+  }
+  New-Item -ItemType Directory -Path $cacheRoot -Force | Out-Null
+
+  Write-UiLine "Downloading pinned SPT02 player mod set from Forge..." DarkCyan
+  Write-UiLine "Download cache: $cacheRoot" Gray
+  Write-UiLine "Pinned versions are used so players match SPT02 instead of silently installing newer releases." Gray
+
+  $count = $Script:Spt02RequiredForgeDownloads.Count
+  $index = 0
+  foreach ($download in $Script:Spt02RequiredForgeDownloads) {
+    $index++
+    Write-Progress -Activity "Downloading SPT02 Forge mods" -Status $download.Name -PercentComplete ([Math]::Round(($index / $count) * 100))
+    Write-UiLine ("[{0}/{1}] {2} {3}" -f $index, $count, $download.Name, $download.Version) Cyan
+
+    $versionInfo = Get-ForgeVersionDownload -Download $download
+    if ($versionInfo.FikaCompatibility -eq "incompatible") {
+      throw "$($versionInfo.Name) $($versionInfo.Version) is marked Fika-incompatible by Forge. Page: $($versionInfo.PageUrl)"
+    }
+    if ($versionInfo.FikaCompatibility -eq "unknown") {
+      Write-UiLine "  Forge Fika compatibility: unknown. This version is pinned because it matches the current SPT02 setup." Yellow
+    }
+
+    $extension = Get-ArchiveExtensionFromUrl -Url $versionInfo.Link
+    $archiveName = "{0}-{1}{2}" -f (Get-SafeFileName -Name $versionInfo.Name), $versionInfo.Version, $extension
+    $archivePath = Join-Path $cacheRoot $archiveName
+
+    if (-not (Test-Path -LiteralPath $archivePath)) {
+      Write-UiLine "  Downloading from Forge-provided link..." Gray
+      try {
+        Invoke-WebRequest -Uri $versionInfo.Link -OutFile $archivePath -UseBasicParsing -Headers @{ "User-Agent" = "SPT-Fika-PlayerSetup/1.0" }
+      } catch {
+        throw "Failed to download $($versionInfo.Name) $($versionInfo.Version) from Forge-provided link. Page: $($versionInfo.PageUrl). Details: $($_.Exception.Message)"
+      }
+    } else {
+      Write-UiLine "  Using cached archive." Gray
+    }
+
+    if (-not (Test-Path -LiteralPath $archivePath)) {
+      throw "Download failed for $($versionInfo.Name). Page: $($versionInfo.PageUrl)"
+    }
+    if ((Get-Item -LiteralPath $archivePath).Length -le 0) {
+      throw "Downloaded archive is empty for $($versionInfo.Name): $archivePath"
+    }
+
+    $stage = Join-Path $env:TEMP ("spt-forge-mod-" + [guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $stage -Force | Out-Null
+    try {
+      try {
+        Expand-ModArchive -ArchivePath $archivePath -Destination $stage
+      } catch {
+        throw "Failed to extract $($versionInfo.Name) archive at $archivePath. Details: $($_.Exception.Message)"
+      }
+      if (-not (Copy-ModArchiveContentsToSptRoot -Stage $stage -Root $Root)) {
+        throw "Archive did not contain recognizable SPT mod folders. Expected BepInEx, user\mods, SPT\user\mods, plugins, or server-mods. Archive: $archivePath"
+      }
+      Write-UiLine "  Installed." Green
+    } finally {
+      if (Test-Path -LiteralPath $stage) {
+        Remove-Item -LiteralPath $stage -Recurse -Force
+      }
+    }
+  }
+
+  Write-Progress -Activity "Downloading SPT02 Forge mods" -Completed
+  Write-UiLine "Installed pinned SPT02 Forge mod set into $Root." Green
+}
+
+function Test-Spt02ExpectedModSet {
+  param(
+    [string]$Root,
+    [switch]$WarnOnly
+  )
+
+  Write-UiLine "Checking expected SPT02 mod components..." DarkCyan
+  $missing = @()
+  foreach ($entry in $Script:Spt02ExpectedModItems) {
+    $full = Join-Path $Root $entry.Path
+    if (Test-Path -LiteralPath $full) {
+      Write-UiLine ("  OK: {0}" -f $entry.Name) Green
+    } else {
+      Write-UiLine ("  Missing: {0} ({1})" -f $entry.Name, $entry.Path) Yellow
+      $missing += $entry
+    }
+  }
+
+  if ($missing.Count -gt 0) {
+    $message = "The applied SPT02 mod set is missing $($missing.Count) expected component(s). Confirm the pinned Forge download list still matches SPT02 before players join the modded server."
+    if ($WarnOnly) {
+      Write-UiLine $message Yellow
+    } else {
+      throw $message
+    }
+  } else {
+    Write-UiLine "SPT02 mod component check passed." Green
+  }
+}
+
 function New-ClientModPackage {
   Write-UiHeader
   $sourceRoot = Read-RequiredValue "Source SPT folder to package" "C:\SPT"
@@ -644,9 +1085,11 @@ function New-ClientModPackage {
     created = (Get-Date).ToString("s")
     serverUrl = $ServerUrl
     sourceRoot = $sourceRoot
+    expectedItems = @($Script:Spt02ExpectedModItems | ForEach-Object { $_.Path })
     notes = @(
       "Install SPT and Fika first.",
       "Apply this package with Install-SPTFikaPlayerClient.ps1.",
+      "This package should include LootNET and the MergeConsumables Fika sync addon for the current SPT02 modded setup.",
       "Do not include disabled/quarantined mods unless deliberately testing them."
     )
   }
@@ -682,6 +1125,7 @@ function Invoke-PlayerSetup {
   $root = Select-InstallRoot
   $root = $root.TrimEnd("\")
   $logPath = Join-Path $env:TEMP ("spt-fika-player-setup-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
+  $Script:LastLogPath = $logPath
   Start-Transcript -Path $logPath -Force | Out-Null
 
   try {
@@ -701,8 +1145,9 @@ function Invoke-PlayerSetup {
     Update-SetupProgress -Status "Quarantining old mods"
     Move-ExistingClientMods -Root $root
 
-    Update-SetupProgress -Status "Installing SPT02 mod package"
-    Install-ModPackage -Root $root -PackagePath $ModPackagePath
+    Update-SetupProgress -Status "Installing SPT02 Forge mods"
+    Install-Spt02ForgeMods -Root $root
+    Test-Spt02ExpectedModSet -Root $root -WarnOnly
 
     Update-SetupProgress -Status "Validating local files"
     $required = @(
@@ -745,6 +1190,7 @@ function Invoke-Spt02ModSetup {
   }
 
   $logPath = Join-Path $env:TEMP ("spt-fika-mod-switch-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
+  $Script:LastLogPath = $logPath
   Start-Transcript -Path $logPath -Force | Out-Null
   try {
     $Script:StepTotal = 4
@@ -754,8 +1200,9 @@ function Invoke-Spt02ModSetup {
     Update-SetupProgress -Status "Backing up current mods"
     Move-ExistingClientMods -Root $root | Out-Null
 
-    Update-SetupProgress -Status "Installing SPT02 mod package"
-    Install-ModPackage -Root $root -PackagePath $ModPackagePath
+    Update-SetupProgress -Status "Installing SPT02 Forge mods"
+    Install-Spt02ForgeMods -Root $root
+    Test-Spt02ExpectedModSet -Root $root -WarnOnly
 
     Update-SetupProgress -Status "Complete"
     Write-Progress -Activity "SPT/Fika player setup" -Completed
@@ -776,6 +1223,7 @@ function Invoke-ModRestore {
   }
 
   $logPath = Join-Path $env:TEMP ("spt-fika-mod-restore-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
+  $Script:LastLogPath = $logPath
   Start-Transcript -Path $logPath -Force | Out-Null
   try {
     $Script:StepTotal = 3
@@ -801,8 +1249,8 @@ function Invoke-ModRestore {
 function Show-MainMenu {
   Write-UiHeader
   Write-UiLine "Choose an action:" DarkCyan
-  Write-UiLine "  1. Full setup: install/check SPT, install/check Fika, then apply SPT02 mods" Gray
-  Write-UiLine "  2. Mods only: back up current mods and apply the SPT02 mod package" Gray
+  Write-UiLine "  1. Full setup: install/check SPT, install/check Fika, then download/apply SPT02 mods" Gray
+  Write-UiLine "  2. Mods only: back up current mods and download/apply SPT02 mods" Gray
   Write-UiLine "  3. Restore a previous mod setup" Gray
   Write-UiLine "  4. Build a player mod package from an existing SPT install" Gray
   Write-UiLine "  5. Exit" Gray
@@ -819,10 +1267,31 @@ function Show-MainMenu {
   }
 }
 
-switch ($Mode) {
-  "Interactive" { Show-MainMenu }
-  "Setup" { Invoke-PlayerSetup }
-  "Mods" { Invoke-Spt02ModSetup }
-  "Restore" { Invoke-ModRestore }
-  "Package" { New-ClientModPackage }
+try {
+  switch ($Mode) {
+    "Interactive" { Show-MainMenu }
+    "Setup" { Invoke-PlayerSetup }
+    "Mods" { Invoke-Spt02ModSetup }
+    "Restore" { Invoke-ModRestore }
+    "Package" { New-ClientModPackage }
+  }
+} catch {
+  Write-Progress -Activity "SPT/Fika player setup" -Completed
+  Write-Host ""
+  Write-Host "SPT/Fika player setup failed." -ForegroundColor Red
+  Write-Host ""
+  Write-Host $_.Exception.Message -ForegroundColor Yellow
+  if ($_.ScriptStackTrace) {
+    Write-Host ""
+    Write-Host "Stack trace:" -ForegroundColor DarkCyan
+    Write-Host $_.ScriptStackTrace -ForegroundColor DarkGray
+  }
+  if (-not [string]::IsNullOrWhiteSpace($Script:LastLogPath)) {
+    Write-Host ""
+    Write-Host "Setup log:" -ForegroundColor DarkCyan
+    Write-Host "  $Script:LastLogPath" -ForegroundColor Gray
+  }
+  Write-Host ""
+  Read-Host "Press Enter to close"
+  exit 1
 }

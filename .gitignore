@@ -21,6 +21,9 @@ tmp/*
 repositories/*
 !repositories/.KEEP
 
+# Local tool caches
+.tools/
+
 # Editor / OS
 .DS_Store
 Thumbs.db

@@ -2,7 +2,7 @@ $ErrorActionPreference = "Continue"
 
 $ServerTaskName = "SPT01-SPT-Server"
 $HeadlessTaskName = "SPT01-Fika-Headless"
-$ServerUrl = "https://127.0.0.1:6969/client/game/version/validate"
+$ServerUrl = "https://127.0.0.1:6969/fika/headless/get"
 $HeadlessUrl = "https://127.0.0.1:6969/fika/headless/get"
 $LogPath = "C:\SPT\Logs\spt01-fika-manager.log"
 
