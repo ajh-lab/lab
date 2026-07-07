@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Workstation Ops"
+  short_description: "Maintain ai-workstation and Hermes services"
+  default_prompt: "Use $ai-workstation-ops for ai-workstation, Fedora, Ollama, and Hermes service work."

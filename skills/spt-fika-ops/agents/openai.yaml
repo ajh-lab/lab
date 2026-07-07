@@ -1,0 +1,4 @@
+interface:
+  display_name: "SPT Fika Ops"
+  short_description: "Operate the SPT/Fika server safely"
+  default_prompt: "Use $spt-fika-ops for SPT02 and Fika server operations."

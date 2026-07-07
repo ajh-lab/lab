@@ -1,14 +1,14 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-06-26 19:49 (America/Chicago)
+Last updated: 2026-07-07 (America/Chicago)
 
 ## Purpose
 
-This repository is the baseline operational context for the home lab. It is intended to be AI-ingestable and kept current as infrastructure changes.
+This repository is the baseline operational context and working area for the home lab. It is intended to be AI-ingestable and kept current as infrastructure changes.
 
 ## AI Workspace Model
 
-This `lab` repo is the primary AI workspace for operations, infrastructure, and ticket-driven delivery.
+This `lab` repo is the primary AI workspace for operations, infrastructure, and ticket-driven delivery across Codex, Hermes/Helios, Cline, and DeepSeek-backed agents.
 
 Standard workflow conventions:
 
@@ -20,6 +20,10 @@ Standard workflow conventions:
    - Context file: `tmp/<ticket-number>/<ticket-number>-context.md`
    - Example: `tmp/DEVOPS-142/DEVOPS-142-context.md`
 5. Disposable agent-generated files, one-off scratch scripts, command outputs, and experiments must be created under `tmp/<task-or-topic>/`, not in the repository root.
+
+`repositories/` is a local checkout workspace, not a source-of-truth folder for this repo. Agents may clone, pull, branch, test, and edit external project repositories there, but those nested repositories must not be committed into this `lab` repo. `.gitignore` intentionally ignores `repositories/*`; only `repositories/.KEEP` is tracked so the folder exists after clone. Durable changes made inside a nested repository must be committed and pushed in that nested repository's own Git history, or promoted into the appropriate first-class folder in this `lab` repo when the file truly belongs here.
+
+When Codex credits are unavailable, the Hermes `deepseek` profile can be used for Kanban work after `DEEPSEEK_API_KEY` is stored/configured. The local `default` Hermes profile should continue to use the ai-workstation-hosted qwen3-coder model for routine/local work, while `deepseek` is intended for harder coding, review, and research tasks.
 
 ## Source of Truth Files
 
@@ -40,9 +44,10 @@ Standard workflow conventions:
 - `sub-context/ai-infrastructure-context.md`: infrastructure-specific supplemental context.
 - `phase1-agent-todo.md`: first-phase execution backlog for agent platform, knowledge system, and automation control plane.
 - `phase1-agent-queue.yaml` + `phase1-agent-queue.json`: machine-readable execution queue for agent task orchestration.
-- `repositories/`: workspace for repos the agent clones/pulls for implementation work.
+- `repositories/`: ignored local workspace for repos the agent clones/pulls for implementation work. Only `repositories/.KEEP` is tracked; nested repos are not part of this repo's Git history.
 - `tmp/`: transient ticket working area (`tmp/<ticket-number>/<ticket-number>-context.md` pattern).
 - `tmp/README.md`: scratch workspace rules; contents of `tmp/` are ignored unless explicitly allow-listed.
+- `skills/`: reusable Codex/Hermes operational skills for lab work. Current focused skills cover OpenBAO secrets, Hermes Kanban, k3s/GitOps, lab documentation, ai-workstation operations, and SPT/Fika operations. Use these to avoid rediscovering common procedures.
 
 ## Repo Layout
 
@@ -55,7 +60,8 @@ lab/
   .env                      # gitignored (secrets)
   .gitignore
   .kubeconfig-192.168.1.80.yaml
-  repositories/             # agent code workspace (cloned repos, feature work)
+  repositories/             # ignored agent code workspace; only .KEEP is tracked
+    .KEEP
   tmp/                      # ticket temp workspace
     README.md
     <ticket-number>/

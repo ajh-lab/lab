@@ -16,6 +16,11 @@ tmp/*
 !tmp/.gitkeep
 !tmp/README.md
 
+# Agent checkout workspace. Repos cloned here are working copies and must not
+# be committed to this lab workspace repo.
+repositories/*
+!repositories/.KEEP
+
 # Editor / OS
 .DS_Store
 Thumbs.db

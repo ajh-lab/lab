@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lab GitOps"
+  short_description: "Deploy and verify lab k3s GitOps services"
+  default_prompt: "Use $lab-gitops for k3s, ArgoCD, ESO, and registry deployment work."

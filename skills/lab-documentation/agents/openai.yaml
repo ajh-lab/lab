@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lab Documentation"
+  short_description: "Update Wiki.js, NetBox, and lab baseline docs"
+  default_prompt: "Use $lab-documentation for Wiki.js, NetBox, and baseline documentation updates."

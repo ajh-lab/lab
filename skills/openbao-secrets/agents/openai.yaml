@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenBAO Secrets"
+  short_description: "Read and write lab secrets safely"
+  default_prompt: "Use $openbao-secrets for OpenBAO secret-store work."

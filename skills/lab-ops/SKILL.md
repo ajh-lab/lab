@@ -5,6 +5,17 @@ description: Home lab operations workflow for the lab repo, OpenBao/OpenBAO secr
 
 # Lab Ops
 
+## Related Skills
+
+Use this skill as the broad entry point. Prefer these focused skills when the task matches:
+
+- `$openbao-secrets`: OpenBAO KV v2 reads/writes, secret paths, ExternalSecrets, provider API keys, sudo secret injection.
+- `$hermes-kanban`: Hermes board/card inspection, blocked cards, worker logs, safe card recovery, profile assignment.
+- `$lab-gitops`: k3s, ArgoCD, External Secrets Operator, internal registry, CI/CD deployment verification.
+- `$lab-documentation`: `ai-baseline-context.md`, Wiki.js, NetBox, `network_devices.csv`, post-deployment documentation.
+- `$ai-workstation-ops`: Fedora updates, Hermes upgrades/services, Ollama/local model, DeepSeek profile setup.
+- `$spt-fika-ops`: SPT02/Fika server operations, restricted Discord control bot, SPT runbook/wiki updates.
+
 ## Locate Context
 
 Find the lab repo before doing operational work. Prefer the current working directory if it is a `lab` checkout. Otherwise check these paths in order:

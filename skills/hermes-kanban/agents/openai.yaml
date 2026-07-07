@@ -1,0 +1,4 @@
+interface:
+  display_name: "Hermes Kanban"
+  short_description: "Operate Hermes Kanban from the lab repo"
+  default_prompt: "Use $hermes-kanban for Hermes board/card work."
