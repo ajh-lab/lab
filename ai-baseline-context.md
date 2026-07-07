@@ -23,7 +23,7 @@ Standard workflow conventions:
 
 `repositories/` is a local checkout workspace, not a source-of-truth folder for this repo. Agents may clone, pull, branch, test, and edit external project repositories there, but those nested repositories must not be committed into this `lab` repo. `.gitignore` intentionally ignores `repositories/*`; only `repositories/.KEEP` is tracked so the folder exists after clone. Durable changes made inside a nested repository must be committed and pushed in that nested repository's own Git history, or promoted into the appropriate first-class folder in this `lab` repo when the file truly belongs here.
 
-When Codex credits are unavailable, the Hermes `deepseek` profile can be used for Kanban work after `DEEPSEEK_API_KEY` is stored/configured. The local `default` Hermes profile should continue to use the ai-workstation-hosted qwen3-coder model for routine/local work, while `deepseek` is intended for harder coding, review, and research tasks.
+When Codex credits are unavailable, the Hermes `deepseek` profile can be used for Kanban work. The DeepSeek provider key is stored in OpenBao at `secret/homelab/providers/deepseek`, field `api_key`, and the ai-workstation Hermes profile `.env` is populated with `DEEPSEEK_API_KEY` as the controlled runtime fallback. The local `default` Hermes profile should continue to use the ai-workstation-hosted qwen3-coder model for routine/local work, while `deepseek` is intended for harder coding, review, and research tasks.
 
 ## Source of Truth Files
 
@@ -307,8 +307,9 @@ Worker recovery note:
   - `open-webui` active via Docker (`http://192.168.1.123:3000`)
   - local tool-calling agent active (`http://192.168.1.123:8777/health`)
   - cockpit socket active (`https://192.168.1.123:9090`)
-  - `hermes-gateway` user systemd service active (`Hermes Agent v0.13.0 / 2026.5.7`)
+  - `hermes-gateway` user systemd service active (`Hermes Agent v0.18.0 / 2026.7.1` as of 2026-07-07)
     - Model: `hermes-qwen3-coder:30b-64k` via local Ollama OpenAI-compatible endpoint (`http://127.0.0.1:11434/v1`)
+    - Secondary profile: `deepseek` uses provider `deepseek`, model `deepseek-chat`, alias `/home/helios/.local/bin/deepseek`, and profile env file `/home/helios/.hermes/profiles/deepseek/.env`. On 2026-07-07, `hermes -p deepseek doctor` validated DeepSeek API connectivity and `hermes -p deepseek -z ...` returned successfully.
     - Runtime model alias points to `qwen3-coder:30b-a3b-q8_0` with `PARAMETER num_ctx 65536`; Hermes config also sets `model.context_length=65536` and `model.ollama_num_ctx=65536`.
     - Latency note: raw Ollama response for a trivial prompt is fast with the capped alias, but full Hermes browser/CLI chat remains dominated by tool-enabled agent prompt overhead. Simple chat without toolsets tested much faster than tool-enabled chat.
     - OpenBao env injected through systemd drop-in with read-only policy `hermes-bootstrap-env-read`; helper command `openbao-env-get FIELD_NAME` reads fields from `secret/homelab/bootstrap/env`.
@@ -731,6 +732,7 @@ Operational note for future agents:
   - If the VM is powered off or rebooted again, expect OpenBao to require manual unseal before ESO can read secrets.
 - Primary KV mount: `secret/` (KV v2)
 - Bootstrap environment snapshot: `secret/homelab/bootstrap/env`
+- DeepSeek provider key path: `secret/homelab/providers/deepseek`, field `api_key`; do not store the key value in docs or committed files.
 - Kalshi research agent Discord webhook path: `secret/homelab/services/kalshi-research-agent`, field `discord_webhook_url`
 - AI workstation sudo password field: `AI_WORKSTATION_PASSWORD`
 - Safe lookup commands on `ai-workstation-evox2`:

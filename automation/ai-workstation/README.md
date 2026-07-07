@@ -21,8 +21,9 @@ This folder tracks automation and runbooks for the Fedora AI workstation (`192.1
 - Gateway service token environment is injected via systemd drop-in:
   - `/home/helios/.config/systemd/user/openclaw-gateway.service.d/10-env.conf`
 - Hermes and OpenClaw run side-by-side as separate user services.
-- Hermes status: `hermes-gateway.service` is enabled and active (`Hermes Agent v0.13.0 / 2026.5.7`), with systemd linger enabled.
+- Hermes status: `hermes-gateway.service` is enabled and active (`Hermes Agent v0.18.0 / 2026.7.1` as of 2026-07-07), with systemd linger enabled.
 - Hermes model: `hermes-qwen3-coder:30b-64k` through local Ollama OpenAI-compatible endpoint (`http://127.0.0.1:11434/v1`).
+- Hermes secondary profile: `deepseek` uses provider `deepseek`, model `deepseek-chat`, and alias `/home/helios/.local/bin/deepseek`. The DeepSeek key is stored in OpenBao at `secret/homelab/providers/deepseek`, field `api_key`; the runtime fallback file `/home/helios/.hermes/profiles/deepseek/.env` contains `DEEPSEEK_API_KEY` and must not be printed or committed.
 - Hermes model alias source: `qwen3-coder:30b-a3b-q8_0` with `PARAMETER num_ctx 65536`; Hermes config also sets `model.context_length=65536` and `model.ollama_num_ctx=65536`.
 - Hermes browser chat latency note: the 64k cap avoids Ollama's 262k KV-cache allocation. A lower-precision alias, `hermes-qwen3-coder:latest-64k`, reduces model memory further, but full tool-enabled Hermes chat is still mostly prompt/tool overhead. Simple no-tool chat tested much faster.
 - Hermes dashboard: `hermes-dashboard.service` is enabled and bound to `127.0.0.1:9119` for SSH-tunneled browser access.
@@ -47,6 +48,8 @@ openbao-env-get AI_WORKSTATION_PASSWORD
 ollama ps
 ollama show hermes-qwen3-coder:30b-64k
 hermes config show
+hermes profile list
+hermes -p deepseek doctor
 ```
 
 ## Strix Halo Backend Source
