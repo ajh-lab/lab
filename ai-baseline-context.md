@@ -308,11 +308,12 @@ Worker recovery note:
   - local tool-calling agent active (`http://192.168.1.123:8777/health`)
   - cockpit socket active (`https://192.168.1.123:9090`)
   - `hermes-gateway` user systemd service active (`Hermes Agent v0.18.0 / 2026.7.1` as of 2026-07-07)
-    - Model: `hermes-qwen3-coder:30b-64k` via local Ollama OpenAI-compatible endpoint (`http://127.0.0.1:11434/v1`)
+    - Model: `hermes-qwen3-coder:30b-64k` via local LiteLLM OpenAI-compatible endpoint (`http://127.0.0.1:4000/v1`), which forwards to Ollama and emits Prometheus usage metrics.
     - Secondary profile: `deepseek` uses provider `deepseek`, model `deepseek-chat`, alias `/home/helios/.local/bin/deepseek`, and profile env file `/home/helios/.hermes/profiles/deepseek/.env`. On 2026-07-07, `hermes -p deepseek doctor` validated DeepSeek API connectivity and `hermes -p deepseek -z ...` returned successfully.
-    - Metered local profile: `localmetered` uses the same `hermes-qwen3-coder:30b-64k` model through LiteLLM at `http://127.0.0.1:4000/v1`, alias `/home/helios/.local/bin/localmetered`, and profile config `/home/helios/.hermes/profiles/localmetered/config.yaml`. This profile was created on 2026-07-08 for testing local usage tracking without changing the default Discord-backed Hermes profile.
+    - Metered local profile: `localmetered` uses the same `hermes-qwen3-coder:30b-64k` model through LiteLLM at `http://127.0.0.1:4000/v1`, alias `/home/helios/.local/bin/localmetered`, and profile config `/home/helios/.hermes/profiles/localmetered/config.yaml`. This profile was created on 2026-07-08 for explicit local usage tracking tests; the default Discord-backed Hermes profile now uses the same LiteLLM proxy.
     - LiteLLM local proxy: user systemd service `litellm-ollama-proxy.service`, config `/home/helios/.config/litellm/config.yaml`, venv `/home/helios/.local/share/litellm/venv`, bound to `127.0.0.1:4000`. It maps model name `hermes-qwen3-coder:30b-64k` to `ollama_chat/hermes-qwen3-coder:30b-64k` at `http://127.0.0.1:11434` and exposes Prometheus metrics at `http://127.0.0.1:4000/metrics/`.
-    - LiteLLM validation on 2026-07-08: direct OpenAI-compatible non-streaming and streaming calls succeeded; `/home/helios/.local/bin/localmetered -z ...` returned successfully; LiteLLM metrics showed request, latency, input token, output token, and total token counters for the metered Hermes call. The default Hermes profile was not changed.
+    - LiteLLM metrics proxy: user systemd service `litellm-metrics-proxy.service`, script `/home/helios/.local/share/litellm-metrics-proxy/litellm_metrics_proxy.py`, bound to `0.0.0.0:4001`. It exposes only `/metrics` and `/metrics/` to the lab network and forwards those requests to LiteLLM on loopback; do not expose the model API on `4000` to the network.
+    - LiteLLM validation on 2026-07-08: direct OpenAI-compatible non-streaming and streaming calls succeeded; `/home/helios/.local/bin/localmetered -z ...` returned successfully; default `/home/helios/.local/bin/hermes -z ...` returned through LiteLLM after the default config switch; LiteLLM metrics showed request, latency, input token, output token, and total token counters.
     - Runtime model alias points to `qwen3-coder:30b-a3b-q8_0` with `PARAMETER num_ctx 65536`; Hermes config also sets `model.context_length=65536` and `model.ollama_num_ctx=65536`.
     - Latency note: raw Ollama response for a trivial prompt is fast with the capped alias, but full Hermes browser/CLI chat remains dominated by tool-enabled agent prompt overhead. Simple chat without toolsets tested much faster than tool-enabled chat.
     - OpenBao env injected through systemd drop-in with read-only policy `hermes-bootstrap-env-read`; helper command `openbao-env-get FIELD_NAME` reads fields from `secret/homelab/bootstrap/env`.
@@ -818,6 +819,8 @@ Operational note for future agents:
 - Helm chart: `prometheus-community/prometheus` (`29.2.0`)
 - Service: NodePort `32091`
 - URL: `http://192.168.1.80:32091`
+- Lab repo Helm values: `k8s/helm/prometheus/values.yaml`
+- Scrapes LiteLLM metrics from ai-workstation using job `litellm-ai-workstation` and target `192.168.1.123:4001`.
 
 ### Grafana
 
@@ -826,7 +829,9 @@ Operational note for future agents:
 - Service: NodePort `32030`
 - URL: `http://192.168.1.80:32030`
 - Grafana credentials are stored in `.env` (`GRAFANA_ADMIN_PASSWORD`, user `admin`).
-- Future LiteLLM/Hermes usage dashboard should scrape `litellm-ollama-proxy.service` metrics from the AI workstation. Current proxy metrics are bound to loopback only for safe testing; production dashboarding needs either a controlled metrics exposure path from `ai-workstation-evox2` to k3s Prometheus or a k3s-hosted LiteLLM deployment in front of Ollama. Recommended dashboard panels: requests by model/profile/API key, input/output/total tokens, latency p50/p95, error rate, stream vs non-stream, and monthly totals.
+- LiteLLM/Hermes usage dashboard: `http://192.168.1.80:32030/d/litellm-hermes-usage/litellm-hermes-usage`
+- Dashboard source JSON: `k8s/helm/grafana/dashboards/litellm-hermes-usage.json`
+- Dashboard panels cover request volume, token totals and rates, latency p50/p95, non-2xx/error visibility, stream vs non-stream traffic, and per-model/API-key-hash breakdowns.
 
 ### Loki
 

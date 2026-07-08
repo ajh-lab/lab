@@ -4,6 +4,13 @@
 prometheus-pushgateway:
   enabled: false
 
+extraScrapeConfigs: |
+  - job_name: litellm-ai-workstation
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 192.168.1.123:4001
+
 server:
   service:
     type: NodePort
