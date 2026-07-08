@@ -830,7 +830,7 @@ Operational note for future agents:
 - URL: `http://192.168.1.80:32030`
 - Grafana credentials are stored in `.env` (`GRAFANA_ADMIN_PASSWORD`, user `admin`).
 - LiteLLM/Hermes usage dashboard: `http://192.168.1.80:32030/d/litellm-hermes-usage/litellm-hermes-usage`
-- Dashboard source JSON: `k8s/helm/grafana/dashboards/litellm-hermes-usage.json`
+- Dashboard source of truth: `lab-monitoring` repo (`dashboards/grafana/litellm-hermes-usage.json`); the old file at `k8s/helm/grafana/dashboards/litellm-hermes-usage.json` now contains only a pointer
 - Dashboard panels cover request volume, token totals and rates, latency p50/p95, non-2xx/error visibility, stream vs non-stream traffic, and per-model/API-key-hash breakdowns.
 
 ### Loki
