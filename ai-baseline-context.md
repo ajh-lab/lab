@@ -310,6 +310,9 @@ Worker recovery note:
   - `hermes-gateway` user systemd service active (`Hermes Agent v0.18.0 / 2026.7.1` as of 2026-07-07)
     - Model: `hermes-qwen3-coder:30b-64k` via local Ollama OpenAI-compatible endpoint (`http://127.0.0.1:11434/v1`)
     - Secondary profile: `deepseek` uses provider `deepseek`, model `deepseek-chat`, alias `/home/helios/.local/bin/deepseek`, and profile env file `/home/helios/.hermes/profiles/deepseek/.env`. On 2026-07-07, `hermes -p deepseek doctor` validated DeepSeek API connectivity and `hermes -p deepseek -z ...` returned successfully.
+    - Metered local profile: `localmetered` uses the same `hermes-qwen3-coder:30b-64k` model through LiteLLM at `http://127.0.0.1:4000/v1`, alias `/home/helios/.local/bin/localmetered`, and profile config `/home/helios/.hermes/profiles/localmetered/config.yaml`. This profile was created on 2026-07-08 for testing local usage tracking without changing the default Discord-backed Hermes profile.
+    - LiteLLM local proxy: user systemd service `litellm-ollama-proxy.service`, config `/home/helios/.config/litellm/config.yaml`, venv `/home/helios/.local/share/litellm/venv`, bound to `127.0.0.1:4000`. It maps model name `hermes-qwen3-coder:30b-64k` to `ollama_chat/hermes-qwen3-coder:30b-64k` at `http://127.0.0.1:11434` and exposes Prometheus metrics at `http://127.0.0.1:4000/metrics/`.
+    - LiteLLM validation on 2026-07-08: direct OpenAI-compatible non-streaming and streaming calls succeeded; `/home/helios/.local/bin/localmetered -z ...` returned successfully; LiteLLM metrics showed request, latency, input token, output token, and total token counters for the metered Hermes call. The default Hermes profile was not changed.
     - Runtime model alias points to `qwen3-coder:30b-a3b-q8_0` with `PARAMETER num_ctx 65536`; Hermes config also sets `model.context_length=65536` and `model.ollama_num_ctx=65536`.
     - Latency note: raw Ollama response for a trivial prompt is fast with the capped alias, but full Hermes browser/CLI chat remains dominated by tool-enabled agent prompt overhead. Simple chat without toolsets tested much faster than tool-enabled chat.
     - OpenBao env injected through systemd drop-in with read-only policy `hermes-bootstrap-env-read`; helper command `openbao-env-get FIELD_NAME` reads fields from `secret/homelab/bootstrap/env`.
@@ -823,6 +826,7 @@ Operational note for future agents:
 - Service: NodePort `32030`
 - URL: `http://192.168.1.80:32030`
 - Grafana credentials are stored in `.env` (`GRAFANA_ADMIN_PASSWORD`, user `admin`).
+- Future LiteLLM/Hermes usage dashboard should scrape `litellm-ollama-proxy.service` metrics from the AI workstation. Current proxy metrics are bound to loopback only for safe testing; production dashboarding needs either a controlled metrics exposure path from `ai-workstation-evox2` to k3s Prometheus or a k3s-hosted LiteLLM deployment in front of Ollama. Recommended dashboard panels: requests by model/profile/API key, input/output/total tokens, latency p50/p95, error rate, stream vs non-stream, and monthly totals.
 
 ### Loki
 
