@@ -23,7 +23,7 @@ Standard workflow conventions:
 
 `repositories/` is a local checkout workspace, not a source-of-truth folder for this repo. Agents may clone, pull, branch, test, and edit external project repositories there, but those nested repositories must not be committed into this `lab` repo. `.gitignore` intentionally ignores `repositories/*`; only `repositories/.KEEP` is tracked so the folder exists after clone. Durable changes made inside a nested repository must be committed and pushed in that nested repository's own Git history, or promoted into the appropriate first-class folder in this `lab` repo when the file truly belongs here.
 
-When Codex credits are unavailable, the Hermes `deepseek` profile can be used for Kanban work. The DeepSeek provider key is stored in OpenBao at `secret/homelab/providers/deepseek`, field `api_key`, and the ai-workstation Hermes profile `.env` is populated with `DEEPSEEK_API_KEY` as the controlled runtime fallback. The local `default` Hermes profile should continue to use the ai-workstation-hosted qwen3-coder model for routine/local work, while `deepseek` is intended for harder coding, review, and research tasks.
+When Codex credits are unavailable, the Hermes `deepseek` profile can be used for Kanban work. The DeepSeek provider key is stored in OpenBao at `secret/homelab/providers/deepseek`, field `api_key`, and the ai-workstation Hermes profile `.env` is populated with `DEEPSEEK_API_KEY` as the controlled runtime fallback. As of 2026-07-08, the `deepseek` Hermes profile is routed through local LiteLLM at `http://127.0.0.1:4000/v1` so token/request usage appears in Grafana alongside local qwen3-coder usage. The local `default` Hermes profile should continue to use the ai-workstation-hosted qwen3-coder model for routine/local work, while `deepseek` is intended for harder coding, review, and research tasks.
 
 ## Source of Truth Files
 
@@ -309,9 +309,9 @@ Worker recovery note:
   - cockpit socket active (`https://192.168.1.123:9090`)
   - `hermes-gateway` user systemd service active (`Hermes Agent v0.18.0 / 2026.7.1` as of 2026-07-07)
     - Model: `hermes-qwen3-coder:30b-64k` via local LiteLLM OpenAI-compatible endpoint (`http://127.0.0.1:4000/v1`), which forwards to Ollama and emits Prometheus usage metrics.
-    - Secondary profile: `deepseek` uses provider `deepseek`, model `deepseek-chat`, alias `/home/helios/.local/bin/deepseek`, and profile env file `/home/helios/.hermes/profiles/deepseek/.env`. On 2026-07-07, `hermes -p deepseek doctor` validated DeepSeek API connectivity and `hermes -p deepseek -z ...` returned successfully.
+    - Secondary profile: `deepseek` uses model `deepseek-chat` through LiteLLM at `http://127.0.0.1:4000/v1`, alias `/home/helios/.local/bin/deepseek`, and profile env file `/home/helios/.hermes/profiles/deepseek/.env`. On 2026-07-08, `hermes -p deepseek -z ...` returned through LiteLLM and Prometheus showed `requested_model="deepseek-chat"` under job `litellm-ai-workstation`.
     - Metered local profile: `localmetered` uses the same `hermes-qwen3-coder:30b-64k` model through LiteLLM at `http://127.0.0.1:4000/v1`, alias `/home/helios/.local/bin/localmetered`, and profile config `/home/helios/.hermes/profiles/localmetered/config.yaml`. This profile was created on 2026-07-08 for explicit local usage tracking tests; the default Discord-backed Hermes profile now uses the same LiteLLM proxy.
-    - LiteLLM local proxy: user systemd service `litellm-ollama-proxy.service`, config `/home/helios/.config/litellm/config.yaml`, venv `/home/helios/.local/share/litellm/venv`, bound to `127.0.0.1:4000`. It maps model name `hermes-qwen3-coder:30b-64k` to `ollama_chat/hermes-qwen3-coder:30b-64k` at `http://127.0.0.1:11434` and exposes Prometheus metrics at `http://127.0.0.1:4000/metrics/`.
+    - LiteLLM local proxy: user systemd service `litellm-ollama-proxy.service`, config `/home/helios/.config/litellm/config.yaml`, venv `/home/helios/.local/share/litellm/venv`, bound to `127.0.0.1:4000`. It maps model name `hermes-qwen3-coder:30b-64k` to `ollama_chat/hermes-qwen3-coder:30b-64k` at `http://127.0.0.1:11434`, maps `deepseek-chat` to DeepSeek using `DEEPSEEK_API_KEY`, and exposes Prometheus metrics at `http://127.0.0.1:4000/metrics/`.
     - LiteLLM metrics proxy: user systemd service `litellm-metrics-proxy.service`, script `/home/helios/.local/share/litellm-metrics-proxy/litellm_metrics_proxy.py`, bound to `0.0.0.0:4001`. It exposes only `/metrics` and `/metrics/` to the lab network and forwards those requests to LiteLLM on loopback; do not expose the model API on `4000` to the network.
     - LiteLLM validation on 2026-07-08: direct OpenAI-compatible non-streaming and streaming calls succeeded; `/home/helios/.local/bin/localmetered -z ...` returned successfully; default `/home/helios/.local/bin/hermes -z ...` returned through LiteLLM after the default config switch; LiteLLM metrics showed request, latency, input token, output token, and total token counters.
     - Runtime model alias points to `qwen3-coder:30b-a3b-q8_0` with `PARAMETER num_ctx 65536`; Hermes config also sets `model.context_length=65536` and `model.ollama_num_ctx=65536`.
@@ -832,6 +832,23 @@ Operational note for future agents:
 - LiteLLM/Hermes usage dashboard: `http://192.168.1.80:32030/d/litellm-hermes-usage/litellm-hermes-usage`
 - Dashboard source of truth: `lab-monitoring` repo (`dashboards/grafana/litellm-hermes-usage.json`); the old file at `k8s/helm/grafana/dashboards/litellm-hermes-usage.json` now contains only a pointer
 - Dashboard panels cover request volume, token totals and rates, latency p50/p95, non-2xx/error visibility, stream vs non-stream traffic, and per-model/API-key-hash breakdowns.
+
+### Lab Monitoring
+
+- GitHub repository: `https://github.com/ajh-lab/lab-monitoring` (private)
+- Local workspace checkout: `repositories/lab-monitoring` (ignored by this lab repo)
+- AI workstation checkout: `/home/helios/lab/repositories/lab-monitoring`
+- Hermes Kanban board: `lab-monitoring` (`Lab Monitoring`), using the `deepseek` profile.
+- Purpose: source of truth for lab observability assets such as custom exporters, Grafana dashboards, Prometheus scrape/rule docs, and monitoring runbooks.
+- DeepSeek balance exporter:
+  - ArgoCD Application: `argocd/deepseek-balance-exporter`
+  - Namespace: `observability`
+  - Image: `192.168.1.15:5000/lab/deepseek-balance-exporter`
+  - Runtime secret source: OpenBao `secret/lab/runtime/deepseek-balance-exporter`, field `deepseek_api_key`
+  - Kubernetes secret: `observability/deepseek-api-key`, synced by External Secrets Operator.
+  - Registry pull secret: `observability/lab-registry-pull`
+  - Metrics observed in Prometheus: `deepseek_api_available`, `deepseek_balance_total`, `deepseek_balance_granted`, `deepseek_balance_topped_up`, `deepseek_balance_last_success_timestamp_seconds`, and `deepseek_balance_scrape_success`.
+  - Verified on 2026-07-08: ArgoCD `Synced`/`Healthy`, exporter pod `Running`, Prometheus scraping DeepSeek balance metrics.
 
 ### Loki
 
