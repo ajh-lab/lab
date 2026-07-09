@@ -10,6 +10,20 @@ extraScrapeConfigs: |
     static_configs:
       - targets:
           - 192.168.1.123:4001
+  - job_name: ai-workstation-node
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 192.168.1.123:9100
+        labels:
+          host: ai-workstation-evox2
+  - job_name: ai-workstation-gpu
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - 192.168.1.123:9101
+        labels:
+          host: ai-workstation-evox2
 
 server:
   service:

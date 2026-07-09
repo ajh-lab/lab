@@ -823,7 +823,10 @@ Operational note for future agents:
 - Service: NodePort `32091`
 - URL: `http://192.168.1.80:32091`
 - Lab repo Helm values: `k8s/helm/prometheus/values.yaml`
-- Scrapes LiteLLM metrics from ai-workstation using job `litellm-ai-workstation` and target `192.168.1.123:4001`.
+- Scrapes ai-workstation metrics using static targets:
+  - `litellm-ai-workstation`: `192.168.1.123:4001`
+  - `ai-workstation-node`: `192.168.1.123:9100`
+  - `ai-workstation-gpu`: `192.168.1.123:9101`
 
 ### Grafana
 
@@ -843,6 +846,10 @@ Operational note for future agents:
 - AI workstation checkout: `/home/helios/lab/repositories/lab-monitoring`
 - Hermes Kanban board: `lab-monitoring` (`Lab Monitoring`). DeepSeek-backed cards should use the model-named `deepseek-v4-flash` profile unless the task needs `deepseek-v4-pro`.
 - Purpose: source of truth for lab observability assets such as custom exporters, Grafana dashboards, Prometheus scrape/rule docs, and monitoring runbooks.
+- AI workstation health:
+  - `node_exporter` user service: `/home/helios/.config/systemd/user/node-exporter.service`, endpoint `http://192.168.1.123:9100/metrics`.
+  - ROCm/sysfs GPU exporter user service: `/home/helios/.config/systemd/user/ai-workstation-gpu-exporter.service`, script `/home/helios/.local/share/ai-workstation-gpu-exporter/ai_workstation_gpu_exporter.py`, endpoint `http://192.168.1.123:9101/metrics`.
+  - Grafana dashboard `LiteLLM / Hermes Usage` includes `AI Workstation Health` panels for CPU, RAM, root disk, GPU busy, VRAM, and GPU temperature.
 - DeepSeek balance exporter:
   - ArgoCD Application: `argocd/deepseek-balance-exporter`
   - Namespace: `observability`

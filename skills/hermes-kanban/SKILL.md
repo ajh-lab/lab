@@ -52,8 +52,9 @@ hermes kanban assignees
 
 Current model split:
 
-- `default`: local `hermes-qwen3-coder:30b-64k` via Ollama on ai-workstation.
-- `deepseek`: DeepSeek direct API profile, intended for harder coding/review/research tasks once `DEEPSEEK_API_KEY` is configured.
+- `default`: local `hermes-qwen3-coder:30b-256k` via LiteLLM/Ollama on ai-workstation.
+- `deepseek-v4-flash`: DeepSeek V4 Flash profile for normal paid DeepSeek work.
+- `deepseek-v4-pro`: DeepSeek V4 Pro profile for harder coding/review/research tasks.
 
 Assign cards by profile name only after confirming the profile exists and its gateway is running or spawnable.
 
