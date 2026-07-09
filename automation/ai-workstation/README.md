@@ -25,7 +25,7 @@ This folder tracks automation and runbooks for the Fedora AI workstation (`192.1
 - Hermes default model: `hermes-qwen3-coder:30b-256k` through local LiteLLM (`http://127.0.0.1:4000/v1`) and Ollama. Hermes config sets `model.context_length=262144` and `model.ollama_num_ctx=262144`.
 - Hermes DeepSeek profiles are model-named: `deepseek-v4-flash` and `deepseek-v4-pro`. Do not recreate the removed legacy `deepseek` profile. The DeepSeek key is stored in OpenBao at `secret/homelab/providers/deepseek`, field `api_key`; runtime fallback `.env` files must not be printed or committed.
 - Hermes model alias source: `qwen3-coder:30b-a3b-q8_0`; aliases exist for `hermes-qwen3-coder:30b-64k`, `hermes-qwen3-coder:30b-128k`, and `hermes-qwen3-coder:30b-256k`.
-- Hermes browser chat latency note: the 256k default increases KV-cache allocation but fits the Strix Halo ROCm memory budget. Full tool-enabled Hermes chat is still mostly prompt/tool overhead.
+- Hermes browser chat latency note: the 256k default increases KV-cache allocation but fits the Strix Halo ROCm memory budget. Full tool-enabled Hermes chat is still mostly prompt/tool overhead and can loop on lightweight questions. For direct browser chat, prefer `qwen3-coder-128k-fast-chat` or `qwen3-coder-256k-fast-chat`; those profiles restrict CLI tools to web only, disable local action tools, set `agent.max_turns: 4`, and disable environment probing.
 - ai-workstation monitoring: `node-exporter.service` exposes host metrics on `0.0.0.0:9100`; `ai-workstation-gpu-exporter.service` exposes ROCm/sysfs GPU metrics on `0.0.0.0:9101`. Prometheus scrapes both and the `LiteLLM / Hermes Usage` Grafana dashboard includes an `AI Workstation Health` section.
 - Hermes dashboard: `hermes-dashboard.service` is enabled and bound to `127.0.0.1:9119` for SSH-tunneled browser access.
 - Hermes OpenBao access: `hermes-gateway.service` and `hermes-dashboard.service` have OpenBao env injected through `20-openbao.conf` drop-ins using read-only policy `hermes-bootstrap-env-read`.
@@ -52,7 +52,48 @@ hermes config show
 hermes profile list
 hermes -p deepseek-v4-flash doctor
 systemctl --user status node-exporter.service ai-workstation-gpu-exporter.service
+python3 ~/lab/automation/ai-workstation/scripts/benchmark-hermes-models.py --provider litellm --show-ollama-ps
 ```
+
+## Local Model Benchmarking
+
+Use `scripts/benchmark-hermes-models.py` on the ai-workstation when changing Ollama aliases, Hermes profiles, context windows, or LiteLLM routing. The script runs dependency-free with Python 3 and can target either the LiteLLM OpenAI-compatible endpoint or Ollama's native API.
+
+Recommended first pass:
+
+```bash
+cd ~/lab
+python3 automation/ai-workstation/scripts/benchmark-hermes-models.py \
+  --provider litellm \
+  --models hermes-qwen3-coder:30b-64k,hermes-qwen3-coder:30b-128k,hermes-qwen3-coder:30b-256k \
+  --jsonl /tmp/hermes-model-benchmark.jsonl \
+  --show-ollama-ps
+```
+
+Use the Ollama provider when you need native prompt/eval token-per-second counters:
+
+```bash
+python3 automation/ai-workstation/scripts/benchmark-hermes-models.py \
+  --provider ollama \
+  --models hermes-qwen3-coder:30b-128k,hermes-qwen3-coder:30b-256k \
+  --scenarios smoke,rust-light \
+  --jsonl /tmp/hermes-ollama-benchmark.jsonl \
+  --show-ollama-ps
+```
+
+For practical Hermes use, prefer the smallest context profile that fits the task. The 256k alias fits the workstation memory budget, but it allocates a much larger KV cache than 64k or 128k and should be treated as a large-context profile, not automatically assumed to be the fastest default.
+
+Observed benchmark results from 2026-07-09:
+
+- Raw Ollama and direct LiteLLM calls are healthy for the qwen3-coder aliases. The `rust-light` scenario generated about 87 output tokens in roughly 2 seconds after model load, around 43-48 output tokens/sec.
+- A synthetic long-context prompt of about 10.3k prompt tokens completed in roughly 13 seconds for both 128k and 256k aliases, around 800 prompt tokens/sec.
+- The slow 20+ minute browser response was not a raw model throughput problem. It came from full Hermes agent chat using broad tool access, high turn budget, and environment probing. The same Rust-capability prompt completed in about 4-16 seconds with the fast-chat profiles.
+
+Recommended profile usage:
+
+- `qwen3-coder-128k-fast-chat`: default choice for lightweight browser chat and quick Q&A.
+- `qwen3-coder-256k-fast-chat`: use when browser chat needs very large context.
+- `qwen3-coder-128k`, `qwen3-coder-256k`, or default: use for full development/agent work where terminal, file, and code execution tools are expected.
 
 ## Strix Halo Backend Source
 
