@@ -28,6 +28,7 @@ This folder tracks automation and runbooks for the Fedora AI workstation (`192.1
 - Hermes browser chat latency note: the 256k default increases KV-cache allocation but fits the Strix Halo ROCm memory budget. Full tool-enabled Hermes chat is still mostly prompt/tool overhead and can loop on lightweight questions. For direct browser chat, prefer `qwen3-coder-128k-fast-chat` or `qwen3-coder-256k-fast-chat`; those profiles restrict CLI tools to web only, disable local action tools, set `agent.max_turns: 4`, and disable environment probing.
 - ai-workstation monitoring: `node-exporter.service` exposes host metrics on `0.0.0.0:9100`; `ai-workstation-gpu-exporter.service` exposes ROCm/sysfs GPU metrics on `0.0.0.0:9101`. Prometheus scrapes both and the `LiteLLM / Hermes Usage` Grafana dashboard includes an `AI Workstation Health` section.
 - Hermes dashboard: `hermes-dashboard.service` is enabled and bound to `127.0.0.1:9119` for SSH-tunneled browser access.
+- Hermes dashboard browser sessions use a stable local session token from `/home/helios/.config/hermes-dashboard/session-token.env`, injected into `hermes-dashboard.service` by `/home/helios/.config/systemd/user/hermes-dashboard.service.d/50-stable-session-token.conf`. This prevents dashboard restarts from invalidating the browser chat websocket token. Do not print or commit the token value.
 - Hermes OpenBao access: `hermes-gateway.service` and `hermes-dashboard.service` have OpenBao env injected through `20-openbao.conf` drop-ins using read-only policy `hermes-bootstrap-env-read`.
 - Hermes OpenBao helper: `/home/helios/.local/bin/openbao-env-get FIELD_NAME` reads fields from `secret/homelab/bootstrap/env`, for example `openbao-env-get AI_WORKSTATION_PASSWORD`.
 
@@ -44,6 +45,7 @@ systemctl --user enable --now openclaw-gateway.service
 systemctl --user status hermes-gateway.service
 journalctl --user -u hermes-gateway.service -n 200 --no-pager
 systemctl --user status hermes-dashboard.service
+systemctl --user cat hermes-dashboard.service
 ssh -L 9119:127.0.0.1:9119 helios@192.168.1.123
 openbao-env-get AI_WORKSTATION_PASSWORD
 ollama ps
