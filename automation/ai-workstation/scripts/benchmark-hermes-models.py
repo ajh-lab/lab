@@ -239,7 +239,7 @@ def build_long_prompt(target_tokens: int) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Benchmark Hermes/Ollama model aliases.")
     parser.add_argument("--provider", choices=["litellm", "ollama"], default="litellm")
-    parser.add_argument("--base-url", default="http://127.0.0.1:4000/v1", help="LiteLLM OpenAI-compatible base URL")
+    parser.add_argument("--base-url", default="http://127.0.0.1:4004/v1", help="LiteLLM OpenAI-compatible base URL")
     parser.add_argument("--ollama-url", default="http://127.0.0.1:11434", help="Ollama base URL")
     parser.add_argument("--api-key", default="no-key-required")
     parser.add_argument("--models", default=",".join(DEFAULT_MODELS), help="Comma-separated model aliases")
