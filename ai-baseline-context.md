@@ -523,6 +523,21 @@ Worker recovery note:
     - Dependencies installed: Color Converter API, Quests Extended, Item Preview QoL.
     - Forge lists Fika compatibility as unknown; validated state is backend/headless startup only, not full raid behavior.
     - Install backups: local `C:\SPT\_migration-backups\ttc-install-20260607-154320`; SPT02 `C:\SPT\_migration-backups\ttc-install-20260607-154342`.
+  - Progression Tracker installed on SPT02 and local `C:\SPT` on 2026-07-25:
+    - Forge page: `https://forge.sp-tarkov.com/mod/2482/progression-tracker`
+    - Installed version: `1.0.3`
+    - Installed folder: `C:\SPT\SPT\user\mods\acidphantasm-progressiontracker`
+    - Forge marks the version Fika-compatible and SPT 4.0.13 compatible.
+    - SPT02 validation after install: backend healthy, Fika headless re-registered, and `https://192.168.1.86:6969/progressiontracker/` returned HTTP 200.
+    - Install backups: local `C:\SPT\_mod-install-backups\progression-tracker-1.0.3-20260725-170237`; SPT02 `C:\SPT\_mod-install-backups\progression-tracker-1.0.3-20260725-170344`.
+  - Better Night Skies installed on SPT02 headless and local `C:\SPT` on 2026-07-25:
+    - Forge page: `https://forge.sp-tarkov.com/mod/2734/better-night-skies`
+    - Installed version: `1.0.0`
+    - Installed folder: `C:\SPT\BepInEx\plugins\BetterNightSkies`
+    - This is a BepInEx visual/client plugin, not an SPT server-side `SPT\user\mods` mod.
+    - Forge marks the version Fika-compatible and SPT 4 compatible.
+    - SPT02 validation after install: backend healthy, Fika headless re-registered, BepInEx logged `Better Night Skies 1.0.0 loaded`, plugin validation completed, and headless websocket connected.
+    - Install backups: local `C:\SPT\_mod-install-backups\better-night-skies-1.0.0-20260725-172059`; SPT02 `C:\SPT\_mod-install-backups\better-night-skies-1.0.0-20260725-172139`.
   - Desktop player profile `Chadnovski` is active on SPT02 again as of 2026-06-08. It was re-imported from local `C:\SPT\SPT\user\profiles\6a1f4c94ed07eef6542364cd.json` to SPT02 active profiles, replacing the prior SPT02 copy. The replaced SPT02 profile and Discord Raid Map state were backed up under `C:\SPT\_mod-install-backups\discord-raid-map-profile-import-20260608-100754`.
   - The generated headless profile was backed up and cleaned of invalid scav inventory items left over from copied desktop mods.
   - `C:\SPT\SPT\SPT_Data\configs\core.json` has `removeModItemsFromProfile` and `removeInvalidTradersFromProfile` enabled to strip invalid modded items/trader data if a dirty profile is loaded again.

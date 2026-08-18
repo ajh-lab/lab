@@ -216,6 +216,7 @@ The SPT02 mod install step uses the authenticated Forge API to resolve pinned ve
 - Medical SICC Case (MICC) - UPDATED `5.0.3`
 - Handy Toolbox `1.0.0`
 - Disciples Ballistic Case Plus `1.0.0`
+- Progression Tracker `1.0.3`
 
 For unattended automation only, the script also accepts `-ForgeApiToken`; do not put that token in Git, Wiki.js, Discord, or command logs.
 
@@ -393,6 +394,7 @@ These are the active folders currently present on SPT02 under `C:\SPT\SPT\user\m
 | `fika-server` | [Project Fika - Server](https://forge.sp-tarkov.com/mod/2357/project-fika-server) | 2.2.6 | Required server component for Fika co-op, backend coordination, presence, and headless registration. | Required. All players and the headless client must use compatible Fika versions. |
 | `DrakiaXYZ-GildedKeyStorage` | [Gilded Key Storage](https://forge.sp-tarkov.com/mod/865/gilded-key-storage) | 2.0.4 | Adds progression-based key storage containers and supporting barter flow. | Server-side item/profile mod. All players should have matching required client pieces if prompted. |
 | `FikaDiscordPresence` | [Fika Discord Presence](https://forge.sp-tarkov.com/mod/2583/fika-discord-presence) | 1.0.2 | Adds Discord webhook status integration for Fika sessions. | Installed on SPT02 and local `C:\SPT` on 2026-06-08. The webhook and Fika API key are configured only on SPT02 at `C:\SPT\SPT\user\mods\FikaDiscordPresence\config.json`; do not copy those secret values into Git or Wiki.js. |
+| `acidphantasm-progressiontracker` | [Progression Tracker](https://forge.sp-tarkov.com/mod/2482/progression-tracker) | 1.0.3 | Adds a Blazor page for per-profile progression tracking, including Collector quest progression and hideout construction requirements. | Installed on SPT02 and local `C:\SPT` on 2026-07-25. Forge marks this version Fika-compatible and SPT 4.0.13 compatible. Validated SPT02 backend/headless startup and `https://192.168.1.86:6969/progressiontracker/` HTTP 200 after install. |
 | `QuestsExtended` | [Quests Extended](https://forge.sp-tarkov.com/mod/2106/quests-extended) | 4.0.3 | Adds quest condition support used by custom quests and trader/content mods. | Required for profiles/quests using extended conditions. Server side remains enabled for compatibility. |
 | `SkillsExtended` | [Skills Extended](https://forge.sp-tarkov.com/mod/2383/skills-extended) | 2.2.2 | Adds and expands skill progression content. | Server mod is active for profile compatibility. The BepInEx client plugin was disabled on headless due a runtime error. |
 | `Solarint-SAIN-ServerMod` | [SAIN](https://forge.sp-tarkov.com/mod/2513/sain-solarints-ai-modifications-full-ai-combat-system-replacement) | Verify on disk | Replaces and expands AI combat behavior. | Restored on SPT02 and the local client on 2026-06-07 after removing the old imported profile. Requires matching BigBrain and Waypoints client/headless plugins. |
@@ -450,6 +452,7 @@ Current active headless BepInEx plugins:
 - `SAIN`
 - `TTC.dll`
 - `tarkin-ladders`
+- `BetterNightSkies`
 - `UnityToolkit`
 - `UseItemsFromAnywhere.dll`
 - `WTT-ArmoryClient`
@@ -466,6 +469,7 @@ Climbable Ladders is installed as `BepInEx\plugins\tarkin-ladders` on SPT02/head
 | Plugin folder | Forge mod | Version | Note |
 | --- | --- | --- | --- |
 | `BepInEx\plugins\tarkin-ladders` | [Climbable Ladders](https://forge.sp-tarkov.com/mod/2649/climbable-ladders) | 1.0.2 | Installed on SPT02 and local `C:\SPT` on 2026-06-08. Forge has a Fika-compatible version available. |
+| `BepInEx\plugins\BetterNightSkies` | [Better Night Skies](https://forge.sp-tarkov.com/mod/2734/better-night-skies) | 1.0.0 | Installed on SPT02 headless and local `C:\SPT` on 2026-07-25. This is a visual BepInEx plugin, not an SPT server mod. Forge marks it Fika-compatible and SPT 4 compatible. SPT02 validation showed the plugin loaded, plugin validation completed, and the headless websocket connected. |
 
 TTC requires Color Converter API, Quests Extended, and Item Preview QoL. TTC and those client-side pieces are installed on both SPT02/headless and the local `C:\SPT` client. Backups from the install are under `C:\SPT\_migration-backups\ttc-install-20260607-154320` locally and `C:\SPT\_migration-backups\ttc-install-20260607-154342` on SPT02.
 
