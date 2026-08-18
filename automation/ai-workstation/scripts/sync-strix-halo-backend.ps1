@@ -31,8 +31,8 @@ fi
 cd /mnt/ai/llama/amd-strix-halo-toolboxes
 git pull --ff-only
 if [ "__SKIP_TOOLBOX__" = "0" ]; then
-  toolbox list | grep -q 'llama-rocm-7.2.2' || toolbox create --assumeyes llama-rocm-7.2.2 --image docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.2.2 -- --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined
-  toolbox run -c llama-rocm-7.2.2 llama-cli --list-devices | sed -n '1,20p'
+  toolbox list | grep -q 'llama-rocm-7.14' || toolbox create --assumeyes llama-rocm-7.14 --image docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14 -- --device /dev/dri --device /dev/kfd --group-add video --group-add render --group-add sudo --security-opt seccomp=unconfined
+  toolbox run -c llama-rocm-7.14 llama-cli --list-devices | sed -n '1,20p'
 fi
 echo "BACKEND_SYNC_OK"
 '@

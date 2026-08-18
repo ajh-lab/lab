@@ -27,7 +27,9 @@ This folder tracks automation and runbooks for the Fedora AI workstation (`192.1
 - Hermes model alias source: `qwen3-coder:30b-a3b-q8_0`; aliases exist for `hermes-qwen3-coder:30b-64k`, `hermes-qwen3-coder:30b-128k`, and `hermes-qwen3-coder:30b-256k`.
 - Hermes browser chat latency note: the 256k default increases KV-cache allocation but fits the Strix Halo ROCm memory budget. Full tool-enabled Hermes chat is still mostly prompt/tool overhead and can loop on lightweight questions. For direct browser chat, prefer `qwen3-coder-128k-fast-chat` or `qwen3-coder-256k-fast-chat`; those profiles restrict CLI tools to web only, disable local action tools, set `agent.max_turns: 4`, and disable environment probing.
 - Hermes Kanban worker profile: `qwen3-coder-128k-worker` is the preferred local worker for normal coding cards. It uses `hermes-qwen3-coder:30b-128k`, keeps only terminal/file/code-execution/todo/skills tools, disables browser/image/TTS/computer-use/delegation/cron/memory extras, sets `agent.max_turns: 28`, sets `agent.reasoning_effort: none` so Ollama does not receive unsupported thinking requests, and disables environment probing with a fixed lab workspace hint. Use larger/full profiles only when the card needs broader tools or 256k context.
+- Qwen3.8 BF16 tool-enabled test profile: `qwen38bf16tools` uses LiteLLM model `qwen3.8-27b-bf16`, alias `/home/helios/.local/bin/qwen38-bf16-tools`, and the user service `llama-qwen38-bf16.service` on `http://127.0.0.1:11437/v1`. The model file came from Ollama tag `qwen3.8:27b-bf16` and is stored under `/mnt/ai/ollama-qwen38/models`; Ollama `0.32.14` can download/show the model but was not the working runtime because it under-offloaded this dense BF16 model on Strix Halo and hit system-memory OOM. Use the refreshed `llama-rocm-7.14` toolbox for this model. The profile keeps Hermes' full default tool surface enabled; web search still requires a configured Hermes search/tool-gateway API key.
 - LiteLLM split-port routing: `litellm-ollama-proxy.service` is the internal backend on `127.0.0.1:4004`; Hermes profiles use this loopback endpoint. `litellm-lan-auth-proxy.service` exposes the OpenAI-compatible API on `0.0.0.0:4000` for LAN clients such as Cline and requires a bearer key. The key is stored in OpenBao at `secret/homelab/providers/litellm`, field `lan_api_key`, with local runtime copy `/home/helios/.config/litellm/litellm-lan-api-key.env`. Cline should use base URL `http://192.168.1.123:4000/v1` and that key.
+- LiteLLM package status: `/home/helios/.local/share/litellm/venv` was upgraded from LiteLLM `1.91.0` to `1.97.0` on 2026-08-18 after restoring `pip` in the venv. Freeze backups are under `/home/helios/.local/share/litellm/backups/`.
 - ai-workstation monitoring: `node-exporter.service` exposes host metrics on `0.0.0.0:9100`; `ai-workstation-gpu-exporter.service` exposes ROCm/sysfs GPU metrics on `0.0.0.0:9101`. Prometheus scrapes both and the `LiteLLM / Hermes Usage` Grafana dashboard includes an `AI Workstation Health` section.
 - Hermes dashboard: `hermes-dashboard.service` is enabled and bound to `127.0.0.1:9119` for SSH-tunneled browser access.
 - Hermes dashboard browser sessions use a stable local session token from `/home/helios/.config/hermes-dashboard/session-token.env`, injected into `hermes-dashboard.service` by `/home/helios/.config/systemd/user/hermes-dashboard.service.d/50-stable-session-token.conf`. This prevents dashboard restarts from invalidating the browser chat websocket token. Do not print or commit the token value.
@@ -55,6 +57,11 @@ ollama show hermes-qwen3-coder:30b-256k
 hermes config show
 hermes profile list
 qwen3-coder-128k-worker tools list
+qwen38-bf16-tools tools list
+systemctl --user status llama-qwen38-bf16.service
+curl -sS http://127.0.0.1:11437/health
+curl -sS http://127.0.0.1:4004/v1/models
+curl -sS http://127.0.0.1:4001/metrics | head
 hermes -p deepseek-v4-flash doctor
 systemctl --user status node-exporter.service ai-workstation-gpu-exporter.service
 python3 ~/lab/automation/ai-workstation/scripts/benchmark-hermes-models.py --provider litellm --show-ollama-ps
@@ -99,6 +106,7 @@ Recommended profile usage:
 - `qwen3-coder-128k-fast-chat`: default choice for lightweight browser chat and quick Q&A.
 - `qwen3-coder-256k-fast-chat`: use when browser chat needs very large context.
 - `qwen3-coder-128k`, `qwen3-coder-256k`, or default: use for full development/agent work where terminal, file, and code execution tools are expected.
+- `qwen38bf16tools`: use for Qwen3.8 27B BF16 experiments that need the full Hermes tool surface. It is heavier and slower than the qwen3-coder Q8 aliases, but keeps BF16 model weights.
 
 ## Strix Halo Backend Source
 
@@ -106,14 +114,14 @@ Backend source of truth for ROCm/Vulkan llama.cpp toolboxes:
 
 - GitHub: `https://github.com/kyuz0/amd-strix-halo-toolboxes`
 - Remote clone path on workstation: `/mnt/ai/llama/amd-strix-halo-toolboxes`
-- Provisioned toolbox container: `llama-rocm-7.2.2`
-- Toolbox image: `docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.2.2`
+- Provisioned toolbox containers include `llama-rocm-7.2.2` and refreshed `llama-rocm-7.14`.
+- Qwen3.8 BF16 runtime image: `docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14`
 
 ## Script
 
 - `scripts/sync-strix-halo-backend.ps1`
   - Pulls latest upstream repo on workstation
-  - Ensures `llama-rocm-7.2.2` toolbox exists
+  - Ensures `llama-rocm-7.14` toolbox exists
   - Validates device visibility with `llama-cli --list-devices`
 
 ## Required `.env` Keys
