@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-07-09 (America/Chicago)
+Last updated: 2026-08-19 (America/Chicago)
 
 ## Purpose
 
@@ -183,6 +183,8 @@ Current columns:
 - Secrets backend: `lab-secrets01` at `192.168.1.25`, OpenBao API `http://192.168.1.25:8200`
 - PostgreSQL service host: `lab-pgsql01` at `192.168.1.216`
 - Container registry host: `lab-registry01` at `192.168.1.15:5000`
+- DroneOps field gateway host: `bst01-gw` at `192.168.1.108`
+- DroneOps field data host: `bs01-data` at `192.168.1.66`
 - AI workstation: `ai-workstation-evox2` at `192.168.1.123`
 - SPT/Fika server host: `SPT02` at `192.168.1.86`
 - Most k3s web services are exposed either by NodePort on `192.168.1.80` or Traefik ingress with `*.192.168.1.80.sslip.io` hostnames.
@@ -286,6 +288,50 @@ Worker recovery note:
 - Credential references:
   - SSH: `LAB_REGISTRY01_*`
   - Registry auth: `LAB_REGISTRY01_REGISTRY_*`
+
+### DroneOps Field Gateway Host
+
+- Host: `bst01-gw` (`192.168.1.108`, Dell OptiPlex 3060, Ubuntu Server 24.04 LTS)
+- Role: native Linux host for the DroneOps bastion field gateway service and hardware adapter development.
+- Local lab checkout/source: `repositories/droneops-gateway`
+- Deployed source path on host: `/opt/droneops-gateway-src`
+- Runtime service:
+  - systemd unit: `droneops-gateway.service` (enabled, active)
+  - binary: `/usr/local/bin/droneops-gateway`
+  - environment file: `/etc/droneops-gateway/gateway.env`
+  - working directory: `/var/lib/droneops-gateway`
+  - diagnostics API: `http://192.168.1.108:8700`
+  - validated endpoints: `/health`, `/ready`, `/metrics`
+- Current gateway implementation is Rust-based and exposes a diagnostic API plus initial Tello adapter scaffolding. The diagnostic API is intentionally kept for test-driven development, health checks, and Prometheus scraping.
+- Runtime logging: structured JSON logs emitted through Rust `tracing` and captured by journald. Use `RUST_LOG` in `/etc/droneops-gateway/gateway.env` to adjust verbosity. Logging standards live in the `droneops-gateway` repo at `docs/context/logging-standards.md`.
+- MOTD: dynamic colored Iron Meridian Systems Field Gateway banner installed via `/etc/update-motd.d/00-iron-meridian`; shows hostname, IP, kernel, uptime, load, memory, disk, gateway service state, current time, and the unauthorized-access warning.
+- Credential reference: OpenBao KV v2 path `secret/homelab/vms/bst01-gw`; do not store the SSH password in docs or committed files.
+
+### DroneOps Field Data Host
+
+- Host: `bs01-data` (`192.168.1.66`, Ubuntu Server 24.04 LTS)
+- Role: dedicated data node for the DroneOps field base station. This host is intentionally outside k3s and separate from the gateway node.
+- Installed baseline as of 2026-08-19:
+  - PostgreSQL 16 service enabled and active.
+  - PostGIS 3.4 enabled in database `droneops`.
+  - Extensions enabled for `droneops`: `postgis`, `pgcrypto`, `uuid-ossp`.
+  - Prometheus node exporter enabled and listening on `9100/tcp`.
+  - PostgreSQL listening on `0.0.0.0:5432` and `[::]:5432`.
+  - PostgreSQL host access allows `192.168.1.0/24` with `scram-sha-256`.
+  - Data directories prepared:
+    - `/srv/droneops/postgres-backups`
+    - `/srv/droneops/video`
+    - `/srv/droneops/object-storage`
+- Runtime credential source: OpenBAO KV v2 path `secret/lab/runtime/droneops`.
+  - Fields: `database_host`, `database_port`, `database_name`, `database_user`, `database_password`, `database_url`.
+  - Do not print, commit, or document the actual password or URL value.
+- Database connection:
+  - database: `droneops`
+  - least-privilege role: `droneops`
+  - host: `192.168.1.66`
+  - port: `5432`
+- MOTD: dynamic colored Iron Meridian Systems Field Data Server banner installed via `/etc/update-motd.d/00-iron-meridian`; shows hostname, IP, kernel, uptime, load, memory, disk, PostgreSQL state, node-exporter state, current time, role summary, and unauthorized-access warning.
+- Video storage rule: PostgreSQL stores metadata and references only. Large video payloads should live in dedicated video/object storage paths and be linked from database metadata.
 
 ### AI Workstation
 
