@@ -69,7 +69,7 @@
 "192.168.1.63","63","TRUE","TRUE","147","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
 "192.168.1.64","64","TRUE","FALSE","","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
 "192.168.1.65","65","TRUE","FALSE","","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
-"192.168.1.66","66","TRUE","TRUE","","bs01-data","2026-08-19 07:08","bs01-data","DroneOps field data server (Ubuntu 24.04 LTS)","PostgreSQL 16/PostGIS data node outside k3s; node-exporter on 9100; MOTD configured; runtime DB secret path secret/lab/runtime/droneops","BS01-DATA_*","TRUE","2026-08-19 07:08"
+"192.168.1.66","66","TRUE","TRUE","","bs01-data","2026-08-19 07:08","bs01-data","DroneOps field data server (Ubuntu 24.04 LTS)","PostgreSQL 16/PostGIS data node outside k3s; node-exporter on 9100; MOTD configured; runtime DB secret path secret/lab/runtime/droneops","secret/homelab/vms/bs01-data","TRUE","2026-08-19 07:08"
 "192.168.1.67","67","TRUE","TRUE","137","iPad.localdomain","4/11/2026 14:49","","","","","","4/11/2026 14:49"
 "192.168.1.68","68","TRUE","FALSE","","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
 "192.168.1.69","69","TRUE","FALSE","","","4/11/2026 14:49","","","","","","4/11/2026 14:49"

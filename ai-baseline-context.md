@@ -325,6 +325,7 @@ Worker recovery note:
 - Runtime credential source: OpenBAO KV v2 path `secret/lab/runtime/droneops`.
   - Fields: `database_host`, `database_port`, `database_name`, `database_user`, `database_password`, `database_url`.
   - Do not print, commit, or document the actual password or URL value.
+- Host SSH credential reference: OpenBAO KV v2 path `secret/homelab/vms/bs01-data`; do not store the SSH password in docs or committed files.
 - Database connection:
   - database: `droneops`
   - least-privilege role: `droneops`
