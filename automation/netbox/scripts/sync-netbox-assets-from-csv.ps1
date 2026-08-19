@@ -212,6 +212,48 @@ function Classify-Row {
     }
   }
 
+  if (($l -match 'bs01-gw' -or $l -match 'field gateway') -and $l -match 'opti?plex 3060') {
+    return @{
+      assetType = 'device'
+      roleSlug = 'field-gateway'
+      roleName = 'Field Gateway'
+      roleColor = '2196f3'
+      manufacturerSlug = 'dell'
+      manufacturerName = 'Dell'
+      deviceTypeSlug = 'optiplex-3060-micro'
+      deviceTypeModel = 'OptiPlex 3060 Micro'
+      interfaceName = 'mgmt0'
+    }
+  }
+
+  if (($l -match 'bs01-data' -or $l -match 'field data') -and $l -match 'opti?plex 3046') {
+    return @{
+      assetType = 'device'
+      roleSlug = 'field-data-server'
+      roleName = 'Field Data Server'
+      roleColor = '00bcd4'
+      manufacturerSlug = 'dell'
+      manufacturerName = 'Dell'
+      deviceTypeSlug = 'optiplex-3046-micro'
+      deviceTypeModel = 'OptiPlex 3046 Micro'
+      interfaceName = 'mgmt0'
+    }
+  }
+
+  if (($l -match 'bs01-wknd' -or $l -match 'field k3s worker' -or $l -match 'field k3s server') -and $l -match 'opti?plex 7040') {
+    return @{
+      assetType = 'device'
+      roleSlug = 'field-k3s-server'
+      roleName = 'Field k3s Server'
+      roleColor = '4caf50'
+      manufacturerSlug = 'dell'
+      manufacturerName = 'Dell'
+      deviceTypeSlug = 'optiplex-7040-micro'
+      deviceTypeModel = 'OptiPlex 7040 Micro'
+      interfaceName = 'mgmt0'
+    }
+  }
+
   if ($l -match 'worker' -or $l -match 'wknd') {
     return @{
       assetType = 'device'

@@ -1,0 +1,98 @@
+﻿=== 2026-08-18T02:07:34.9279937-05:00 BEFORE BCD ===
+
+Windows Boot Loader
+-------------------
+identifier              {current}
+device                  partition=C:
+path                    \WINDOWS\system32\winload.efi
+description             Windows 11
+locale                  en-US
+inherit                 {bootloadersettings}
+recoverysequence        {55567548-8b92-11f0-a0b7-0018219e934c}
+displaymessageoverride  Recovery
+recoveryenabled         Yes
+isolatedcontext         Yes
+allowedinmemorysettings 0x15000075
+osdevice                partition=C:
+systemroot              \WINDOWS
+resumeobject            {55567545-8b92-11f0-a0b7-0018219e934c}
+nx                      OptIn
+bootmenupolicy          Standard
+hypervisorlaunchtype    Auto
+hypervisoriommupolicy   Disable
+vsmlaunchtype           Off
+
+=== 2026-08-18T02:07:35.0214355-05:00 BEFORE AMDRyzenMasterDriverV22 ===
+[SC] QueryServiceConfig SUCCESS
+
+SERVICE_NAME: AMDRyzenMasterDriverV22
+        TYPE               : 1  KERNEL_DRIVER 
+        START_TYPE         : 2   AUTO_START
+        ERROR_CONTROL      : 1   NORMAL
+        BINARY_PATH_NAME   : \??\C:\Program Files\AMD\RyzenMaster\bin\AMDRyzenMasterDriver.sys
+        LOAD_ORDER_GROUP   : 
+        TAG                : 0
+        DISPLAY_NAME       : AMDRyzenMasterDriverV22
+        DEPENDENCIES       : 
+        SERVICE_START_NAME : 
+
+SERVICE_NAME: AMDRyzenMasterDriverV22 
+        TYPE               : 1  KERNEL_DRIVER  
+        STATE              : 4  RUNNING 
+                                (STOPPABLE, NOT_PAUSABLE, IGNORES_SHUTDOWN)
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+
+=== Removing failed hypervisoriommupolicy override ===
+The operation completed successfully.
+
+=== Disabling AMDRyzenMasterDriverV22 for next boot ===
+[SC] ChangeServiceConfig SUCCESS
+
+=== 2026-08-18T02:07:35.1204581-05:00 AFTER BCD ===
+
+Windows Boot Loader
+-------------------
+identifier              {current}
+device                  partition=C:
+path                    \WINDOWS\system32\winload.efi
+description             Windows 11
+locale                  en-US
+inherit                 {bootloadersettings}
+recoverysequence        {55567548-8b92-11f0-a0b7-0018219e934c}
+displaymessageoverride  Recovery
+recoveryenabled         Yes
+isolatedcontext         Yes
+allowedinmemorysettings 0x15000075
+osdevice                partition=C:
+systemroot              \WINDOWS
+resumeobject            {55567545-8b92-11f0-a0b7-0018219e934c}
+nx                      OptIn
+bootmenupolicy          Standard
+hypervisorlaunchtype    Auto
+vsmlaunchtype           Off
+
+=== 2026-08-18T02:07:35.2050731-05:00 AFTER AMDRyzenMasterDriverV22 ===
+[SC] QueryServiceConfig SUCCESS
+
+SERVICE_NAME: AMDRyzenMasterDriverV22
+        TYPE               : 1  KERNEL_DRIVER 
+        START_TYPE         : 4   DISABLED
+        ERROR_CONTROL      : 1   NORMAL
+        BINARY_PATH_NAME   : \??\C:\Program Files\AMD\RyzenMaster\bin\AMDRyzenMasterDriver.sys
+        LOAD_ORDER_GROUP   : 
+        TAG                : 0
+        DISPLAY_NAME       : AMDRyzenMasterDriverV22
+        DEPENDENCIES       : 
+        SERVICE_START_NAME : 
+
+SERVICE_NAME: AMDRyzenMasterDriverV22 
+        TYPE               : 1  KERNEL_DRIVER  
+        STATE              : 4  RUNNING 
+                                (STOPPABLE, NOT_PAUSABLE, IGNORES_SHUTDOWN)
+        WIN32_EXIT_CODE    : 0  (0x0)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0

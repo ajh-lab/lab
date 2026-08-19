@@ -43,6 +43,7 @@ For direct Hermes browser chat on the ai-workstation, use `qwen3-coder-128k-fast
 - `automation/hermes/*`: Hermes Kanban query/recovery helpers for local agents; prefer these over dashboard discovery or direct SQLite edits.
 - `automation/windows-upgrade/*`: Windows upgrade remediation helpers; generated outputs should go to `tmp/windows-upgrade/`.
 - `docs/windows-upgrade/*`: archived Windows upgrade troubleshooting logs/results.
+- `docs/bs01-field-rack.md`: DroneOps BS01 field rack roles, static IPs, OpenBAO paths, MOTD, and field k3s cluster verification notes.
 - `sub-context/ai-infrastructure-context.md`: infrastructure-specific supplemental context.
 - `phase1-agent-todo.md`: first-phase execution backlog for agent platform, knowledge system, and automation control plane.
 - `phase1-agent-queue.yaml` + `phase1-agent-queue.json`: machine-readable execution queue for agent task orchestration.
@@ -183,8 +184,9 @@ Current columns:
 - Secrets backend: `lab-secrets01` at `192.168.1.25`, OpenBao API `http://192.168.1.25:8200`
 - PostgreSQL service host: `lab-pgsql01` at `192.168.1.216`
 - Container registry host: `lab-registry01` at `192.168.1.15:5000`
-- DroneOps field gateway host: `bst01-gw` at `192.168.1.108`
-- DroneOps field data host: `bs01-data` at `192.168.1.66`
+- DroneOps field gateway host: `bs01-gw` at `192.168.1.108`
+- DroneOps field data host: `bs01-data` at `192.168.1.109`
+- DroneOps field k3s cluster servers: `bs01-wknd01` (`192.168.1.110`), `bs01-wknd02` (`192.168.1.111`), `bs01-wknd03` (`192.168.1.112`)
 - AI workstation: `ai-workstation-evox2` at `192.168.1.123`
 - SPT/Fika server host: `SPT02` at `192.168.1.86`
 - Most k3s web services are exposed either by NodePort on `192.168.1.80` or Traefik ingress with `*.192.168.1.80.sslip.io` hostnames.
@@ -291,7 +293,7 @@ Worker recovery note:
 
 ### DroneOps Field Gateway Host
 
-- Host: `bst01-gw` (`192.168.1.108`, Dell OptiPlex 3060, Ubuntu Server 24.04 LTS)
+- Host: `bs01-gw` (`192.168.1.108`, Dell OptiPlex 3060, Ubuntu Server 24.04 LTS)
 - Role: native Linux host for the DroneOps bastion field gateway service and hardware adapter development.
 - Local lab checkout/source: `repositories/droneops-gateway`
 - Deployed source path on host: `/opt/droneops-gateway-src`
@@ -302,14 +304,15 @@ Worker recovery note:
   - working directory: `/var/lib/droneops-gateway`
   - diagnostics API: `http://192.168.1.108:8700`
   - validated endpoints: `/health`, `/ready`, `/metrics`
+  - host metrics: Prometheus node exporter enabled on port `9100`
 - Current gateway implementation is Rust-based and exposes a diagnostic API plus initial Tello adapter scaffolding. The diagnostic API is intentionally kept for test-driven development, health checks, and Prometheus scraping.
 - Runtime logging: structured JSON logs emitted through Rust `tracing` and captured by journald. Use `RUST_LOG` in `/etc/droneops-gateway/gateway.env` to adjust verbosity. Logging standards live in the `droneops-gateway` repo at `docs/context/logging-standards.md`.
 - MOTD: dynamic colored Iron Meridian Systems Field Gateway banner installed via `/etc/update-motd.d/00-iron-meridian`; shows hostname, IP, kernel, uptime, load, memory, disk, gateway service state, current time, and the unauthorized-access warning.
-- Credential reference: OpenBao KV v2 path `secret/homelab/vms/bst01-gw`; do not store the SSH password in docs or committed files.
+- Credential reference: OpenBao KV v2 path `secret/homelab/vms/bs01-gw`; do not store the SSH password in docs or committed files. The older path `secret/homelab/vms/bst01-gw` is retained as a compatibility alias while references are normalized.
 
 ### DroneOps Field Data Host
 
-- Host: `bs01-data` (`192.168.1.66`, Ubuntu Server 24.04 LTS)
+- Host: `bs01-data` (`192.168.1.109`, Dell OptiPlex 3046, Ubuntu Server 24.04 LTS)
 - Role: dedicated data node for the DroneOps field base station. This host is intentionally outside k3s and separate from the gateway node.
 - Installed baseline as of 2026-08-19:
   - PostgreSQL 16 service enabled and active.
@@ -329,10 +332,30 @@ Worker recovery note:
 - Database connection:
   - database: `droneops`
   - least-privilege role: `droneops`
-  - host: `192.168.1.66`
+  - host: `192.168.1.109`
   - port: `5432`
 - MOTD: dynamic colored Iron Meridian Systems Field Data Server banner installed via `/etc/update-motd.d/00-iron-meridian`; shows hostname, IP, kernel, uptime, load, memory, disk, PostgreSQL state, node-exporter state, current time, role summary, and unauthorized-access warning.
 - Video storage rule: PostgreSQL stores metadata and references only. Large video payloads should live in dedicated video/object storage paths and be linked from database metadata.
+
+### DroneOps Field k3s Cluster
+
+- `bs01-wknd01` (`192.168.1.110`, Dell OptiPlex 7040, Ubuntu Server 24.04 LTS)
+- `bs01-wknd02` (`192.168.1.111`, Dell OptiPlex 7040, Ubuntu Server 24.04 LTS)
+- `bs01-wknd03` (`192.168.1.112`, Dell OptiPlex 7040, Ubuntu Server 24.04 LTS)
+- Role: three-node k3s server/control-plane cluster for the DroneOps base-station/spoke environment. All three OptiPlex 7040 nodes run k3s server with embedded etcd and remain schedulable for workloads.
+- API endpoint: `https://192.168.1.110:6443`
+- Verified k3s version: `v1.36.3+k3s1`
+- Verified baseline pods: CoreDNS, local-path-provisioner, metrics-server, Traefik, and Traefik service load-balancer pods are running.
+- OpenBAO cluster access path: `secret/homelab/k3s/bs01-field`
+  - Fields: `api_endpoint`, `primary_server`, `nodes`, `kubeconfig`
+  - Treat `kubeconfig` as sensitive. Do not print or commit it.
+- Networking: static `/24` addresses, gateway/DNS `192.168.1.1`, interface `enp0s31f6`.
+- Credential references:
+  - `secret/homelab/vms/bs01-wknd01`
+  - `secret/homelab/vms/bs01-wknd02`
+  - `secret/homelab/vms/bs01-wknd03`
+- MOTD: shared Iron Meridian Systems field-rack MOTD installed via `/etc/update-motd.d/00-iron-meridian`.
+- Node metrics: Prometheus node exporter is enabled on each node at port `9100`.
 
 ### AI Workstation
 
