@@ -43,7 +43,8 @@ For direct Hermes browser chat on the ai-workstation, use `qwen3-coder-128k-fast
 - `automation/hermes/*`: Hermes Kanban query/recovery helpers for local agents; prefer these over dashboard discovery or direct SQLite edits.
 - `automation/windows-upgrade/*`: Windows upgrade remediation helpers; generated outputs should go to `tmp/windows-upgrade/`.
 - `docs/windows-upgrade/*`: archived Windows upgrade troubleshooting logs/results.
-- `docs/bs01-field-rack.md`: DroneOps BS01 field rack roles, static IPs, OpenBAO paths, MOTD, and field k3s cluster verification notes.
+- `docs/bs01-field-rack.md`: DroneOps BS01 field rack roles, static IPs, OpenBAO paths, MOTD, field k3s cluster verification notes, and Longhorn storage summary.
+- `docs/bs01-longhorn-runbook.md`: BS01 Longhorn GitOps source, NVMe disk mapping, host prerequisites, verification, smoke test, and operations notes.
 - `repositories/droneops-platform/docs/context/repository-context-map.md`: DroneOps cross-repo context map; use it before copying context between DroneOps repos.
 - `repositories/droneops-platform/docs/context/field-data-architecture.md`: DroneOps field data architecture, base-station roles, persistence priority, event backbone direction, and video data-plane boundaries.
 - `repositories/droneops-platform/docs/context/service-architecture.md`: DroneOps service and repo boundary strategy, naming conventions, split triggers, and field/HQ product separation guidance.
@@ -350,6 +351,13 @@ Worker recovery note:
 - API endpoint: `https://192.168.1.110:6443`
 - Verified k3s version: `v1.36.3+k3s1`
 - Verified baseline pods: CoreDNS, local-path-provisioner, metrics-server, Traefik, and Traefik service load-balancer pods are running.
+- Longhorn:
+  - Deployed in namespace `longhorn-system` by ArgoCD Application `longhorn`.
+  - GitOps manifest: `k8s/field/bs01/argocd/longhorn-application.yaml`.
+  - Runbook: `docs/bs01-longhorn-runbook.md`.
+  - Each worker uses its dedicated NVMe filesystem at `/var/lib/longhorn`.
+  - `longhorn` is the default storage class; `local-path` remains available but is not default.
+  - Use Longhorn for k3s workload PVs only. PostgreSQL/PostGIS remains on `bs01-data`; large DroneOps video payloads should not be stored in Longhorn by default.
 - OpenBAO cluster access path: `secret/homelab/k3s/bs01-field`
   - Fields: `api_endpoint`, `primary_server`, `nodes`, `kubeconfig`
   - Treat `kubeconfig` as sensitive. Do not print or commit it.

@@ -37,6 +37,8 @@ The field k3s cluster is a three-server HA k3s install using embedded etcd. All 
 - API endpoint: `https://192.168.1.110:6443`
 - Current verified version: `v1.36.3+k3s1`
 - Baseline components: CoreDNS, metrics-server, local-path-provisioner, Traefik
+- Longhorn storage: deployed by ArgoCD from `k8s/field/bs01/argocd/longhorn-application.yaml`
+- Longhorn runbook: `docs/bs01-longhorn-runbook.md`
 - OpenBAO cluster access path: `secret/homelab/k3s/bs01-field`
   - Fields: `api_endpoint`, `primary_server`, `nodes`, `kubeconfig`
   - Treat `kubeconfig` as sensitive.
@@ -47,6 +49,18 @@ Verification from `bs01-wknd01`:
 sudo k3s kubectl get nodes -o wide
 sudo k3s kubectl get pods -A
 ```
+
+## Longhorn Storage
+
+Each k3s node has a dedicated 256 GB NVMe drive mounted at `/var/lib/longhorn` for Longhorn replicated cluster storage. The OS disk remains `/dev/sda` on each worker and must not be touched during storage operations.
+
+| Host | Longhorn disk | Serial | Filesystem UUID |
+| --- | --- | --- | --- |
+| `bs01-wknd01` | `/dev/nvme0n1p1` | `MQ44B37803249` | `e1c9f1f9-1e84-467d-a534-1976947f256f` |
+| `bs01-wknd02` | `/dev/nvme0n1p1` | `MQ44B37801758` | `97538229-24f7-4dec-9893-82d15ca86e23` |
+| `bs01-wknd03` | `/dev/nvme0n1p1` | `MR12W53800132` | `b3bedbab-e2a0-4bfc-87c4-7b864980f997` |
+
+Longhorn is the default storage class for k3s workloads that need persistent volumes. `local-path` remains installed but is not the default. PostgreSQL/PostGIS stays on `bs01-data`; Longhorn is not the primary data plane and should not be used for large DroneOps video payload storage.
 
 ## MOTD
 
