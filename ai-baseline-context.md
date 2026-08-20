@@ -46,6 +46,7 @@ For direct Hermes browser chat on the ai-workstation, use `qwen3-coder-128k-fast
 - `docs/bs01-field-rack.md`: DroneOps BS01 field rack roles, static IPs, OpenBAO paths, MOTD, and field k3s cluster verification notes.
 - `repositories/droneops-platform/docs/context/repository-context-map.md`: DroneOps cross-repo context map; use it before copying context between DroneOps repos.
 - `repositories/droneops-platform/docs/context/field-data-architecture.md`: DroneOps field data architecture, base-station roles, persistence priority, event backbone direction, and video data-plane boundaries.
+- `repositories/droneops-platform/docs/context/service-architecture.md`: DroneOps service and repo boundary strategy, naming conventions, split triggers, and field/HQ product separation guidance.
 - `sub-context/ai-infrastructure-context.md`: infrastructure-specific supplemental context.
 - `phase1-agent-todo.md`: first-phase execution backlog for agent platform, knowledge system, and automation control plane.
 - `phase1-agent-queue.yaml` + `phase1-agent-queue.json`: machine-readable execution queue for agent task orchestration.
