@@ -1,0 +1,55 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: longhorn
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: longhorn
+    app.kubernetes.io/part-of: bs01-field-cluster
+    droneops.io/deployment-profile: bs01-field
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: longhorn-system
+  source:
+    repoURL: https://charts.longhorn.io
+    chart: longhorn
+    targetRevision: 1.12.1
+    helm:
+      values: |
+        service:
+          ui:
+            type: ClusterIP
+
+        preUpgradeChecker:
+          jobEnabled: false
+
+        persistence:
+          createStorageClass: true
+          defaultClass: true
+          defaultFsType: ext4
+          defaultClassReplicaCount: 3
+          defaultDataLocality: disabled
+          reclaimPolicy: Delete
+
+        defaultSettings:
+          defaultDataPath: /var/lib/longhorn
+          defaultReplicaCount: 3
+          replicaAutoBalance: best-effort
+          storageMinimalAvailablePercentage: 10
+          storageOverProvisioningPercentage: 200
+          defaultDataLocality: disabled
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 3m
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
