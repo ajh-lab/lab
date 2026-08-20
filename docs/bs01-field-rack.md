@@ -59,6 +59,11 @@ Each node uses the shared Iron Meridian Systems MOTD installed at:
 
 The MOTD includes the IMS ASCII banner, role name, role description, system details, service state, and unauthorized-access warning.
 
+Ubuntu's optional `motd-news.timer` is disabled on the field-rack hosts so the
+console MOTD stays local, deterministic, and free of external news-fetch
+failures. The OptiPlex nodes do not have IPMI/BMC hardware, so
+`openipmi.service` is disabled to avoid false failed-unit noise.
+
 ## Inventory
 
 `network_devices.csv` is the source-of-truth inventory file in this repo. NetBox should model the five hosts as physical Dell OptiPlex Micro devices at site `BS01 Field Rack`.
