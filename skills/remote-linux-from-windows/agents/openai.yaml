@@ -1,0 +1,4 @@
+interface:
+  display_name: "Remote Linux From Windows"
+  short_description: "Run reliable SSH and Linux service operations from PowerShell"
+  default_prompt: "Use $remote-linux-from-windows when operating Linux hosts from Windows or PowerShell."

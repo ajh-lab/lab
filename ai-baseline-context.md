@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-08-19 (America/Chicago)
+Last updated: 2026-08-21 (America/Chicago)
 
 ## Purpose
 
@@ -55,7 +55,31 @@ For direct Hermes browser chat on the ai-workstation, use `qwen3-coder-128k-fast
 - `repositories/`: ignored local workspace for repos the agent clones/pulls for implementation work. Only `repositories/.KEEP` is tracked; nested repos are not part of this repo's Git history.
 - `tmp/`: transient ticket working area (`tmp/<ticket-number>/<ticket-number>-context.md` pattern).
 - `tmp/README.md`: scratch workspace rules; contents of `tmp/` are ignored unless explicitly allow-listed.
-- `skills/`: reusable Codex/Hermes operational skills for lab work. Current focused skills cover OpenBAO secrets, Hermes Kanban, k3s/GitOps, lab documentation, ai-workstation operations, and SPT/Fika operations. Use these to avoid rediscovering common procedures.
+- `skills/`: reusable Codex/Hermes operational skills for lab work. Current focused skills cover OpenBAO secrets, Hermes Kanban, k3s/GitOps, lab documentation, ai-workstation operations, remote Linux operations from Windows/PowerShell, and SPT/Fika operations. Use these to avoid rediscovering common procedures.
+
+## Context Routing Map
+
+Use this map to load the smallest useful context set instead of copying every
+detail into custom instructions or every project repo.
+
+| Work Area | Start Here | Then Read |
+|---|---|---|
+| Any non-trivial lab task | `ai-baseline-context.md` | Relevant rows below plus task-specific files |
+| Windows workstation to Linux SSH/service work | `skills/remote-linux-from-windows/SKILL.md` | Host-specific docs and repo runbooks for the target |
+| Secrets, credentials, API keys, ESO | `skills/openbao-secrets/SKILL.md` | `automation/common/SecretResolver.psm1`, relevant OpenBAO path docs |
+| k3s, Helm, ArgoCD, ESO, registry, CI/CD | `skills/lab-gitops/SKILL.md` | Cluster-specific kubeconfig and deployment repo docs |
+| NetBox, Wiki.js, inventory docs | `skills/lab-documentation/SKILL.md` | `network_devices.csv`, `automation/netbox/`, `automation/wikijs/` |
+| Hermes boards, cards, blocked tasks | `skills/hermes-kanban/SKILL.md` | `automation/hermes/README.md` and helper scripts |
+| AI workstation and Hermes runtime | `skills/ai-workstation-ops/SKILL.md` | `automation/ai-workstation/README.md` |
+| BS01 field rack infrastructure | `docs/bs01-field-rack.md` | `docs/bs01-longhorn-runbook.md`, DroneOps platform field context |
+| DroneOps platform work | `repositories/droneops-platform/ai-baseline-context.md` | `repositories/droneops-platform/docs/context/project-status.md` immediately after |
+| DroneOps gateway work | `repositories/droneops-gateway/ai-baseline-context.md` | Gateway context files plus DroneOps platform context map as needed |
+
+Custom instructions should stay host-agnostic and short. Project-specific facts
+such as BS01 host roles, DroneOps architecture, deployment state, and OpenBAO
+paths belong in this repo's context files or the relevant project repo. When an
+agent is running from Windows and operating Linux hosts, use the
+`remote-linux-from-windows` skill before issuing complex SSH commands.
 
 ## Repo Layout
 
@@ -1075,7 +1099,8 @@ Bootstrap behavior:
 12. For OpenClaw operations on the workstation, use `automation/ai-workstation/README.md` for install/status/security/runtime reference.
 13. For SPT/Fika control requests, use the `SPT/Fika Server` section above and prefer `ssh helios@192.168.1.86 "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\SPT\automation\Invoke-SPT02-FikaAction.ps1 -Action Status|Start|Stop|Restart"` from `ai-workstation-evox2`; do not use the interactive desktop menu from Hermes/Discord.
 14. For Hermes Kanban work from this Windows repo, use `automation/hermes/scripts/query_kanban.py` for board/card visibility and `automation/hermes/scripts/reset_card.py` for safe official recovery actions. Do not edit Hermes Kanban SQLite databases directly unless the owner explicitly asks for low-level repair.
-15. Do not create ad hoc files in the repository root. Use `tmp/<task-or-topic>/` for scratch files and move durable scripts/docs into `automation/` or `docs/` before finishing work.
+15. For Linux remote operations from this Windows workspace, use `skills/remote-linux-from-windows/SKILL.md`; prefer transferred LF-normalized scripts over deeply nested PowerShell/SSH/Bash quoting.
+16. Do not create ad hoc files in the repository root. Use `tmp/<task-or-topic>/` for scratch files and move durable scripts/docs into `automation/` or `docs/` before finishing work.
 
 ## Next Actions
 
