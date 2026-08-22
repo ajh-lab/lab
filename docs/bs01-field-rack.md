@@ -38,6 +38,11 @@ The field k3s cluster is a three-server HA k3s install using embedded etcd. All 
 - Current verified version: `v1.36.3+k3s1`
 - Baseline components: CoreDNS, metrics-server, local-path-provisioner, Traefik
 - Longhorn storage: deployed by ArgoCD from `k8s/field/bs01/argocd/longhorn-application.yaml`
+- ArgoCD Image Updater: deploy with
+  `k8s/field/bs01/argocd-image-updater` so DroneOps BS01 service images can
+  move from mutable `sha-latest` pulls to immutable `sha-<commit>` tags through
+  GitOps. The BS01 overlay reuses the shared lab manifest and removes the main
+  lab node selector.
 - Longhorn runbook: `docs/bs01-longhorn-runbook.md`
 - OpenBAO cluster access path: `secret/homelab/k3s/bs01-field`
   - Fields: `api_endpoint`, `primary_server`, `nodes`, `kubeconfig`
