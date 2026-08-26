@@ -23,6 +23,25 @@ Standard workflow conventions:
 
 `repositories/` is a local checkout workspace, not a source-of-truth folder for this repo. Agents may clone, pull, branch, test, and edit external project repositories there, but those nested repositories must not be committed into this `lab` repo. `.gitignore` intentionally ignores `repositories/*`; only `repositories/.KEEP` is tracked so the folder exists after clone. Durable changes made inside a nested repository must be committed and pushed in that nested repository's own Git history, or promoted into the appropriate first-class folder in this `lab` repo when the file truly belongs here.
 
+## Unattended / Multi-PR Context Refresh Rule
+
+For unattended, goal-driven, or multi-PR work, refresh authoritative context at
+the start of the run, the start of every new PR-sized phase, after every PR
+merge, before switching repositories, before schema/database work, before
+GitOps/ArgoCD/live verification, and after a blocker or owner decision. Start
+with the relevant repository `ai-baseline-context.md`, then its
+`docs/context/project-status.md`, then only the referenced context files that
+apply to the next phase. Do not reread every referenced file blindly for every
+small phase, but load all context directly relevant to the planned change.
+
+For cross-repository DroneOps work, refresh both platform and gateway
+baselines/status files when the phase affects both. When follow-up work is
+discovered outside the current PR scope, do not expand that PR unless safety or
+correctness requires it; groom the follow-up into the relevant
+`project-status.md`. Treat this as Follow-Up Discovery: preserve or update
+evidence-backed `DONE - ...` history and record only the smallest safe next
+action. Do not document or print secrets.
+
 When Codex credits are unavailable, Hermes DeepSeek profiles can be used for Kanban work. The DeepSeek provider key is stored in OpenBao at `secret/homelab/providers/deepseek`, field `api_key`, and the ai-workstation Hermes profile `.env` files are populated with `DEEPSEEK_API_KEY` as the controlled runtime fallback. As of 2026-07-09, the model-named Hermes profiles `deepseek-v4-flash` and `deepseek-v4-pro` route through the internal local LiteLLM backend at `http://127.0.0.1:4004/v1`, so token/request usage appears in Grafana alongside local qwen3-coder usage. LAN OpenAI-compatible clients such as Cline should use the authenticated proxy at `http://192.168.1.123:4000/v1` with the key stored in OpenBao at `secret/homelab/providers/litellm`, field `lan_api_key`. The local `default` Hermes profile should continue to use the ai-workstation-hosted qwen3-coder model for routine/local work. Use `deepseek-v4-flash` for normal paid DeepSeek work and `deepseek-v4-pro` only for complex planning, review, difficult debugging, or failed-card recovery. Do not use the old `deepseek` profile name; it was removed to avoid ambiguous model selection.
 
 For direct Hermes browser chat on the ai-workstation, use `qwen3-coder-128k-fast-chat` for normal lightweight Q&A and `qwen3-coder-256k-fast-chat` only when a very large browser-chat context is needed. These profiles route through the same local LiteLLM/Ollama qwen3-coder aliases but restrict CLI tools to web only, disable local action tools, set `agent.max_turns: 4`, and disable environment probing. Keep the default/full qwen3-coder profile for Kanban and implementation work where file, terminal, and code execution tools are expected.
@@ -202,6 +221,17 @@ Current columns:
 6. NetBox is the system-of-record for modeled assets (Devices/VMs, interfaces, primary IP relationships) after sync.
 
 ## Current Environment Facts
+
+## DroneOps Cluster Targeting
+
+- The main Raspberry Pi lab k3s cluster at `192.168.1.80` uses
+  `.kubeconfig-192.168.1.80.yaml` and hosts general lab services.
+- The BS01 DroneOps field k3s cluster uses `.kubeconfig-bs01-field.yaml` with
+  API endpoint `https://192.168.1.110:6443`; its ArgoCD namespace is `argocd`
+  and its DroneOps application is `droneops-platform`.
+- For DroneOps BS01 live deployment, ArgoCD, NATS, Flyway, and runtime
+  verification, use the BS01 field kubeconfig, not the main Raspberry Pi
+  cluster, unless explicitly instructed otherwise.
 
 ### Home Lab Layout Summary
 
