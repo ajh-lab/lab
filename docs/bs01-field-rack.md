@@ -55,6 +55,29 @@ sudo k3s kubectl get nodes -o wide
 sudo k3s kubectl get pods -A
 ```
 
+## Gateway GPS
+
+`bs01-gw` has an optional Microsoft Streets & Trips-era Pharos USB GPS for
+locating the field base station. The verified receiver enumerates as USB
+`067b:aaa0`, binds to the Linux `pl2303` driver, and emits NMEA at 4800 baud.
+The gateway repository owns its repeatable udev and `gpsd` configuration under
+`deploy/gpsd/`.
+
+The udev rule provides the stable path `/dev/droneops-base-gps`. `gpsd` listens
+only on loopback (`127.0.0.1:2947` and the local Unix socket); it must not be
+exposed directly to the browser or LAN.
+
+On 2026-08-28, `gpsd` identified the receiver as SiRF PharNav `07S203`, but the
+indoor puck reported `mode=1` with zero visible or used satellites. This proves
+the host and serial path, not a valid position. Place the puck outdoors or at a
+window with a broad sky view and require `mode>=2` plus finite latitude and
+longitude before accepting a fix. Do not accept NMEA `V` status, placeholder
+coordinates, or the receiver's stale pre-fix clock.
+
+Future application integration should update the platform-owned BS01 node
+location. It must not represent base-station GPS as Tello/vehicle telemetry or
+write PostgreSQL directly from the gateway.
+
 ## Longhorn Storage
 
 Each k3s node has a dedicated 256 GB NVMe drive mounted at `/var/lib/longhorn` for Longhorn replicated cluster storage. The OS disk remains `/dev/sda` on each worker and must not be touched during storage operations.
