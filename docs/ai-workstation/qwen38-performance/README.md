@@ -66,7 +66,7 @@ Common flags after experiment E002:
 | Endpoint | `http://127.0.0.1:11440/v1` |
 | LiteLLM alias | `qwen3.8-27b-uncensored-q4_k_m` |
 | Loaded GPU memory | About 22.2 GB decimal with 131k context |
-| Current state after E002 | Active and healthy |
+| Current state after E005 | Active and healthy; only Qwen listener on the host |
 
 ### BF16 Comparison Candidate
 
@@ -141,14 +141,18 @@ Record at minimum:
 | --- | --- | --- | --- |
 | E001 | Q4 versus BF16 on ROCm 7.14 | Complete | Select practical worker baseline |
 | E002 | Add `--no-mmap` | Complete, retained for stability | Keep unless regression is repeatable |
-| E003 | Current stable ROCm toolbox | Pending | Advance only with equal correctness and useful speed/stability gain |
-| E004 | Vulkan RADV toolbox | Pending | Compare exact same GGUF and flags |
-| E005 | Batch/microbatch matrix | Pending | Improve prompt processing without OOM or decode regression |
+| E003 | Current stable ROCm 10 toolbox | Complete, neutral | No promotion; speed difference was within run variance |
+| E004 | Vulkan RADV toolbox | Complete, rejected | Slower decode and context processing than ROCm |
+| E005 | Batch/microbatch matrix | Complete, neutral | Cold-start repeats showed no material improvement |
 | E006 | One-boot `amd_iommu=off` test | Pending approval | Require reversible boot test and measurable benefit |
 | E007 | Dynamic GTT/TTM memory layout | Deferred | Capacity experiment requiring BIOS/kernel change and reboot |
 
 Do not combine E003, E004, or E005. Establish a result for each independent
 variable before creating a combined candidate.
+
+Long-context repetitions must restart the model service before every measured
+run. llama.cpp prompt-cache reuse otherwise turns later repetitions into cache
+tests and invalidates cold prompt-processing comparisons.
 
 ## Current Decision
 
@@ -158,3 +162,21 @@ roughly 4.1 for BF16. BF16 did not show a quality advantage in the small test
 set. A real issue execution still requires a restricted worker profile,
 isolated worktree, mandatory CI, no automatic merge, and stronger-model review.
 
+ROCm 10 build `10751` was also tested against the same Q4 file and flags. Its
+decode and context results were effectively equal to ROCm 7.14 build `10540`,
+so the current service was not promoted solely for version freshness.
+
+Vulkan RADV build `10751` was slower for the same dense Q4 model. Keep ROCm as
+the Qwen3.8 backend; retain Vulkan only as a compatibility option or for a
+future model-specific experiment.
+
+Batch candidates `2048/512` and `4096/1024` did not materially outperform the
+`1024/256` control. Retain `1024/256` until a different model or workload
+demonstrates a repeatable prompt-processing benefit.
+
+After E005, a stopped toolbox-backed test unit left its child `llama-server`
+process alive. The orphan held about 22 GB of VRAM and kept the GPU busy even
+though port `11444` was no longer listening. Terminating that exact test PID
+restored the expected final state: only primary port `11440`, about 22.2 GB of
+VRAM in use, an idle GPU, and a healthy primary endpoint. Future toolbox tests
+must verify process and GPU state in addition to systemd unit state.
