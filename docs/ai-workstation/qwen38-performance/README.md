@@ -27,7 +27,7 @@ experiment log are in `results/2026-09-01-baseline-and-no-mmap.md`.
 | --- | --- |
 | Host | `ai-workstation-evox2` / `helios@192.168.1.123` |
 | OS | Fedora 43 |
-| Kernel | `7.1.8-100.fc43.x86_64` |
+| Kernel | `7.1.9-100.fc43.x86_64` |
 | Firmware package | `linux-firmware-20260810-1.fc43.noarch` |
 | Physical memory layout | 96 GiB fixed GPU allocation; about 31 GiB visible to Linux |
 | GPU | Radeon 8060S / `gfx1151` |
@@ -92,6 +92,10 @@ broken user mapping. The model and profile were not replaced.
   `/home/helios/.hermes/backups/qwen38-bf16-benchmark-20260901T223023Z`
 - Pre-`--no-mmap` service units:
   `/home/helios/.hermes/backups/qwen38-no-mmap-20260901T224645Z`
+- Pre-E006 `7.1.8` boot-entry snapshot:
+  `/home/helios/.hermes/backups/qwen38-iommu-20260901T231833Z`
+- Pre-E006 `7.1.9` boot-entry snapshot:
+  `/home/helios/.hermes/backups/qwen38-iommu-20260901T232227Z`
 
 ## Standard Benchmark Protocol
 
@@ -144,7 +148,7 @@ Record at minimum:
 | E003 | Current stable ROCm 10 toolbox | Complete, neutral | No promotion; speed difference was within run variance |
 | E004 | Vulkan RADV toolbox | Complete, rejected | Slower decode and context processing than ROCm |
 | E005 | Batch/microbatch matrix | Complete, neutral | Cold-start repeats showed no material improvement |
-| E006 | One-boot `amd_iommu=off` test | Pending approval | Require reversible boot test and measurable benefit |
+| E006 | One-boot `amd_iommu=off` test | Complete, rejected | No measurable decode or cold-context benefit |
 | E007 | Dynamic GTT/TTM memory layout | Deferred | Capacity experiment requiring BIOS/kernel change and reboot |
 
 Do not combine E003, E004, or E005. Establish a result for each independent
@@ -180,3 +184,9 @@ though port `11444` was no longer listening. Terminating that exact test PID
 restored the expected final state: only primary port `11440`, about 22.2 GB of
 VRAM in use, an idle GPU, and a healthy primary endpoint. Future toolbox tests
 must verify process and GPU state in addition to systemd unit state.
+
+E006 disabled AMD IOMMU for one controlled boot. Decode remained within normal
+variance and three cold 10,298-token context runs averaged 32.84 seconds versus
+the 32.87-second control. The 0.03-second difference is not meaningful. The
+flag was removed from the saved boot entry before the restoration reboot, so
+normal IOMMU behavior remains the accepted configuration.
