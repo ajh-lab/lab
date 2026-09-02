@@ -65,6 +65,7 @@ For direct Hermes browser chat on the ai-workstation, use `qwen38-27b-uncensored
 - `docs/bs01-field-rack.md`: DroneOps BS01 field rack roles, static IPs, OpenBAO paths, MOTD, field k3s cluster verification notes, and Longhorn storage summary.
 - `docs/bs01-longhorn-runbook.md`: BS01 Longhorn GitOps source, NVMe disk mapping, host prerequisites, verification, smoke test, and operations notes.
 - `repositories/droneops-platform/docs/context/repository-context-map.md`: DroneOps cross-repo context map; use it before copying context between DroneOps repos.
+- `repositories/droneops-platform/docs/context/agent-issue-delivery-workflow.md`: Canonical manual DroneOps issue-to-worker standard. Read it before manually claiming a DroneOps Delivery Project issue; issue edits never dispatch work.
 - `repositories/droneops-platform/docs/context/field-data-architecture.md`: DroneOps field data architecture, base-station roles, persistence priority, event backbone direction, and video data-plane boundaries.
 - `repositories/droneops-platform/docs/context/service-architecture.md`: DroneOps service and repo boundary strategy, naming conventions, split triggers, and field/HQ product separation guidance.
 - `repositories/droneops-platform/docs/context/replay-and-video-retention.md`: DroneOps replay, UTC timestamp, video segment metadata, storage reference, retention, and playback context.
@@ -93,6 +94,7 @@ detail into custom instructions or every project repo.
 | BS01 field rack infrastructure | `docs/bs01-field-rack.md` | `docs/bs01-longhorn-runbook.md`, DroneOps platform field context |
 | DroneOps platform work | `repositories/droneops-platform/ai-baseline-context.md` | `repositories/droneops-platform/docs/context/project-status.md` immediately after |
 | DroneOps gateway work | `repositories/droneops-gateway/ai-baseline-context.md` | Gateway context files plus DroneOps platform context map as needed |
+| DroneOps Delivery issue claim | `repositories/droneops-platform/docs/context/agent-issue-delivery-workflow.md` | Project item, owning-repository baseline/status, and focused referenced context |
 
 Custom instructions should stay host-agnostic and short. Project-specific facts
 such as BS01 host roles, DroneOps architecture, deployment state, and OpenBAO
