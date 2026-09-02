@@ -1,0 +1,110 @@
+{
+  "timestamp": "2026-09-02T21:24:00Z",
+  "host": "helios@192.168.1.123",
+  "decision": "blocked_before_download",
+  "reason": "No high-quality, trusted Qwen3.8-Flash-Next variant both fit the current 96 GiB GPU allocation and matched the installed ROCm llama.cpp runtime support. Only low-precision third-party GGUFs had plausible memory fit, and the installed llama.cpp build predates the quantizer-required build.",
+  "official_sources": {
+    "model_card": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next",
+    "github": "https://github.com/QwenLM/Qwen3.8-Flash-Next",
+    "vllm_recipe": "https://recipes.vllm.ai/Qwen/Qwen3.8-Flash-Next",
+    "license": "https://huggingface.co/Qwen/Qwen3.8-Flash-Next/raw/main/LICENSE"
+  },
+  "official_model": {
+    "repo": "Qwen/Qwen3.8-Flash-Next",
+    "sha": "de4b8e4d43b917e7706784d8bb445c9af86a3540",
+    "license": "qwen-community-1.0",
+    "task": "image-text-to-text",
+    "architecture": "Qwen4ExpForConditionalGeneration",
+    "native_context_tokens": 262144,
+    "main_parameters": "125B",
+    "active_parameters_per_token": "6B",
+    "ngram_embedding_parameters": "51B",
+    "mtp_parameters": "4B",
+    "language_model_layers": 48,
+    "experts": 512,
+    "activated_experts": "10 routed plus 1 shared",
+    "official_bf16_safetensors_bytes": 360000192888,
+    "official_bf16_safetensors_gib": 335.28
+  },
+  "official_fp8": {
+    "repo": "Qwen/Qwen3.8-Flash-Next-FP8",
+    "sha": "236dfdf285828023ca3bcd3f37366c58a3469b13",
+    "safetensors_bytes": 185523317458,
+    "safetensors_gib": 172.78
+  },
+  "trusted_gguf_candidates_checked": [
+    {
+      "repo": "bartowski/Qwen3.8-Flash-Next-GGUF",
+      "sha": "928589fdb66c6ff07f22ac561e3fbce76553548f",
+      "quantizer_llamacpp_build": "b10665",
+      "largest_plausibly_fit_candidate": "Qwen3.8-Flash-Next-IQ2_M",
+      "largest_plausibly_fit_bytes": 80369487552,
+      "largest_plausibly_fit_gib": 74.85,
+      "smallest_q4_class_bytes": 97681835680,
+      "smallest_q4_class_gib": 90.97,
+      "recommended_q4_k_m_bytes": 119599030080,
+      "recommended_q4_k_m_gib": 111.39
+    },
+    {
+      "repo": "unsloth/Qwen3.8-Flash-Next-GGUF",
+      "sha": "38bb39ee97821de2c9009abb7e93950eec396e66",
+      "smallest_plausibly_fit_candidate": "UD-Q2_K_XL",
+      "smallest_plausibly_fit_bytes": 78869128864,
+      "smallest_plausibly_fit_gib": 73.45,
+      "smallest_q4_class_candidate": "UD-IQ4_XS",
+      "smallest_q4_class_bytes": 93682584224,
+      "smallest_q4_class_gib": 87.25,
+      "mtp_bundle_bytes": 24616077888,
+      "mtp_bundle_gib": 22.93
+    }
+  ],
+  "live_host_inventory": {
+    "os": "Fedora Linux 43 Workstation Edition",
+    "kernel": "7.1.9-100.fc43.x86_64",
+    "gpu": "AMD Radeon 8060S / gfx1151",
+    "vram_total_bytes": 103079215104,
+    "vram_total_gib": 96.0,
+    "linux_memory_total": "30 GiB",
+    "linux_memory_available_at_inventory": "18 GiB",
+    "disk_available": "1.3T",
+    "ollama_version": "0.21.2",
+    "hermes_version": "0.21.0",
+    "llama_cpp_runtime": "0.1.2-dev build 10540 commit 07822bddf",
+    "active_default_model": "qwen3.8-27b-uncensored-q6_k",
+    "active_default_service": "llama-qwen38-uncensored-q6k.service",
+    "active_default_endpoint": "http://127.0.0.1:11446/v1",
+    "current_default_health": "ok",
+    "inactive_rollback_services": [
+      "llama-qwen38-uncensored-q4km.service",
+      "llama-qwen38-uncensored-bf16.service"
+    ],
+    "litellm_models_include": [
+      "hermes-qwen3-coder:30b-64k",
+      "hermes-qwen3-coder:30b-128k",
+      "hermes-qwen3-coder:30b-256k",
+      "deepseek-v4-flash",
+      "deepseek-v4-pro",
+      "qwen3.8-27b-obliterated-q6_k",
+      "qwen3.8-27b-uncensored-bf16",
+      "qwen3.8-27b-uncensored-q4_k_m",
+      "qwen3.8-27b-uncensored-q6_k"
+    ],
+    "non_secret_inventory_snapshot": "/tmp/qwen38-flashnext-inventory-20260902T212033Z"
+  },
+  "memory_estimate": {
+    "baseline_reference": "Existing Qwen3.8 27B Q6_K file is 22430999968 bytes and loads as 27386691584 bytes with 131072 context, implying about 4955691616 bytes of non-weight overhead on this host.",
+    "full_attention_kv_estimate_131k_q8_bytes": 1610612736,
+    "minimum_extra_over_file_bytes": 6566304352,
+    "bartowski_iq2_m_estimated_loaded_bytes": 86935791904,
+    "bartowski_iq3_xs_estimated_loaded_bytes": 98511794464,
+    "bartowski_iq4_xs_estimated_loaded_bytes": 104248140032,
+    "bartowski_q4_k_m_estimated_loaded_bytes": 126165334432,
+    "note": "Estimates exclude MTP and multimodal projector unless explicitly included. MTP from Unsloth adds about 24.62 GB decimal by itself."
+  },
+  "final_state": {
+    "download_started": false,
+    "configuration_changed": false,
+    "default_model_restored_or_preserved": "preserved",
+    "q6_health_verified": true
+  }
+}

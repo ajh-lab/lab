@@ -30,6 +30,13 @@ coding behavior rather than treating model labels as sufficient worker metrics.
 The intermediate-precision promotion decision is recorded in
 `results/2026-09-01-q6-python-telemetry-eval.md`.
 
+Qwen3.8-Flash-Next preflight is recorded in
+`results/2026-09-02-flash-next-preflight.md`. It stopped before any large
+download because official FP8/BF16 checkpoints and quality-preserving GGUFs do
+not fit the current 96 GiB GPU allocation, while plausible-fit third-party
+GGUFs are low precision and require a newer llama.cpp runtime than the active
+ROCm toolbox provides.
+
 ## Host Baseline
 
 | Item | Verified state |
@@ -174,6 +181,7 @@ Record at minimum:
 | E006 | One-boot `amd_iommu=off` test | Complete, rejected | No measurable decode or cold-context benefit |
 | E007 | Dynamic GTT/TTM memory layout | Deferred | Capacity experiment requiring BIOS/kernel change and reboot |
 | E008 | Q6_K implementation quality | Complete, promoted | Better blind score with acceptable latency and VRAM cost |
+| E009 | Qwen3.8-Flash-Next preflight | Blocked before download | Needs side-by-side llama.cpp >= b10665 and owner acceptance of low-precision text-only test |
 
 Do not combine E003, E004, or E005. Establish a result for each independent
 variable before creating a combined candidate.
@@ -244,3 +252,11 @@ seconds after feedback. Keep it as a candidate for low-risk, heavily tested
 work such as documentation, scaffolding, focused UI edits, and mechanical test
 creation. Qwen3.8 Q6 is now the preferred local implementation worker for
 general DroneOps issues; Q4 remains the rollback and faster-throughput option.
+
+Qwen3.8-Flash-Next was preflighted on 2026-09-02 and not downloaded. The
+official BF16 and FP8 checkpoints are too large for the current memory split,
+Q4-class GGUFs exceed the GPU budget after runtime overhead, and the active
+ROCm llama.cpp build `10540` predates the GGUF publisher's required `b10665`
+support for the new architecture. Revisit only after preparing a side-by-side
+newer ROCm llama.cpp runtime and accepting that the first local test would need
+to be low-precision, text-only, and non-default.
