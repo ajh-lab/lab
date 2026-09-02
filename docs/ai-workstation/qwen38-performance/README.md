@@ -21,6 +21,11 @@ Keep experiments controlled:
 Raw benchmark records are under `results/raw/`. The interpreted comparison and
 experiment log are in `results/2026-09-01-baseline-and-no-mmap.md`.
 
+The first implementation-quality evaluation is recorded in
+`results/2026-09-01-q4-python-telemetry-eval.md`. It tests whether throughput
+results translate into useful coding behavior rather than treating tokens per
+second as the only worker metric.
+
 ## Host Baseline
 
 | Item | Verified state |
@@ -190,3 +195,11 @@ variance and three cold 10,298-token context runs averaged 32.84 seconds versus
 the 32.87-second control. The 0.03-second difference is not meaningful. The
 flag was removed from the saved boot entry before the restoration reboot, so
 normal IOMMU behavior remains the accepted configuration.
+
+The standalone Python telemetry evaluation increased confidence that Q4_K_M is
+useful for scoped implementation work: it passed all 13 initial hidden tests on
+its first attempt. Additional standards-focused review found five RFC3339 and
+mapping-contract cases; after one feedback cycle it passed three of those five
+while retaining all original behavior. Keep Q4 as the primary local candidate,
+but require tests and review for exact protocol, security, persistence, and
+safety contracts.
