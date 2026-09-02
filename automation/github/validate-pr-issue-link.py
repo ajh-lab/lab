@@ -9,7 +9,6 @@ import re
 import sys
 from dataclasses import dataclass
 
-
 SECTION_HEADING = re.compile(r"^##[ \t]+Owning Issue[ \t]*$", re.IGNORECASE | re.MULTILINE)
 NEXT_SECTION = re.compile(r"^##[ \t]+", re.MULTILINE)
 HTML_COMMENT = re.compile(r"<!--[\s\S]*?-->")
