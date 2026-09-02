@@ -1,7 +1,7 @@
 # Python Telemetry Evaluation Artifacts
 
-These artifacts reproduce the 2026-09-01 Q4_K_M and BF16 implementation
-comparison.
+These artifacts reproduce the 2026-09-01 Q4_K_M, Q6_K, BF16, and
+Qwen3-Coder implementation comparison.
 
 ## Inputs And Harness
 
@@ -20,6 +20,7 @@ artifact folder.
 - `q4-candidate.py` and `q4-candidate-repaired.py`
 - `bf16-candidate.py` and `bf16-candidate-repaired.py`
 - `qwen3coder-candidate.py` and `qwen3coder-candidate-repaired.py`
+- `q6-candidate.py` and `q6-candidate-repaired.py`
 - matching `*-raw-response.json` API records
 
 Raw response files contain generated content, model identifiers, usage counts,

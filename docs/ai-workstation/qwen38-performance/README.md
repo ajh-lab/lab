@@ -27,6 +27,8 @@ Implementation-quality evaluations are recorded in
 comparison in `results/2026-09-01-qwen3-coder-python-telemetry-eval.md`. They
 test whether throughput, precision, and specialization translate into useful
 coding behavior rather than treating model labels as sufficient worker metrics.
+The intermediate-precision promotion decision is recorded in
+`results/2026-09-01-q6-python-telemetry-eval.md`.
 
 ## Host Baseline
 
@@ -50,7 +52,7 @@ coding behavior rather than treating model labels as sufficient worker metrics.
 
 ## Runtime Baseline
 
-Both tested services use toolbox `llama-rocm-7.14-q4`, image
+The Q4, Q6, and BF16 comparison services use toolbox `llama-rocm-7.14-q4`, image
 `docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-7.14`, and llama.cpp build
 `10540` at commit `07822bddf`.
 
@@ -62,7 +64,20 @@ Common flags after experiment E002:
 --temp 0 --repeat-penalty 1.15
 ```
 
-### Q4 Worker Candidate
+### Q6 Default Worker
+
+| Item | Value |
+| --- | --- |
+| Model | `Qwen3.8-27B-Uncensored-Q6_K.gguf` |
+| Model path | `/mnt/ai/models/qwen38-uncensored-q6k/` |
+| Exact file size | 22,430,999,968 bytes |
+| Service | `llama-qwen38-uncensored-q6k.service` |
+| Endpoint | `http://127.0.0.1:11446/v1` |
+| LiteLLM alias | `qwen3.8-27b-uncensored-q6_k` |
+| Loaded GPU memory | 27,386,691,584 bytes with 131k context |
+| Current state | Enabled, active, healthy, and selected by the Hermes default profile |
+
+### Q4 Rollback Candidate
 
 | Item | Value |
 | --- | --- |
@@ -73,7 +88,7 @@ Common flags after experiment E002:
 | Endpoint | `http://127.0.0.1:11440/v1` |
 | LiteLLM alias | `qwen3.8-27b-uncensored-q4_k_m` |
 | Loaded GPU memory | About 22.2 GB decimal with 131k context |
-| Current state after E005 | Active and healthy; only Qwen listener on the host |
+| Current state | Installed, disabled, and inactive after the Q6 promotion |
 
 ### BF16 Comparison Candidate
 
@@ -157,6 +172,7 @@ Record at minimum:
 | E005 | Batch/microbatch matrix | Complete, neutral | Cold-start repeats showed no material improvement |
 | E006 | One-boot `amd_iommu=off` test | Complete, rejected | No measurable decode or cold-context benefit |
 | E007 | Dynamic GTT/TTM memory layout | Deferred | Capacity experiment requiring BIOS/kernel change and reboot |
+| E008 | Q6_K implementation quality | Complete, promoted | Better blind score with acceptable latency and VRAM cost |
 
 Do not combine E003, E004, or E005. Establish a result for each independent
 variable before creating a combined candidate.
@@ -167,11 +183,13 @@ tests and invalidates cold prompt-processing comparisons.
 
 ## Current Decision
 
-Q4_K_M is the preferred worker candidate. In E001 it produced correct simple
-coding answers at roughly 11.5-11.9 output tokens per second, compared with
-roughly 4.1 for BF16. BF16 did not show a quality advantage in the small test
-set. A real issue execution still requires a restricted worker profile,
-isolated worktree, mandatory CI, no automatic merge, and stronger-model review.
+Q6_K is the preferred quality-first local Qwen3.8 worker. On the blind Python
+telemetry task it scored 14/18 initially and 16/18 after feedback, compared
+with Q4's 13/18 and 16/18. It took 11.9% longer across both generations and
+used about 5.2 GB more VRAM, but improved first-pass correctness and produced a
+shorter repaired implementation. Q4 remains installed as the faster rollback.
+A real issue execution still requires a restricted worker profile, isolated
+worktree, mandatory CI, no automatic merge, and stronger-model review.
 
 ROCm 10 build `10751` was also tested against the same Q4 file and flags. Its
 decode and context results were effectively equal to ROCm 7.14 build `10540`,
@@ -213,14 +231,15 @@ compared with Q4's 212.608 and 296.842 seconds. Retain BF16 for controlled
 experiments only; this test supplies no evidence for promoting it as the
 default worker.
 
-The source model family also publishes intermediate `Q5_K_M`, `Q6_K`, and
-`Q8_0` GGUFs. `Q6_K` is the next recommended precision experiment because it
-sits materially above Q4 while remaining much smaller than BF16. It must pass
-the same blind evaluation before any routing change.
+The source model family also publishes `Q5_K_M` and `Q8_0` GGUFs. Q6_K passed
+the same blind evaluation and was promoted on 2026-09-01. Because its observed
+advantage is small and comes from one deterministic task, revisit the decision
+after several real GitHub issues rather than assuming quantization alone
+guarantees better results.
 
 The resident Qwen3-Coder 30B-A3B Q8_0 model was much faster but less correct on
 the same task. It scored 10/18 in 58.123 seconds initially and 12/18 in 53.121
 seconds after feedback. Keep it as a candidate for low-risk, heavily tested
 work such as documentation, scaffolding, focused UI edits, and mechanical test
-creation. Qwen3.8 Q4 remains the preferred local implementation worker for
-general DroneOps issues.
+creation. Qwen3.8 Q6 is now the preferred local implementation worker for
+general DroneOps issues; Q4 remains the rollback and faster-throughput option.
