@@ -19,6 +19,7 @@ artifact folder.
 
 - `q4-candidate.py` and `q4-candidate-repaired.py`
 - `bf16-candidate.py` and `bf16-candidate-repaired.py`
+- `qwen3coder-candidate.py` and `qwen3coder-candidate-repaired.py`
 - matching `*-raw-response.json` API records
 
 Raw response files contain generated content, model identifiers, usage counts,

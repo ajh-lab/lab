@@ -23,9 +23,10 @@ experiment log are in `results/2026-09-01-baseline-and-no-mmap.md`.
 
 Implementation-quality evaluations are recorded in
 `results/2026-09-01-q4-python-telemetry-eval.md` and
-`results/2026-09-01-bf16-python-telemetry-eval.md`. They test whether throughput
-and precision results translate into useful coding behavior rather than
-treating tokens per second or weight precision as sufficient worker metrics.
+`results/2026-09-01-bf16-python-telemetry-eval.md`, with the coding-specialized
+comparison in `results/2026-09-01-qwen3-coder-python-telemetry-eval.md`. They
+test whether throughput, precision, and specialization translate into useful
+coding behavior rather than treating model labels as sufficient worker metrics.
 
 ## Host Baseline
 
@@ -216,3 +217,10 @@ The source model family also publishes intermediate `Q5_K_M`, `Q6_K`, and
 `Q8_0` GGUFs. `Q6_K` is the next recommended precision experiment because it
 sits materially above Q4 while remaining much smaller than BF16. It must pass
 the same blind evaluation before any routing change.
+
+The resident Qwen3-Coder 30B-A3B Q8_0 model was much faster but less correct on
+the same task. It scored 10/18 in 58.123 seconds initially and 12/18 in 53.121
+seconds after feedback. Keep it as a candidate for low-risk, heavily tested
+work such as documentation, scaffolding, focused UI edits, and mechanical test
+creation. Qwen3.8 Q4 remains the preferred local implementation worker for
+general DroneOps issues.
