@@ -21,10 +21,11 @@ Keep experiments controlled:
 Raw benchmark records are under `results/raw/`. The interpreted comparison and
 experiment log are in `results/2026-09-01-baseline-and-no-mmap.md`.
 
-The first implementation-quality evaluation is recorded in
-`results/2026-09-01-q4-python-telemetry-eval.md`. It tests whether throughput
-results translate into useful coding behavior rather than treating tokens per
-second as the only worker metric.
+Implementation-quality evaluations are recorded in
+`results/2026-09-01-q4-python-telemetry-eval.md` and
+`results/2026-09-01-bf16-python-telemetry-eval.md`. They test whether throughput
+and precision results translate into useful coding behavior rather than
+treating tokens per second or weight precision as sufficient worker metrics.
 
 ## Host Baseline
 
@@ -203,3 +204,15 @@ mapping-contract cases; after one feedback cycle it passed three of those five
 while retaining all original behavior. Keep Q4 as the primary local candidate,
 but require tests and review for exact protocol, security, persistence, and
 safety contracts.
+
+BF16 performed worse on the identical blind task. It scored 10/18 initially
+and 14/18 after the same two-item feedback cycle, compared with Q4's 13/18 and
+16/18. BF16 also took 578.806 and 605.428 seconds for the two generations,
+compared with Q4's 212.608 and 296.842 seconds. Retain BF16 for controlled
+experiments only; this test supplies no evidence for promoting it as the
+default worker.
+
+The source model family also publishes intermediate `Q5_K_M`, `Q6_K`, and
+`Q8_0` GGUFs. `Q6_K` is the next recommended precision experiment because it
+sits materially above Q4 while remaining much smaller than BF16. It must pass
+the same blind evaluation before any routing change.
