@@ -21,7 +21,9 @@ Decision: prefer Q4_K_M for the first restricted worker trial. It generated
 approximately 2.8 times faster and used about 35 GB less GPU memory without a
 quality difference in this limited test set.
 
-The full `qwen38bf16tools` Hermes smoke test passed with `BF16_PROFILE_OK`.
+The full profile, then named `qwen38bf16tools` and now named
+`qwen38-27b-uncensored-bf16-full-128k`, passed the Hermes smoke test with
+`BF16_PROFILE_OK`.
 Hermes supplied an approximately 17.5k-token tool-enabled prompt, which took
 about 77 seconds to process before the short response. This demonstrates that
 agent prompt overhead is operationally significant even when the model fits.
@@ -50,4 +52,3 @@ slowdowns. The observed differences are small enough to treat as run variance.
 - Q4 idle GPU memory: approximately 22.2 GB decimal
 - observed post-test GPU state: about 3% busy and 48 C
 - Hermes profile configuration unchanged
-

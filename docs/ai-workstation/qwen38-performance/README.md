@@ -74,6 +74,7 @@ Common flags after experiment E002:
 | Service | `llama-qwen38-uncensored-q6k.service` |
 | Endpoint | `http://127.0.0.1:11446/v1` |
 | LiteLLM alias | `qwen3.8-27b-uncensored-q6_k` |
+| Hermes web profile | `qwen38-27b-uncensored-q6_k-web-terminal-128k` |
 | Loaded GPU memory | 27,386,691,584 bytes with 131k context |
 | Current state | Enabled, active, healthy, and selected by the Hermes default profile |
 
@@ -100,7 +101,7 @@ Common flags after experiment E002:
 | Service | `llama-qwen38-uncensored-bf16.service` |
 | Endpoint | `http://127.0.0.1:11439/v1` |
 | LiteLLM alias | `qwen3.8-27b-uncensored-bf16` |
-| Hermes profile | `qwen38bf16tools` |
+| Hermes full profile | `qwen38-27b-uncensored-bf16-full-128k` |
 | Loaded GPU memory | About 57.7 GB decimal with 131k context |
 | Current state after E002 | Configured and stopped |
 
