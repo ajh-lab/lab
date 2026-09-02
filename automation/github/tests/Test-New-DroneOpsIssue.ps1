@@ -24,11 +24,18 @@ Dry run.
 '@ | Set-Content -NoNewline -LiteralPath $bodyPath
 
 try {
-  $plan = & $helper -Title 'Representative dry-run' -BodyPath $bodyPath -ExecutionTier Balanced -ReasoningEffort Medium -RepositoryPath $repoRoot -SkipGitHubLookup -WhatIf
-  $json = $plan | ConvertFrom-Json
-  if ($json.repository -ne 'ajh-lab/lab') { throw 'Repository derivation failed.' }
-  if ($json.dispatches_worker) { throw 'Dry run must not dispatch a worker.' }
-  if ($json.writes.Count -ne 3) { throw 'Dry run plan is incomplete.' }
+  $cases = @(
+    @{ path = $repoRoot; expected = 'ajh-lab/lab' },
+    @{ path = 'C:\Users\adamj\SourceControl\lab\repositories\droneops-platform'; expected = 'ajh-lab/droneops-platform' },
+    @{ path = 'C:\Users\adamj\SourceControl\lab\repositories\droneops-gateway'; expected = 'ajh-lab/droneops-gateway' }
+  )
+  foreach ($case in $cases) {
+    $plan = & $helper -Title 'Representative dry-run' -BodyPath $bodyPath -ExecutionTier Balanced -ReasoningEffort Medium -RepositoryPath $case.path -SkipGitHubLookup -WhatIf
+    $json = $plan | ConvertFrom-Json
+    if ($json.repository -ne $case.expected) { throw "Repository derivation failed for $($case.expected)." }
+    if ($json.dispatches_worker) { throw 'Dry run must not dispatch a worker.' }
+    if ($json.writes.Count -ne 3) { throw 'Dry run plan is incomplete.' }
+  }
   Write-Host 'PASS: New-DroneOpsIssue WhatIf plan'
 } finally {
   Remove-Item -LiteralPath $bodyPath -Force -ErrorAction SilentlyContinue
