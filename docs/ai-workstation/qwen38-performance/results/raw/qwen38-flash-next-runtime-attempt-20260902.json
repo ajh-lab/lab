@@ -1,0 +1,115 @@
+{
+  "timestamp": "2026-09-02T22:45:00Z",
+  "host": "helios@192.168.1.123",
+  "decision": "not_promoted_load_failed",
+  "reason": "The selected AtomicChat AD-4.27bpw-Q4_K_M-M64 split GGUF was downloaded and verified, but repeated isolated load attempts were killed by host RAM OOM before the server became healthy.",
+  "runtime": {
+    "toolbox_repo": "https://github.com/kyuz0/amd-strix-halo-toolboxes",
+    "toolbox_repo_sha": "77599c6166318ecf6bcef1df518cbbe60dd63186",
+    "toolbox_repo_summary": "77599c6 docs: recommend AI Toolbox Cockpit",
+    "image": "docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0-qwen-3.8-flash-next",
+    "image_id": "2a0d32e0017a80ddd9ec27e17147c94d55c4cb944d8bdbe48ea37696ec7db203",
+    "image_digest": "docker.io/kyuz0/amd-strix-halo-toolboxes@sha256:d2067225019f61d39c6531322fff8469d67a9a4457c83ed50945b8dffdd818be",
+    "llama_cpp": "0.3.0-dev build 10672 commit 590ac45bc",
+    "toolbox": "llama-rocm-10.0-qwen38-flash-next",
+    "device_check": "ROCm0: AMD Radeon 8060S Graphics (98304 MiB, 72728 MiB free while Q6 was resident)"
+  },
+  "candidate": {
+    "repo": "AtomicChat/Qwen3.8-Flash-Next-GGUF",
+    "repo_sha": "142262902a46f7daed19c79d0771534c8106ad59",
+    "group": "Qwen3.8-Flash-Next-AD-4.27bpw-Q4_K_M-M64",
+    "publisher_claim": {
+      "in_memory": "54.5 GB",
+      "on_ssd": "38.4 GB",
+      "total": "92.9 GB",
+      "mean_kld": 0.0842,
+      "same_top_1": "89.49%",
+      "ppl_ratio": 1.026
+    },
+    "download_path": "/mnt/ai/models/qwen38-flash-next-ad-4.27bpw-q4km-m64",
+    "file_count": 33,
+    "bytes": 94525394976,
+    "manifest": "/mnt/ai/models/qwen38-flash-next-ad-4.27bpw-q4km-m64/MANIFEST.sha256",
+    "first_files": [
+      {
+        "name": "Qwen3.8-Flash-Next-AD-4.27bpw-Q4_K_M-M64-00001-of-00033.gguf",
+        "bytes": 693380288,
+        "sha256": "d74620aad612239711e0947f58d2614fa8f47335fb01f23e47b24a3315c3e730"
+      },
+      {
+        "name": "Qwen3.8-Flash-Next-AD-4.27bpw-Q4_K_M-M64-00002-of-00033.gguf",
+        "bytes": 38400184512,
+        "sha256": "77edf6523f6abbd7ba6a78aa1ef4a658dfaca544f9c5f46cf0efd0b0ff00bef0"
+      }
+    ]
+  },
+  "metadata_validation": {
+    "first_shard_sha256_match": true,
+    "llama_gguf_parse": "ok",
+    "observed_keys": [
+      "general.architecture",
+      "qwen4exp.block_count",
+      "qwen4exp.context_length",
+      "qwen4exp.ple.layers",
+      "qwen4exp.ple.ngram_size",
+      "split.count"
+    ]
+  },
+  "configuration": {
+    "backup_dir": "/home/helios/.hermes/backups/qwen38-flash-next-20260902T223653Z",
+    "cleanup_backup_dir": "/home/helios/.hermes/backups/qwen38-flash-next-cleanup-20260902T224424Z",
+    "qwen3_coder_keep_alive": 0,
+    "qwen3_coder_unload_test": {
+      "model": "hermes-qwen3-coder:30b-128k",
+      "response": "UNLOAD_OK",
+      "ollama_ps_after_10s": "empty"
+    },
+    "flash_litellm_route_final_state": "removed",
+    "flash_systemd_unit_final_state": "removed after failed load"
+  },
+  "load_attempt": {
+    "clean_gpu_before_flash": {
+      "kfd_processes": "none",
+      "vram_total_bytes": 103079215104,
+      "vram_used_bytes": 746475520
+    },
+    "service": "llama-qwen38-flash-next-ad-q4km-m64.service",
+    "endpoint": "http://127.0.0.1:11447/v1",
+    "flags": "--host 127.0.0.1 --port 11447 --alias qwen3.8-flash-next-ad-q4_k_m_m64 -m /mnt/ai/models/qwen38-flash-next-ad-4.27bpw-q4km-m64/Qwen3.8-Flash-Next-AD-4.27bpw-Q4_K_M-M64-00001-of-00033.gguf -ngl 99 -c 131072 -b 2048 -ub 2048 -fa on -ctk f16 -ctv f16 --parallel 1 --jinja -lm dio --temp 0 --repeat-penalty 1.15",
+    "result": "failed_before_health",
+    "systemd_status": "exit-code status=137",
+    "restart_count_observed": 5,
+    "max_observed_process_vram_bytes": 55683317760,
+    "kernel_evidence": {
+      "oom_kill": true,
+      "example_pid": 460484,
+      "example_total_vm_kb": 135840216,
+      "example_anon_rss_kb": 22931896
+    },
+    "direct_smoke": "not_run",
+    "litellm_smoke": "not_run",
+    "benchmark_suite": "not_run"
+  },
+  "final_state": {
+    "q6_service": "active",
+    "q6_health": "ok",
+    "flash_service": "inactive",
+    "ollama_ps": "empty",
+    "vram_used_bytes": 27447091200,
+    "resident_model_processes": [
+      "llama-qwen38-uncensored-q6k.service"
+    ],
+    "litellm_models": [
+      "deepseek-v4-flash",
+      "deepseek-v4-pro",
+      "hermes-qwen3-coder:30b-128k",
+      "hermes-qwen3-coder:30b-256k",
+      "hermes-qwen3-coder:30b-64k",
+      "qwen3.8-27b-obliterated-q6_k",
+      "qwen3.8-27b-uncensored-bf16",
+      "qwen3.8-27b-uncensored-q4_k_m",
+      "qwen3.8-27b-uncensored-q6_k"
+    ],
+    "dashboard_picker_api": "not_checked_unauthenticated_requests_returned_401"
+  }
+}

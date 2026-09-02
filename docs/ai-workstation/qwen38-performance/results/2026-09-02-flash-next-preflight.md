@@ -13,6 +13,13 @@ not met: the official checkpoints are too large for the current host, the
 installed ROCm llama.cpp build predates the required GGUF build, and the only
 GGUF files with plausible memory fit are low-precision third-party variants.
 
+Supersession note: later on 2026-09-02, upstream published a dedicated Strix
+Halo `qwen4exp` runtime and a split AtomicChat Q4_M64 GGUF was downloaded and
+attempted. That measured attempt is recorded in
+`2026-09-02-flash-next-runtime-attempt.md`; it also rejected Flash-Next for the
+current helios memory split because isolated loads were killed by host RAM OOM
+before health.
+
 ## Official Model Identity
 
 | Item | Value |
