@@ -89,11 +89,14 @@ ss -ltnp | grep -E ':4000|:4001|:4004'
 Current intended split:
 
 - default profile: local `hermes-qwen3-coder:30b-256k` through LiteLLM/Ollama
-- `qwen3-coder-128k-worker`: lean Kanban worker profile for normal coding cards
-- `qwen3-coder-128k-fast-chat`: preferred direct browser chat profile for normal Q&A
-- `qwen3-coder-256k-fast-chat`: browser chat profile only when large context is needed
+- `qwen3-coder-30b-a3b-q8_0-worker-128k`: lean Kanban worker profile for normal coding cards
+- `qwen3-coder-30b-a3b-q8_0-web-128k`: faster direct browser chat profile for normal Q&A
+- `qwen38-27b-uncensored-q6_k-web-terminal-128k`: Q6 browser chat profile with web and terminal access
 - `deepseek-v4-flash`: normal paid DeepSeek work through LiteLLM
 - `deepseek-v4-pro`: complex planning, review, difficult debugging, or failed-card recovery
+
+Model-specific profile names follow `<model>-<variant>-<role>-<context>`, with
+the context window last. Do not recreate `-fast-chat` profile names.
 
 Check profiles:
 

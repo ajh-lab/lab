@@ -23,6 +23,8 @@ repositories/*
 
 # Local tool caches
 .tools/
+__pycache__/
+*.py[cod]
 
 # Editor / OS
 .DS_Store
