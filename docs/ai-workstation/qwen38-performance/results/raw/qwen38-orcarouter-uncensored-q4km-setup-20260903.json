@@ -1,0 +1,112 @@
+{
+  "timestamp": "2026-09-03T17:06:00Z",
+  "host": "helios@192.168.1.123",
+  "decision": "configured_for_user_testing",
+  "selected_candidate": {
+    "repo": "chimingw/Qwen3.8-27B-Uncensored-OrcaRouter-GGUF",
+    "repo_url": "https://huggingface.co/chimingw/Qwen3.8-27B-Uncensored-OrcaRouter-GGUF",
+    "repo_sha": "58ebd123013160600229eda180b5b17f3fb7af9d",
+    "file": "Qwen3.8-27B-Uncensored-OrcaRouter-Q4_K_M.gguf",
+    "source_lineage": "orcarouter/Qwen3.8-27B-Uncensored-FP8 at pinned source revision 21411e351948ec029617fa3c9833adcb2ad25da9",
+    "bytes": 16810714496,
+    "sha256": "3445102e9cde5d562508642c100a2f5ac3368a5a3f748442811d7a95daee3bec",
+    "download_path": "/mnt/ai/models/qwen38-orcarouter-uncensored-q4km/Qwen3.8-27B-Uncensored-OrcaRouter-Q4_K_M.gguf"
+  },
+  "search_context": {
+    "orcarouter_gguf_repo": {
+      "repo": "orcarouter/Qwen3.8-27B-Uncensored-GGUF",
+      "gated": "auto",
+      "q4_k_m_bytes": 16810714496,
+      "q5_k_m_bytes": 19528784992,
+      "q6_k_bytes": 22430999968
+    },
+    "chimingw_repo": {
+      "gated": false,
+      "q4_k_m_bytes": 16810714496,
+      "q5_k_m_bytes": 19528784992,
+      "q6_k_bytes": 22430999968
+    }
+  },
+  "rollback_capture": {
+    "backup_dir": "/home/helios/.hermes/backups/qwen38-orcarouter-test-20260903T164613Z",
+    "captured": [
+      "root Hermes config",
+      "LiteLLM config",
+      "Q6/Q4/BF16 systemd units",
+      "LiteLLM model list",
+      "llama unit list",
+      "rocm-smi pids",
+      "ollama ps"
+    ],
+    "initial_state": {
+      "q6_service": "active",
+      "q4_service": "inactive",
+      "bf16_service": "inactive",
+      "q6_health": "ok",
+      "litellm_ollama_proxy": "active",
+      "litellm_lan_proxy": "active",
+      "litellm_metrics_proxy": "active",
+      "hermes_gateway": "active",
+      "hermes_dashboard": "active",
+      "ollama_ps": "empty",
+      "resident_model_process": "llama-qwen38-uncensored-q6k.service",
+      "resident_model_vram_bytes": 26650734592
+    }
+  },
+  "runtime": {
+    "service": "llama-qwen38-orcarouter-uncensored-q4km.service",
+    "endpoint": "http://127.0.0.1:11448/v1",
+    "alias": "qwen3.8-27b-uncensored-orcarouter-q4_k_m",
+    "toolbox": "llama-rocm-7.14-q4",
+    "flags": "--host 127.0.0.1 --port 11448 --alias qwen3.8-27b-uncensored-orcarouter-q4_k_m -m /mnt/ai/models/qwen38-orcarouter-uncensored-q4km/Qwen3.8-27B-Uncensored-OrcaRouter-Q4_K_M.gguf --no-mmap -ngl 99 -c 131072 -b 1024 -ub 256 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.15",
+    "q6_unloaded_before_test": true,
+    "pre_start_rocm_pids": "none",
+    "pre_start_ollama_ps": "empty",
+    "health_ready_after_seconds": 6
+  },
+  "configuration": {
+    "litellm_route": "qwen3.8-27b-uncensored-orcarouter-q4_k_m",
+    "litellm_route_count": 1,
+    "hermes_custom_model_list_count": 16,
+    "hermes_test_profile": "qwen38-27b-uncensored-orcarouter-q4_k_m-web-terminal-128k",
+    "profile_defaults_changed": false,
+    "backups": [
+      "/home/helios/.hermes/backups/qwen38-orcarouter-route-20260903T170403Z",
+      "/home/helios/.hermes/backups/qwen38-orcarouter-profile-20260903T170528Z"
+    ]
+  },
+  "smoke_tests": {
+    "direct_llama_cpp": {
+      "model": "qwen3.8-27b-uncensored-orcarouter-q4_k_m",
+      "content": "ORCAROUTER_OK",
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 6,
+        "prompt_tokens": 20,
+        "total_tokens": 26
+      }
+    },
+    "litellm": {
+      "model": "qwen3.8-27b-uncensored-orcarouter-q4_k_m",
+      "content": "ORCAROUTER_OK",
+      "finish_reason": "stop",
+      "usage": {
+        "completion_tokens": 6,
+        "prompt_tokens": 20,
+        "total_tokens": 26
+      }
+    }
+  },
+  "final_state": {
+    "orcarouter_service": "active",
+    "orcarouter_health": "ok",
+    "q6_service": "inactive",
+    "litellm_ollama_proxy": "active",
+    "hermes_gateway": "active",
+    "hermes_dashboard": "active",
+    "ollama_ps": "empty",
+    "resident_model_process": "llama-qwen38-orcarouter-uncensored-q4km.service",
+    "resident_model_vram_bytes": 21446123520,
+    "rollback_command": "systemctl --user stop llama-qwen38-orcarouter-uncensored-q4km.service && systemctl --user start llama-qwen38-uncensored-q6k.service && curl -fsS http://127.0.0.1:11446/health"
+  }
+}

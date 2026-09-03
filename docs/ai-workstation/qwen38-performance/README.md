@@ -30,6 +30,11 @@ coding behavior rather than treating model labels as sufficient worker metrics.
 The intermediate-precision promotion decision is recorded in
 `results/2026-09-01-q6-python-telemetry-eval.md`.
 
+The Qwen3.8 OrcaRouter uncensored Q4_K_M setup is recorded in
+`results/2026-09-03-orcarouter-uncensored-q4km-setup.md`. It is a non-default
+user test route and profile. Q6_K remains the configured default/rollback, but
+is intentionally stopped while the OrcaRouter test service is resident.
+
 Qwen3.8-Flash-Next preflight is recorded in
 `results/2026-09-02-flash-next-preflight.md`. The follow-up runtime attempt is
 recorded in `results/2026-09-02-flash-next-runtime-attempt.md` and supersedes
