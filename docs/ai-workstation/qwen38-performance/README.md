@@ -1,6 +1,6 @@
 # Qwen3.8 27B Performance Tuning
 
-Last verified: 2026-09-01 (America/Chicago)
+Last verified: 2026-09-03 (America/Chicago)
 
 ## Purpose
 
@@ -34,6 +34,8 @@ The Qwen3.8 OrcaRouter uncensored Q4_K_M setup is recorded in
 `results/2026-09-03-orcarouter-uncensored-q4km-setup.md`. It is a non-default
 user test route and profile. Q6_K remains the configured default/rollback, but
 is intentionally stopped while the OrcaRouter test service is resident.
+Its controlled coding evaluation is recorded in
+`results/2026-09-03-orcarouter-q4km-python-telemetry-eval.md`.
 
 Qwen3.8-Flash-Next preflight is recorded in
 `results/2026-09-02-flash-next-preflight.md`. The follow-up runtime attempt is
@@ -188,6 +190,7 @@ Record at minimum:
 | E007 | Dynamic GTT/TTM memory layout | Deferred | Capacity experiment requiring BIOS/kernel change and reboot |
 | E008 | Q6_K implementation quality | Complete, promoted | Better blind score with acceptable latency and VRAM cost |
 | E009 | Qwen3.8-Flash-Next runtime attempt | Complete, rejected on current memory split | Do not retry without owner-approved Linux-visible RAM/swap change or a materially smaller higher-confidence candidate |
+| E010 | OrcaRouter uncensored Q4_K_M implementation quality | Complete, test route retained | Keep available for hands-on testing; do not replace Q6 default without real issue evidence |
 
 Do not combine E003, E004, or E005. Establish a result for each independent
 variable before creating a combined candidate.
@@ -205,6 +208,12 @@ used about 5.2 GB more VRAM, but improved first-pass correctness and produced a
 shorter repaired implementation. Q4 remains installed as the faster rollback.
 A real issue execution still requires a restricted worker profile, isolated
 worktree, mandatory CI, no automatic merge, and stronger-model review.
+
+The OrcaRouter uncensored Q4_K_M test model scored 14/18 initially and 17/18
+after the same feedback cycle, with 405.444 seconds across both generations.
+It is the strongest result so far on this one deterministic coding task and is
+faster than Q6_K for the same test. Keep it as a non-default test profile until
+real issue execution proves whether the result generalizes.
 
 ROCm 10 build `10751` was also tested against the same Q4 file and flags. Its
 decode and context results were effectively equal to ROCm 7.14 build `10540`,
