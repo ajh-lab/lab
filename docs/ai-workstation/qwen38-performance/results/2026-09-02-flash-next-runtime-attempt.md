@@ -79,8 +79,9 @@ empty 10 seconds later.
 
 A temporary non-default LiteLLM route and user service were created for
 `qwen3.8-flash-next-ad-q4_k_m_m64`, then removed after the load failure so the
-Hermes picker does not advertise a broken model. The downloaded model files and
-new toolbox remain for evidence or a future owner-directed retest.
+Hermes picker does not advertise a broken model. During owner-requested cleanup
+after the result was reviewed, the downloaded model files, test toolbox, pulled
+image, and Flash attempt backup folders were also removed.
 
 ## Load Attempt
 
@@ -133,10 +134,26 @@ only resident/default model.
 | Final VRAM used | 27,447,091,200 bytes |
 | LiteLLM model list | existing aliases only; no Flash route |
 
-The qwen3-coder `keep_alive: 0` change remains in place and was verified. All
-existing Hermes profiles and active LiteLLM model routes were preserved. The
-dashboard picker API was not checked because unauthenticated requests returned
-401, and the session token was not printed or used.
+The qwen3-coder temporary `keep_alive: 0` change was verified during the test,
+then restored to the prior `keep_alive: 30m` values during owner-requested
+cleanup. All existing Hermes profiles and active LiteLLM model routes were
+preserved. The dashboard picker API was not checked because unauthenticated
+requests returned 401, and the session token was not printed or used.
+
+## Cleanup
+
+Owner-requested cleanup on 2026-09-02 removed:
+
+- `/mnt/ai/models/qwen38-flash-next-ad-4.27bpw-q4km-m64`
+- `llama-qwen38-flash-next-ad-q4km-m64.service`
+- LiteLLM route `qwen3.8-flash-next-ad-q4_k_m_m64`
+- toolbox `llama-rocm-10.0-qwen38-flash-next`
+- image `docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0-qwen-3.8-flash-next`
+- Flash attempt backup folders under `/home/helios/.hermes/backups`
+
+Final cleanup verification showed Q6_K active and healthy, LiteLLM and Hermes
+services active, no Flash route, no Flash model directory, no Flash unit, no
+Flash toolbox/image, and empty `ollama ps`.
 
 ## Decision
 

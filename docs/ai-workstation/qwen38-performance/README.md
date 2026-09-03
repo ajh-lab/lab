@@ -264,5 +264,7 @@ load never reached health: repeated isolated attempts were killed by host RAM
 OOM at about 22-23 GB anonymous RSS and about 55.7 GB process VRAM. Direct
 smoke, LiteLLM smoke, tool-call behavior, and the Python telemetry benchmark
 were therefore not run. Flash was removed from active LiteLLM routing, Q6_K was
-restored healthy as the only resident/default model, and the qwen3-coder
-aliases now use `keep_alive: 0` to unload after requests.
+restored healthy as the only resident/default model, and owner-requested cleanup
+removed the downloaded model directory, test toolbox, pulled image, and Flash
+attempt backup folders. The qwen3-coder aliases were restored to their prior
+`keep_alive: 30m` values after the temporary unload test.

@@ -111,5 +111,40 @@
       "qwen3.8-27b-uncensored-q6_k"
     ],
     "dashboard_picker_api": "not_checked_unauthenticated_requests_returned_401"
+  },
+  "owner_requested_cleanup": {
+    "timestamp": "2026-09-03T00:05:51Z",
+    "removed": {
+      "download_path": "/mnt/ai/models/qwen38-flash-next-ad-4.27bpw-q4km-m64",
+      "flash_systemd_unit": "llama-qwen38-flash-next-ad-q4km-m64.service",
+      "flash_litellm_route": "qwen3.8-flash-next-ad-q4_k_m_m64",
+      "toolbox": "llama-rocm-10.0-qwen38-flash-next",
+      "image": "docker.io/kyuz0/amd-strix-halo-toolboxes:rocm-10.0-qwen-3.8-flash-next",
+      "backup_dirs": [
+        "/home/helios/.hermes/backups/qwen38-flash-next-20260902T223653Z",
+        "/home/helios/.hermes/backups/qwen38-flash-next-cleanup-20260902T224424Z"
+      ]
+    },
+    "restored": {
+      "qwen3_coder_keep_alive": "30m"
+    },
+    "verification": {
+      "q6_service": "active",
+      "q6_health": "ok",
+      "litellm_ollama_proxy": "active",
+      "hermes_gateway": "active",
+      "hermes_dashboard": "active",
+      "download_path": "missing",
+      "flash_systemd_unit": "missing",
+      "flash_litellm_route_count": 0,
+      "toolbox": "missing",
+      "image": "missing",
+      "ollama_ps": "empty",
+      "qwen3_coder_keep_alive": {
+        "hermes-qwen3-coder:30b-64k": "30m",
+        "hermes-qwen3-coder:30b-128k": "30m",
+        "hermes-qwen3-coder:30b-256k": "30m"
+      }
+    }
   }
 }
