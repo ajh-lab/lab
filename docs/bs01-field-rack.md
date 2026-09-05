@@ -99,6 +99,10 @@ are generated inside the cluster and retained only in Kubernetes Secrets
 replicated by embedded etcd. They are not OpenBAO runtime dependencies and must
 never enter Git, documentation, command output, or browser artifacts.
 
+The cert-manager deployment is pinned to `v1.21.1`, the supported release used
+for Kubernetes 1.36 compatibility and explicit disabled automatic renewal on
+the versioned root Certificate.
+
 The root is manually rotated; the intermediate and later 90-day console leaf
 have bounded renewal windows. The three server-local etcd snapshot sets are the
 current issuer backup coverage. This is rack-local recovery only: the

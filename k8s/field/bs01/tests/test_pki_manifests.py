@@ -15,11 +15,13 @@ FIELD_DOC = ROOT / "docs" / "bs01-field-rack.md"
 
 
 class Bs01PkiManifestTests(unittest.TestCase):
-    def test_cert_manager_application_is_pinned_ha_and_offline_cache_safe(self) -> None:
+    def test_cert_manager_application_is_pinned_to_renewal_capable_k8s_136_release(self) -> None:
         content = (ARGO_ROOT / "cert-manager-application.yaml").read_text(encoding="utf-8")
 
         self.assertIn("chart: cert-manager", content)
-        self.assertIn("targetRevision: v1.19.6", content)
+        # Certificate.spec.renewal.policy requires cert-manager 1.21, whose
+        # supported/tested matrix also includes the rack's Kubernetes 1.36.
+        self.assertIn("targetRevision: v1.21.1", content)
         self.assertIn("crds:\n          enabled: true", content)
         self.assertGreaterEqual(content.count("replicaCount: 3"), 3)
         self.assertGreaterEqual(content.count("pullPolicy: IfNotPresent"), 4)
