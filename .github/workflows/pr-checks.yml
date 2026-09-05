@@ -28,3 +28,13 @@ jobs:
 
       - name: Run focused validator tests
         run: python3 -m unittest automation/github/tests/test_validate_pr_issue_link.py
+
+  bs01-pki-manifests:
+    name: BS01 PKI Manifest Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate BS01 PKI GitOps contracts
+        run: python3 -m unittest k8s.field.bs01.tests.test_pki_manifests
