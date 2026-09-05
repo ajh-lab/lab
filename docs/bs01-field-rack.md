@@ -44,6 +44,7 @@ The field k3s cluster is a three-server HA k3s install using embedded etcd. All 
   GitOps. The BS01 overlay reuses the shared lab manifest and removes the main
   lab node selector.
 - Longhorn runbook: `docs/bs01-longhorn-runbook.md`
+- Rack-local cert-manager and PKI runbook: `docs/bs01-pki-runbook.md`
 - OpenBAO cluster access path: `secret/homelab/k3s/bs01-field`
   - Fields: `api_endpoint`, `primary_server`, `nodes`, `kubeconfig`
   - Treat `kubeconfig` as sensitive.
@@ -89,6 +90,20 @@ Each k3s node has a dedicated 256 GB NVMe drive mounted at `/var/lib/longhorn` f
 | `bs01-wknd03` | `/dev/nvme0n1p1` | `MR12W53800132` | `b3bedbab-e2a0-4bfc-87c4-7b864980f997` |
 
 Longhorn is the default storage class for k3s workloads that need persistent volumes. `local-path` remains installed but is not the default. PostgreSQL/PostGIS stays on `bs01-data`; Longhorn is not the primary data plane and should not be used for large DroneOps video payload storage.
+
+## Rack-Local PKI
+
+The BS01 GitOps source includes a three-replica cert-manager deployment and a
+versioned DroneOps ingress root/intermediate hierarchy. The issuer private keys
+are generated inside the cluster and retained only in Kubernetes Secrets
+replicated by embedded etcd. They are not OpenBAO runtime dependencies and must
+never enter Git, documentation, command output, or browser artifacts.
+
+The root is manually rotated; the intermediate and later 90-day console leaf
+have bounded renewal windows. The three server-local etcd snapshot sets are the
+current issuer backup coverage. This is rack-local recovery only: the
+unavailable Longhorn BackupTarget does not protect Kubernetes Secrets and does
+not establish off-rack disaster recovery. See `docs/bs01-pki-runbook.md`.
 
 ## MOTD
 

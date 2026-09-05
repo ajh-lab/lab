@@ -64,6 +64,7 @@ For direct Hermes browser chat on the ai-workstation, use `qwen38-27b-uncensored
 - `docs/windows-upgrade/*`: archived Windows upgrade troubleshooting logs/results.
 - `docs/bs01-field-rack.md`: DroneOps BS01 field rack roles, static IPs, OpenBAO paths, MOTD, field k3s cluster verification notes, and Longhorn storage summary.
 - `docs/bs01-longhorn-runbook.md`: BS01 Longhorn GitOps source, NVMe disk mapping, host prerequisites, verification, smoke test, and operations notes.
+- `docs/bs01-pki-runbook.md`: BS01 cert-manager/issuer GitOps ordering, secret-safe validation, rotation, rack-local recovery, and owner approval boundaries.
 - `repositories/droneops-platform/docs/context/repository-context-map.md`: DroneOps cross-repo context map; use it before copying context between DroneOps repos.
 - `repositories/droneops-platform/docs/context/agent-issue-delivery-workflow.md`: Canonical manual DroneOps issue-to-worker standard. Read it before manually claiming a DroneOps Delivery Project issue; issue edits never dispatch work.
 - `repositories/droneops-platform/docs/context/field-data-architecture.md`: DroneOps field data architecture, base-station roles, persistence priority, event backbone direction, and video data-plane boundaries.
