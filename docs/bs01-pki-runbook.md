@@ -7,6 +7,11 @@ the versioned DroneOps ingress CA hierarchy. It does not add the DroneOps leaf
 certificate, change ingress routing, install workstation trust, remove the
 HTTP console, or change session-cookie behavior.
 
+The deployment pins cert-manager `v1.21.1`. That supported release is tested
+with Kubernetes 1.36 and supplies the `Certificate.spec.renewal.policy` API
+used to keep root renewal owner-controlled. Do not downgrade to a version that
+cannot validate that field.
+
 ## Prerequisites
 
 - Use only `.kubeconfig-bs01-field.yaml`, whose API endpoint is
@@ -16,6 +21,8 @@ HTTP console, or change session-cookie behavior.
   ClusterIssuer, or Certificate name would collide.
 - Confirm the lab GitOps PR containing both Applications and the PKI resources
   has merged to `main`.
+- Confirm the cert-manager Application targets `v1.21.1`; older CRDs cannot
+  accept the root's disabled automatic-renewal policy.
 - Preserve the current DroneOps HTTP ingress and
   `DRONEOPS_AUTH_ALLOW_INSECURE_HTTP=true` during this phase.
 
