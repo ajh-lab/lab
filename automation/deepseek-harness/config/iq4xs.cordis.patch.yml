@@ -1,0 +1,31 @@
+- id: agent-default-model
+  config:
+    provider: deepseek-official
+    model: qwen3.8-flash-next-uncensored-orcarouter-iq4_xs
+
+- id: llm-deepseek
+  config:
+    apiKeyEnv: DEEPSEEK_API_KEY
+    baseURL: http://192.168.1.123:4000/v1
+    thinking: disabled
+    reasoningEffort: off
+    maxTokens: 4096
+    defaultContextWindow: 65536
+    models:
+      - id: qwen3.8-flash-next-uncensored-orcarouter-iq4_xs
+        name: Qwen3.8 Flash-Next Uncensored OrcaRouter IQ4_XS
+        description: Local AI workstation LiteLLM route to llama.cpp on port 11454.
+        contextWindow: 65536
+        maxTokens: 4096
+        inputModalities:
+          - text
+
+- id: deepseek-llm-api-extensions
+  disabled: true
+
+- id: session-log-deepseek
+  disabled: true
+
+- id: plugin-package-inventory-deepseek
+  disabled: true
+
