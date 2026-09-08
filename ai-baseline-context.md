@@ -275,6 +275,7 @@ Current columns:
 - Secrets backend: `lab-secrets01` at `192.168.1.25`, OpenBao API `http://192.168.1.25:8200`
 - PostgreSQL service host: `lab-pgsql01` at `192.168.1.216`
 - Container registry host: `lab-registry01` at `192.168.1.15:5000`
+- Main GitHub Actions runner VM: `lab-gha-runner-01` at `192.168.1.48` (Ubuntu 24.04 LTS on `lab-vm-host`, 8 vCPU, 8 GiB RAM, 100 GB disk, planned at least 3 logical runners)
 - DroneOps field gateway host: `bs01-gw` at `192.168.1.108`
 - DroneOps field data host: `bs01-data` at `192.168.1.109`
 - DroneOps field k3s cluster servers: `bs01-wknd01` (`192.168.1.110`), `bs01-wknd02` (`192.168.1.111`), `bs01-wknd03` (`192.168.1.112`)
@@ -322,6 +323,27 @@ Worker recovery note:
   - service endpoints are populated
   - namespace creation admission works again
 - Deployment pinned to master node selector to avoid scheduling back onto unreachable worker nodes.
+
+### GitHub Actions Runner VM
+
+- Host: `lab-gha-runner-01` (`192.168.1.48`, Ubuntu 24.04 LTS)
+- Role: main GitHub Actions runner host for the lab.
+- Logical runners: 3 GitHub Actions organization runners.
+- Runner names: `lab-gha-runner-01-static`, `lab-gha-runner-01-static-02`, and `lab-gha-runner-01-static-03`.
+- Runner labels: `self-hosted`, `Linux`, `X64`, `lab-ai-workstation-x64`, and `lab-x86-build`.
+- Runner version: GitHub Actions runner `2.337.0`.
+- Install base: `/opt/github-actions-runners`.
+- Systemd services:
+  - `actions.runner.ajh-lab.lab-gha-runner-01-static.service`
+  - `actions.runner.ajh-lab.lab-gha-runner-01-static-02.service`
+  - `actions.runner.ajh-lab.lab-gha-runner-01-static-03.service`
+- Build tooling installed on 2026-09-08: Docker `29.8.0`, Node.js `v22.23.2`, npm `10.9.8`, git `2.43.0`, Python `3.12.3`, and jq `1.7`; user `helios` is in the `docker` group and `docker ps` works without sudo.
+- Virtualization host: `lab-vm-host` at `192.168.1.49` (VMware ESX / VMware host).
+- Current VM sizing: 8 vCPU, 8 GiB RAM, 100 GB disk.
+- Credential reference: OpenBao KV v2 path `secret/homelab/vms/lab-gha-runner-01`, fields `host`, `username`, and `password`; do not store the credential values in docs or committed files.
+- Bootstrap `.env` fallback keys: `LAB-GHA-RUNNER-01_Host`, `LAB-GHA-RUNNER-01_USER`, and `LAB-GHA-RUNNER-01_PASSWORD`.
+- Status on 2026-09-08: installed and registered. All three runner services are active, Docker is active, GitHub reports the three runners online and idle, and TCP/22 is reachable from the Windows workstation.
+- Migration note: the previous org runners on `ai-workstation-evox2` (`ai-workstation-evox2-static` and `ai-workstation-evox2-static-02`) were stopped, uninstalled, deleted from GitHub, and their `/opt/github-actions-runners/ajh-lab-ai-workstation-x64*` directories were removed. The ai-workstation should now stay focused on the local AI model and Hermes runtime.
 
 ### PostgreSQL Service Host
 
@@ -897,6 +919,12 @@ Operational note for future agents:
     - `rancherweb01`
     - `lab-registry01`
   - Current VM cluster for lab guests: `homelab-vms`.
+- Targeted update on 2026-09-08:
+  - `lab-gha-runner-01` modeled in NetBox as a VM with primary IP `192.168.1.48/32`, DNS name `lab-gha-runner-01`, and tag `network-csv-import`.
+  - VM sizing captured in NetBox: `8` vCPU, `8192` MB memory, `100` GB disk.
+  - Comments reference `lab-vm-host` (`192.168.1.49`) as the VMware ESX / VMware host and OpenBao path `secret/homelab/vms/lab-gha-runner-01` for credentials.
+  - Follow-up on 2026-09-08 updated comments after runner migration: three org-level runners installed, former ai-workstation x64 labels mirrored for workflow compatibility, and Docker/Node build tooling captured.
+  - Full CSV sync scripts should still be preferred for routine inventory refreshes; this entry was updated with a targeted NetBox API call while the VM OS install and runner migration were in progress.
 
 ### Container Registry (Docker Registry v2)
 

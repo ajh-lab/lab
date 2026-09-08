@@ -51,7 +51,7 @@
 "192.168.1.45","45","TRUE","TRUE","3","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
 "192.168.1.46","46","TRUE","FALSE","","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
 "192.168.1.47","47","TRUE","FALSE","","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
-"192.168.1.48","48","TRUE","FALSE","","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
+"192.168.1.48","48","TRUE","TRUE","","lab-gha-runner-01","2026-09-08 12:20:55","lab-gha-runner-01","Ubuntu VM for main GitHub Actions runner host.","VM on lab-vm-host (192.168.1.49); Ubuntu 24.04 LTS; 8 vCPU, 8 GiB RAM, 100 GB disk; 3 org-level GitHub Actions runners installed under /opt/github-actions-runners; labels mirror the former ai-workstation x64 runners for workflow compatibility.","OpenBao: secret/homelab/vms/lab-gha-runner-01 fields host, username, password","TRUE","2026-09-08 12:20:55"
 "192.168.1.49","49","TRUE","TRUE","0","DESKTOP-488G4G8.localdomain","4/11/2026 14:49","lab-vm-host","Primary Windows workstation / VMware host for homelab VMs.","Local management machine used for kubectl/helm and automation tasks.","VM_HOST_IP","TRUE","2026-04-13 12:17:21"
 "192.168.1.50","50","TRUE","FALSE","","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
 "192.168.1.51","51","TRUE","FALSE","","","4/11/2026 14:49","","","","","","4/11/2026 14:49"
