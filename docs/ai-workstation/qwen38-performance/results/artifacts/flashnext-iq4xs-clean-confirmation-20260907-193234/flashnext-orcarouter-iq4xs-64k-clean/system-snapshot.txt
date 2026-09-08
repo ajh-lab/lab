@@ -1,0 +1,25 @@
+tested_at=2026-09-07T19:32:34-05:00
+kernel=7.1.9-100.fc43.x86_64
+service=llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service
+model=qwen3.8-flash-next-uncensored-orcarouter-iq4_xs
+context=65536
+ollama_ps_start=
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL
+free_start=
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi        20Gi       5.5Gi       511Mi       5.7Gi        10Gi
+Swap:           71Gi        23Gi        48Gi
+rocm_smi_start=
+
+
+============================ ROCm System Management Interface ============================
+===================================== KFD Processes ======================================
+KFD process information:
+PID    	PROCESS NAME	GPU(s)	VRAM USED  	SDMA USED	CU OCCUPANCY
+2111940	llama-server	1     	70179528704	0        	UNKNOWN
+==========================================================================================
+================================== Memory Usage (Bytes) ==================================
+GPU[0]		: VRAM Total Memory (B): 103079215104
+GPU[0]		: VRAM Total Used Memory (B): 70881472512
+==========================================================================================
+================================== End of ROCm SMI Log ===================================

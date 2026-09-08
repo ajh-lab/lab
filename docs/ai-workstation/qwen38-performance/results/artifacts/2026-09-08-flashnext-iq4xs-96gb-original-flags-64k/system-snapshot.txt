@@ -1,0 +1,17 @@
+tested_at=2026-09-08T08:30:39-05:00
+kernel=7.1.13-100.fc43.x86_64
+model=qwen3.8-flash-next-uncensored-orcarouter-iq4_xs
+context=65536
+bios_split=observed 96 GiB VRAM / 31 GiB Linux RAM
+service=llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service
+service_enabled=disabled
+llama_process=19150 llama-server --host 127.0.0.1 --port 11454 --alias qwen3.8-flash-next-uncensored-orcarouter-iq4_xs -m /mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf -ngl 999 -c 65536 -b 1024 -ub 256 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui
+ollama_ps=
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL
+free=
+               total        used        free      shared  buff/cache   available
+Mem:            30Gi        22Gi       4.8Gi       572Mi       5.1Gi       8.9Gi
+Swap:           71Gi        20Gi        51Gi
+rocm=
+device,VRAM Total Memory (B),VRAM Total Used Memory (B)
+card0,103079215104,70968905728

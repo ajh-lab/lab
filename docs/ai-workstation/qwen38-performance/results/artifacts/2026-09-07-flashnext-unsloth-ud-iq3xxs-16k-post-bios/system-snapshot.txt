@@ -1,0 +1,13 @@
+tested_at=2026-09-07T23:54:31-05:00
+host=fedora
+kernel=7.1.13-100.fc43.x86_64
+bios_split=64GiB_VRAM_62GiB_Linux_RAM_observed
+service=llama-qwen38-flashnext-unsloth-ud-iq3xxs.service
+model_alias=qwen3.8-flash-next-unsloth-ud-iq3_xxs
+context=16384
+execstart=ExecStart=/usr/bin/toolbox run -c llama-rocm-10.0-qwen38-flash-next llama-server --host 127.0.0.1 --port 11455 --alias qwen3.8-flash-next-unsloth-ud-iq3_xxs -m /mnt/ai/models/qwen38-flashnext-unsloth-ud-iq3xxs/UD-IQ3_XXS/Qwen3.8-Flash-Next-UD-IQ3_XXS-00001-of-00003.gguf -ngl 99 -c 16384 -b 512 -ub 128 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui
+               total        used        free      shared  buff/cache   available
+Mem:            62Gi        32Gi        26Gi       698Mi       4.5Gi        29Gi
+Swap:           71Gi       2.1Gi        69Gi
+{"card0": {"VRAM Total Memory (B)": "68719476736", "VRAM Total Used Memory (B)": "53856153600"}}
+{"system": {"PID24835": "llama-server, 1, 53433925632, 0, unknown"}}

@@ -1,0 +1,14 @@
+PASS empty iterable
+PASS validates gap
+PASS validates exact schema and scalar types
+PASS normalizes values and does not mutate input
+PASS deduplicates normalized identity
+PASS rejects conflicting duplicate sequence
+PASS sorts assets and events deterministically
+PASS gap equality joins and greater gap splits
+PASS none closes segment and is omitted
+PASS same timestamp starts a new segment
+FAIL computes distance speed and best fix: AssertionError:
+PASS handles antimeridian
+PASS materializes before raising
+SUMMARY 12/13 passed

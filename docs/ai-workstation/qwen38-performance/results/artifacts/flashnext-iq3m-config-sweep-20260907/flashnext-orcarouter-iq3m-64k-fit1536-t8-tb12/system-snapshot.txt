@@ -1,0 +1,21 @@
+timestamp=2026-09-07T16:26:50-05:00
+variant=fit1536_t8_tb12
+server_flags=--host 127.0.0.1 --port 11453 --alias qwen3.8-flash-next-uncensored-orcarouter-iq3_m -m /mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq3m/Qwen3.8-Flash-Next-Uncensored-IQ3_M-00001-of-00002.gguf -c 65536 -b 1024 -ub 256 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --fit on --fit-target 1536 -t 8 -tb 12 --no-warmup --no-webui
+service=llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service
+model_alias=qwen3.8-flash-next-uncensored-orcarouter-iq3_m
+context=65536
+port=11453
+execstart=/usr/bin/toolbox run -c llama-rocm-10.0-qwen38-flash-next llama-server --host 127.0.0.1 --port 11453 --alias qwen3.8-flash-next-uncensored-orcarouter-iq3_m -m /mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq3m/Qwen3.8-Flash-Next-Uncensored-IQ3_M-00001-of-00002.gguf -c 65536 -b 1024 -ub 256 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --fit on --fit-target 1536 -t 8 -tb 12 --no-warmup --no-webui
+hostname=fedora
+kernel=7.1.9-100.fc43.x86_64
+os=Fedora Linux 43 workstation
+hermes=Hermes Agent v0.21.0 (2026.8.31) · upstream 03f3b092
+litellm=Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+  File "/home/helios/.local/share/litellm/venv/lib/python3.11/site-packages/litellm/__init__.py", line 2337, in __getattr__
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+AttributeError: module 'litellm' has no attribute '__version__'
+llama_server_version=version: 0.3.0-dev (build 10672, commit 590ac45bc)
+rocm_smi=
+memory=mem 19Gi/30Gi swap 22Gi/71Gi
+vram=card0,103079215104,63215603712;;

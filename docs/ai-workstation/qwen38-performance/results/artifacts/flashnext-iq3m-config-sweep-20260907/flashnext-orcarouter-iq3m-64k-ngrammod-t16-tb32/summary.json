@@ -1,0 +1,57 @@
+{
+  "slug": "flashnext-orcarouter-iq3m-64k-ngrammod-t16-tb32",
+  "variant": "ngrammod_t16_tb32",
+  "model": "qwen3.8-flash-next-uncensored-orcarouter-iq3_m",
+  "context": 65536,
+  "service": "llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service",
+  "port": 11453,
+  "tested_at": "2026-09-07T15:46:24-05:00",
+  "server_flags": "/usr/bin/toolbox run -c llama-rocm-10.0-qwen38-flash-next llama-server --host 127.0.0.1 --port 11453 --alias qwen3.8-flash-next-uncensored-orcarouter-iq3_m -m /mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq3m/Qwen3.8-Flash-Next-Uncensored-IQ3_M-00001-of-00002.gguf -ngl 999 -c 65536 -b 1024 -ub 256 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui -t 16 -tb 32 --spec-type ngram-mod --spec-ngram-mod-n-match 24 --spec-ngram-mod-n-min 48 --spec-ngram-mod-n-max 64",
+  "load_status": "healthy",
+  "health": "{\"status\":\"ok\"}",
+  "standard_benchmark_exit": 0,
+  "first_generation": {
+    "elapsed_seconds": 83.714,
+    "prompt_tokens": 702,
+    "completion_tokens": 2311,
+    "total_tokens": 3013,
+    "finish_reason": "stop",
+    "completion_tokens_per_second": 27.61
+  },
+  "repair_generation": {
+    "elapsed_seconds": 47.75,
+    "prompt_tokens": 3126,
+    "completion_tokens": 2603,
+    "total_tokens": 5729,
+    "finish_reason": "stop",
+    "completion_tokens_per_second": 54.51
+  },
+  "first_hidden": {
+    "passed": 13,
+    "total": 13,
+    "failures": ""
+  },
+  "first_adversarial": {
+    "passed": 0,
+    "total": 5,
+    "failures": "FAIL accepts read-only Mapping implementation: ValueError: Each event must be a mapping\nFAIL rejects RFC3339 offset containing seconds: AssertionError: accepted a timezone offset that is not RFC3339\nFAIL rejects timestamp without seconds: AssertionError: accepted RFC3339 timestamp without required seconds\nFAIL rejects compact timezone offset: AssertionError: accepted timezone offset without required colon\nFAIL accepts lowercase RFC3339 t and z: ValueError: observed_at must be a valid RFC3339 string"
+  },
+  "repair_hidden": {
+    "passed": 13,
+    "total": 13,
+    "failures": ""
+  },
+  "repair_adversarial": {
+    "passed": 2,
+    "total": 5,
+    "failures": "FAIL rejects timestamp without seconds: AssertionError: accepted RFC3339 timestamp without required seconds\nFAIL rejects compact timezone offset: AssertionError: accepted timezone offset without required colon\nFAIL accepts lowercase RFC3339 t and z: ValueError: observed_at must be a valid RFC3339 string"
+  },
+  "first_combined": {
+    "passed": 13,
+    "total": 18
+  },
+  "repair_combined": {
+    "passed": 15,
+    "total": 18
+  }
+}

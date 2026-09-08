@@ -1,0 +1,14 @@
+PASS empty iterable
+PASS validates gap
+PASS validates exact schema and scalar types
+FAIL normalizes values and does not mutate input: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+FAIL deduplicates normalized identity: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+PASS rejects conflicting duplicate sequence
+FAIL sorts assets and events deterministically: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+FAIL gap equality joins and greater gap splits: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+FAIL none closes segment and is omitted: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+FAIL same timestamp starts a new segment: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+FAIL computes distance speed and best fix: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+FAIL handles antimeridian: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+PASS materializes before raising
+SUMMARY 5/13 passed

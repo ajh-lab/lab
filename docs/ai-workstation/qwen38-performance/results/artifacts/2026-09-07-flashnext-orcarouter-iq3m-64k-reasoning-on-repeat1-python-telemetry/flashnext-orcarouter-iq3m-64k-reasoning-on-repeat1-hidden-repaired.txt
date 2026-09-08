@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/flashnext-iq3m-tuning/flashnext-orcarouter-iq3m-64k-reasoning-on-repeat1/hidden_tests.py", line 12, in <module>
+    reconstruct_tracks = candidate.reconstruct_tracks
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'

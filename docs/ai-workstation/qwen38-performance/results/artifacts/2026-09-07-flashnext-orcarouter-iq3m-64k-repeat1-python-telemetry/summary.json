@@ -1,0 +1,54 @@
+{
+  "slug": "flashnext-orcarouter-iq3m-64k-repeat1",
+  "variant": "repeat1",
+  "server_flags": "--reasoning off --repeat-penalty 1.0",
+  "model": "qwen3.8-flash-next-uncensored-orcarouter-iq3_m",
+  "context": 65536,
+  "service": "llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service",
+  "port": 11453,
+  "tested_at": "2026-09-07T14:01:13-05:00",
+  "first_generation": {
+    "elapsed_seconds": 83.786,
+    "prompt_tokens": 702,
+    "completion_tokens": 2311,
+    "total_tokens": 3013,
+    "finish_reason": "stop",
+    "completion_tokens_per_second": 27.58
+  },
+  "repair_generation": {
+    "elapsed_seconds": 100.104,
+    "prompt_tokens": 3126,
+    "completion_tokens": 2527,
+    "total_tokens": 5653,
+    "finish_reason": "stop",
+    "completion_tokens_per_second": 25.24
+  },
+  "first_hidden": {
+    "passed": 13,
+    "total": 13,
+    "failures": ""
+  },
+  "first_adversarial": {
+    "passed": 0,
+    "total": 5,
+    "failures": "FAIL accepts read-only Mapping implementation: ValueError: Each event must be a mapping\nFAIL rejects RFC3339 offset containing seconds: AssertionError: accepted a timezone offset that is not RFC3339\nFAIL rejects timestamp without seconds: AssertionError: accepted RFC3339 timestamp without required seconds\nFAIL rejects compact timezone offset: AssertionError: accepted timezone offset without required colon\nFAIL accepts lowercase RFC3339 t and z: ValueError: observed_at must be a valid RFC3339 string"
+  },
+  "repair_hidden": {
+    "passed": 13,
+    "total": 13,
+    "failures": ""
+  },
+  "repair_adversarial": {
+    "passed": 2,
+    "total": 5,
+    "failures": "FAIL rejects timestamp without seconds: AssertionError: accepted RFC3339 timestamp without required seconds\nFAIL rejects compact timezone offset: AssertionError: accepted timezone offset without required colon\nFAIL accepts lowercase RFC3339 t and z: ValueError: observed_at must be a valid RFC3339 string"
+  },
+  "first_combined": {
+    "passed": 13,
+    "total": 18
+  },
+  "repair_combined": {
+    "passed": 15,
+    "total": 18
+  }
+}

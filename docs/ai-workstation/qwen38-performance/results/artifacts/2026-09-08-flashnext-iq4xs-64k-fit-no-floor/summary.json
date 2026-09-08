@@ -1,0 +1,51 @@
+{
+  "model": "qwen3.8-flash-next-uncensored-orcarouter-iq4_xs",
+  "service": "llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service",
+  "context": 65536,
+  "ram_floor_mib": null,
+  "fit_mode": "--fit on --fit-target 1536",
+  "full_offload_attempt": "failed: ROCm OOM allocating 816 MiB KV cache after filling 64 GiB VRAM pool",
+  "load_seconds": 119,
+  "load_min_available_mib": 8054,
+  "load_max_swap_used_mib": 28299,
+  "first_generation": {
+    "elapsed_seconds": 91.939,
+    "prompt_tokens": 702,
+    "completion_tokens": 2359,
+    "total_tokens": 3061,
+    "finish_reason": "stop"
+  },
+  "repair_generation": {
+    "elapsed_seconds": 103.863,
+    "prompt_tokens": 3174,
+    "completion_tokens": 2361,
+    "total_tokens": 5535,
+    "finish_reason": "stop"
+  },
+  "first_hidden": {
+    "passed": 12,
+    "total": 13
+  },
+  "first_adversarial": {
+    "passed": 0,
+    "total": 5
+  },
+  "repair_hidden": {
+    "passed": 12,
+    "total": 13
+  },
+  "repair_adversarial": {
+    "passed": 1,
+    "total": 5
+  },
+  "first_combined": {
+    "passed": 12,
+    "total": 18
+  },
+  "repair_combined": {
+    "passed": 13,
+    "total": 18
+  },
+  "first_tps": 25.66,
+  "repair_tps": 22.73
+}

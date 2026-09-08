@@ -1,0 +1,6 @@
+FAIL accepts read-only Mapping implementation: ValueError: event must be a mapping
+FAIL rejects RFC3339 offset containing seconds: NameError: name 'segs' is not defined
+FAIL rejects timestamp without seconds: NameError: name 'segs' is not defined
+FAIL rejects compact timezone offset: NameError: name 'segs' is not defined
+FAIL accepts lowercase RFC3339 t and z: ValueError: invalid RFC 3339 timestamp: '2026-01-01t00:00:00z'
+SUMMARY 0/5 passed

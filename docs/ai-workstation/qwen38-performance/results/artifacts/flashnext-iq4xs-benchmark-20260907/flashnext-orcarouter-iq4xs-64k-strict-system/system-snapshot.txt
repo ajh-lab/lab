@@ -1,0 +1,22 @@
+timestamp=2026-09-07T17:59:25-05:00
+variant=strict_system
+model_alias=qwen3.8-flash-next-uncensored-orcarouter-iq4_xs
+context=65536
+service=llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service
+port=11454
+model_path=/mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf
+model_size=91G
+service_execstart=ExecStart=/usr/bin/toolbox run -c llama-rocm-10.0-qwen38-flash-next llama-server --host 127.0.0.1 --port 11454 --alias qwen3.8-flash-next-uncensored-orcarouter-iq4_xs -m /mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs/Qwen3.8-Flash-Next-Uncensored-IQ4_XS-00001-of-00003.gguf -ngl 999 -c 65536 -b 1024 -ub 256 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui
+hostname=fedora
+kernel=7.1.9-100.fc43.x86_64
+os=Fedora Linux 43 workstation
+hermes=Hermes Agent v0.21.0 (2026.8.31) · upstream 03f3b092
+litellm=Traceback (most recent call last):
+  File "<stdin>", line 2, in <module>
+  File "/home/helios/.local/share/litellm/venv/lib/python3.11/site-packages/litellm/__init__.py", line 2337, in __getattr__
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+AttributeError: module 'litellm' has no attribute '__version__'
+llama_server_version=version: 0.3.0-dev (build 10672, commit 590ac45bc)
+rocm_smi=
+memory=mem 21Gi/30Gi swap 23Gi/71Gi
+vram=card0,103079215104,71196438528;;

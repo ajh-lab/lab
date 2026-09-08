@@ -1,0 +1,48 @@
+{
+  "model": "qwen3.8-27b-uncensored-q6_k-mtp",
+  "context": 65536,
+  "service": "llama-qwen38-uncensored-q6k-mtp.service",
+  "port": 11450,
+  "first_generation": {
+    "elapsed_seconds": 144.161,
+    "prompt_tokens": 702,
+    "completion_tokens": 2950,
+    "total_tokens": 3652,
+    "finish_reason": "stop"
+  },
+  "repair_generation": {
+    "elapsed_seconds": 147.618,
+    "prompt_tokens": 3765,
+    "completion_tokens": 2977,
+    "total_tokens": 6742,
+    "finish_reason": "stop"
+  },
+  "first_hidden": {
+    "passed": 5,
+    "total": 13,
+    "failures": "FAIL normalizes values and does not mutate input: NameError: name 'segs' is not defined\nFAIL deduplicates normalized identity: NameError: name 'segs' is not defined\nFAIL sorts assets and events deterministically: UnboundLocalError: cannot access local variable 'dlambda' where it is not associated with a value\nFAIL gap equality joins and greater gap splits: UnboundLocalError: cannot access local variable 'dlambda' where it is not associated with a value\nFAIL none closes segment and is omitted: NameError: name 'segs' is not defined\nFAIL same timestamp starts a new segment: NameError: name 'segs' is not defined\nFAIL computes distance speed and best fix: UnboundLocalError: cannot access local variable 'dlambda' where it is not associated with a value\nFAIL handles antimeridian: NameError: name 'segs' is not defined"
+  },
+  "first_adversarial": {
+    "passed": 0,
+    "total": 5,
+    "failures": "FAIL accepts read-only Mapping implementation: ValueError: event must be a mapping\nFAIL rejects RFC3339 offset containing seconds: NameError: name 'segs' is not defined\nFAIL rejects timestamp without seconds: NameError: name 'segs' is not defined\nFAIL rejects compact timezone offset: NameError: name 'segs' is not defined\nFAIL accepts lowercase RFC3339 t and z: ValueError: invalid RFC 3339 timestamp: '2026-01-01t00:00:00z'"
+  },
+  "repair_hidden": {
+    "passed": 5,
+    "total": 13,
+    "failures": "FAIL normalizes values and does not mutate input: NameError: name 'segs' is not defined\nFAIL deduplicates normalized identity: NameError: name 'segs' is not defined\nFAIL sorts assets and events deterministically: UnboundLocalError: cannot access local variable 'dlambda' where it is not associated with a value\nFAIL gap equality joins and greater gap splits: UnboundLocalError: cannot access local variable 'dlambda' where it is not associated with a value\nFAIL none closes segment and is omitted: NameError: name 'segs' is not defined\nFAIL same timestamp starts a new segment: NameError: name 'segs' is not defined\nFAIL computes distance speed and best fix: UnboundLocalError: cannot access local variable 'dlambda' where it is not associated with a value\nFAIL handles antimeridian: NameError: name 'segs' is not defined"
+  },
+  "repair_adversarial": {
+    "passed": 1,
+    "total": 5,
+    "failures": "FAIL accepts read-only Mapping implementation: NameError: name 'segs' is not defined\nFAIL rejects timestamp without seconds: NameError: name 'segs' is not defined\nFAIL rejects compact timezone offset: NameError: name 'segs' is not defined\nFAIL accepts lowercase RFC3339 t and z: ValueError: invalid RFC 3339 timestamp: '2026-01-01t00:00:00z'"
+  },
+  "first_combined": {
+    "passed": 5,
+    "total": 18
+  },
+  "repair_combined": {
+    "passed": 6,
+    "total": 18
+  }
+}

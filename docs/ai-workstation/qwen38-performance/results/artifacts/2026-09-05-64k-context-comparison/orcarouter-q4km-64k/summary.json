@@ -1,0 +1,49 @@
+{
+  "slug": "orcarouter-q4km-64k",
+  "model": "qwen3.8-27b-uncensored-orcarouter-q4_k_m-64k",
+  "context": 65536,
+  "service": "llama-qwen38-orcarouter-uncensored-q4km-64k.service",
+  "port": 11452,
+  "first_generation": {
+    "elapsed_seconds": 199.352,
+    "prompt_tokens": 702,
+    "completion_tokens": 2310,
+    "total_tokens": 3012,
+    "finish_reason": "stop"
+  },
+  "repair_generation": {
+    "elapsed_seconds": 210.858,
+    "prompt_tokens": 3125,
+    "completion_tokens": 2343,
+    "total_tokens": 5468,
+    "finish_reason": "stop"
+  },
+  "first_hidden": {
+    "passed": 13,
+    "total": 13,
+    "failures": ""
+  },
+  "first_adversarial": {
+    "passed": 1,
+    "total": 5,
+    "failures": "FAIL rejects RFC3339 offset containing seconds: AssertionError: accepted a timezone offset that is not RFC3339\nFAIL rejects timestamp without seconds: AssertionError: accepted RFC3339 timestamp without required seconds\nFAIL rejects compact timezone offset: AssertionError: accepted timezone offset without required colon\nFAIL accepts lowercase RFC3339 t and z: ValueError: invalid RFC3339 timestamp: '2026-01-01t00:00:00z'"
+  },
+  "repair_hidden": {
+    "passed": 13,
+    "total": 13,
+    "failures": ""
+  },
+  "repair_adversarial": {
+    "passed": 4,
+    "total": 5,
+    "failures": "FAIL accepts lowercase RFC3339 t and z: ValueError: invalid RFC3339 timestamp: '2026-01-01t00:00:00z'"
+  },
+  "first_combined": {
+    "passed": 14,
+    "total": 18
+  },
+  "repair_combined": {
+    "passed": 17,
+    "total": 18
+  }
+}

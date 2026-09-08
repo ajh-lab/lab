@@ -1,0 +1,29 @@
+usage: benchmark-hermes-models.py [-h] [--provider {litellm,ollama}]
+                                  [--base-url BASE_URL]
+                                  [--ollama-url OLLAMA_URL]
+                                  [--api-key API_KEY] [--models MODELS]
+                                  [--scenarios SCENARIOS] [--repeat REPEAT]
+                                  [--timeout TIMEOUT]
+                                  [--temperature TEMPERATURE] [--jsonl JSONL]
+                                  [--long-context-tokens LONG_CONTEXT_TOKENS]
+                                  [--show-ollama-ps]
+
+Benchmark Hermes/Ollama model aliases.
+
+options:
+  -h, --help            show this help message and exit
+  --provider {litellm,ollama}
+  --base-url BASE_URL   LiteLLM OpenAI-compatible base URL
+  --ollama-url OLLAMA_URL
+                        Ollama base URL
+  --api-key API_KEY
+  --models MODELS       Comma-separated model aliases
+  --scenarios SCENARIOS
+                        Comma-separated scenario names
+  --repeat REPEAT
+  --timeout TIMEOUT
+  --temperature TEMPERATURE
+  --jsonl JSONL
+  --long-context-tokens LONG_CONTEXT_TOKENS
+                        Add a synthetic long-context scenario
+  --show-ollama-ps

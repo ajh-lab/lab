@@ -1,0 +1,6 @@
+FAIL accepts read-only Mapping implementation: ValueError: Each event must be a mapping
+FAIL rejects RFC3339 offset containing seconds: AssertionError: accepted a timezone offset that is not RFC3339
+FAIL rejects timestamp without seconds: AssertionError: accepted RFC3339 timestamp without required seconds
+FAIL rejects compact timezone offset: AssertionError: accepted timezone offset without required colon
+FAIL accepts lowercase RFC3339 t and z: ValueError: observed_at must be a valid RFC3339 string with explicit timezone
+SUMMARY 0/5 passed

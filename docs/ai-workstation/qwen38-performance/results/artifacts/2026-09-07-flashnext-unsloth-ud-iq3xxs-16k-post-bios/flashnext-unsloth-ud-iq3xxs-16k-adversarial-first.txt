@@ -1,0 +1,6 @@
+FAIL accepts read-only Mapping implementation: ValueError: Each event must be a mapping
+FAIL rejects RFC3339 offset containing seconds: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+FAIL rejects timestamp without seconds: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+FAIL rejects compact timezone offset: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value
+FAIL accepts lowercase RFC3339 t and z: ValueError: Invalid RFC3339 timestamp: 2026-01-01t00:00:00z
+SUMMARY 0/5 passed

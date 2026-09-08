@@ -1,0 +1,11 @@
+provider=litellm repeat=1 temperature=0.2
+models=qwen3.8-flash-next-uncensored-orcarouter-iq4_xs
+
+ollama ps:
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL
+ok   litellm qwen3.8-flash-next-uncensored-orcarouter-iq4_xs smoke            0.86s, prompt=37, out=4, total=41, out_tps=4.64
+ok   litellm qwen3.8-flash-next-uncensored-orcarouter-iq4_xs rust-light       3.83s, prompt=63, out=95, total=158, out_tps=24.78
+ok   litellm qwen3.8-flash-next-uncensored-orcarouter-iq4_xs code-review      4.81s, prompt=86, out=117, total=203, out_tps=24.34
+
+ollama ps:
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL
