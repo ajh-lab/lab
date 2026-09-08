@@ -1,0 +1,65 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: bs01-root-selfsigned-2026
+  namespace: cert-manager
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-options: Prune=false
+  labels:
+    app.kubernetes.io/name: bs01-root-ca
+    app.kubernetes.io/part-of: bs01-pki
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bs01-root-ca-2026
+  namespace: cert-manager
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-options: Prune=false
+  labels:
+    app.kubernetes.io/name: bs01-root-ca
+    app.kubernetes.io/part-of: bs01-pki
+spec:
+  secretName: bs01-root-ca-2026
+  commonName: DroneOps BS01 Root CA 2026
+  subject:
+    organizations:
+      - Iron Meridian Systems
+    organizationalUnits:
+      - BS01 Field Rack
+  isCA: true
+  duration: 87600h
+  renewal:
+    policy: Disabled
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Never
+  usages:
+    - digital signature
+    - cert sign
+    - crl sign
+  issuerRef:
+    name: bs01-root-selfsigned-2026
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: bs01-root-ca-2026
+  namespace: cert-manager
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+    argocd.argoproj.io/sync-options: Prune=false
+  labels:
+    app.kubernetes.io/name: bs01-root-ca
+    app.kubernetes.io/part-of: bs01-pki
+spec:
+  ca:
+    secretName: bs01-root-ca-2026
+
