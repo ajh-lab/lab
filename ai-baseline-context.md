@@ -275,6 +275,7 @@ Current columns:
 - Secrets backend: `lab-secrets01` at `192.168.1.25`, OpenBao API `http://192.168.1.25:8200`
 - PostgreSQL service host: `lab-pgsql01` at `192.168.1.216`
 - Container registry host: `lab-registry01` at `192.168.1.15:5000`
+- Main GitHub Actions runner VM: `lab-gha-runner-01` at `192.168.1.48` (Ubuntu 24.04 LTS on `lab-vm-host`, 8 vCPU, 8 GiB RAM, 100 GB disk, planned at least 3 logical runners)
 - DroneOps field gateway host: `bs01-gw` at `192.168.1.108`
 - DroneOps field data host: `bs01-data` at `192.168.1.109`
 - DroneOps field k3s cluster servers: `bs01-wknd01` (`192.168.1.110`), `bs01-wknd02` (`192.168.1.111`), `bs01-wknd03` (`192.168.1.112`)
@@ -322,6 +323,17 @@ Worker recovery note:
   - service endpoints are populated
   - namespace creation admission works again
 - Deployment pinned to master node selector to avoid scheduling back onto unreachable worker nodes.
+
+### GitHub Actions Runner VM
+
+- Host: `lab-gha-runner-01` (`192.168.1.48`, Ubuntu 24.04 LTS)
+- Role: main GitHub Actions runner host for the lab.
+- Logical runner target: at least 3 GitHub Actions runners on this VM.
+- Virtualization host: `lab-vm-host` at `192.168.1.49` (VMware ESX / VMware host).
+- Current VM sizing: 8 vCPU, 8 GiB RAM, 100 GB disk.
+- Credential reference: OpenBao KV v2 path `secret/homelab/vms/lab-gha-runner-01`, fields `host`, `username`, and `password`; do not store the credential values in docs or committed files.
+- Bootstrap `.env` fallback keys: `LAB-GHA-RUNNER-01_Host`, `LAB-GHA-RUNNER-01_USER`, and `LAB-GHA-RUNNER-01_PASSWORD`.
+- Status on 2026-09-08: Ubuntu 24.04 LTS installation in progress; IP `192.168.1.48` responds to ping from the Windows workstation and TCP/22 is reachable, but runner software has not yet been installed or registered.
 
 ### PostgreSQL Service Host
 
@@ -897,6 +909,11 @@ Operational note for future agents:
     - `rancherweb01`
     - `lab-registry01`
   - Current VM cluster for lab guests: `homelab-vms`.
+- Targeted update on 2026-09-08:
+  - `lab-gha-runner-01` modeled in NetBox as a VM with primary IP `192.168.1.48/32`, DNS name `lab-gha-runner-01`, and tag `network-csv-import`.
+  - VM sizing captured in NetBox: `8` vCPU, `8192` MB memory, `100` GB disk.
+  - Comments reference `lab-vm-host` (`192.168.1.49`) as the VMware ESX / VMware host and OpenBao path `secret/homelab/vms/lab-gha-runner-01` for credentials.
+  - Full CSV sync scripts should still be preferred for routine inventory refreshes; this entry was updated with a targeted NetBox API call while the VM OS install was in progress.
 
 ### Container Registry (Docker Registry v2)
 
