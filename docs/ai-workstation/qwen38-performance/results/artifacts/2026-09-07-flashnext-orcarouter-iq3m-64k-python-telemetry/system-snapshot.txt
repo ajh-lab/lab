@@ -1,0 +1,17 @@
+timestamp=2026-09-07T13:30:13-05:00
+hostname=fedora
+kernel=7.1.9-100.fc43.x86_64
+os=Fedora Linux 43 (Workstation Edition) x86_64
+hermes=Hermes Agent v0.21.0 (2026.8.31) · upstream 03f3b092
+litellm=1.97.0
+llama_server_version=version: 0.3.0-dev (build 10672, commit 590ac45bc)
+llama_cli_version=version: 0.3.0-dev (build 10672, commit 590ac45bc)
+rocm_smi=ROCM-SMI version: 3.1.0+unknown
+gpu=card0,N/A,0x1586,Advanced Micro Devices Inc. [AMD/ATI],STRXLGEN,-0x7fe3,0xc1,1,51834,gfx1151;
+services=active,active,active,active,active,active
+model_alias=qwen3.8-flash-next-uncensored-orcarouter-iq3_m
+context=65536
+service=llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service
+port=11453
+memory=15Gi/30Gi swap 30Gi/71Gi
+vram=63343345664/103079215104/

@@ -1,0 +1,21 @@
+captured_at=2026-09-08T07:40:10-05:00
+hostname=fedora
+kernel=7.1.13-100.fc43.x86_64
+os=Fedora Linux 43 (Workstation Edition)
+hermes=Hermes Agent v0.21.0 (2026.8.31) · upstream 8aa219ef
+Install directory: /home/helios/.hermes/hermes-agent
+Install method: git
+Python: 3.11.15
+OpenAI SDK: 2.24.0
+Update available: 499 commits behind — run 'hermes update'
+litellm=
+rocm_smi=ROCM-SMI version: 3.1.0+unknown;ROCM-SMI-LIB version: 7.7.0;
+service=llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service
+model=qwen3.8-flash-next-uncensored-orcarouter-iq3_m
+context=65536
+ram_floor_mib=4096
+execstart=/usr/bin/toolbox run -c llama-rocm-10.0-qwen38-flash-next llama-server --host 127.0.0.1 --port 11453 --alias qwen3.8-flash-next-uncensored-orcarouter-iq3_m -m /mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq3m/Qwen3.8-Flash-Next-Uncensored-IQ3_M-00001-of-00002.gguf -ngl 999 -c 65536 -b 512 -ub 128 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui
+ram=62Gi total, 34Gi used, 22Gi free, 27Gi available} /^Swap:/ {print $2 $3 $4
+vram={"card0": {"VRAM Total Memory (B)": "68719476736", "VRAM Total Used Memory (B)": "62703439872"}}
+active_model_services=llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service loaded active running llama.cpp ROCm Qwen3.8 Flash-Next Uncensored OrcaRouter IQ3_M server 64k
+ollama_ps=NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL ;

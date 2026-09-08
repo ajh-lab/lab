@@ -1,0 +1,14 @@
+PASS empty iterable
+PASS validates gap
+PASS validates exact schema and scalar types
+FAIL normalizes values and does not mutate input: ValueError: Invalid RFC3339 timezone offset format: 2026-01-01T01:02:03+01:00
+FAIL deduplicates normalized identity: ValueError: Invalid RFC3339 timezone offset format: 2025-12-31T19:00:00-05:00
+PASS rejects conflicting duplicate sequence
+PASS sorts assets and events deterministically
+PASS gap equality joins and greater gap splits
+PASS none closes segment and is omitted
+FAIL same timestamp starts a new segment: ValueError: Invalid RFC3339 timezone offset format: 2026-01-01T00:00:00+00:00
+PASS computes distance speed and best fix
+PASS handles antimeridian
+PASS materializes before raising
+SUMMARY 10/13 passed

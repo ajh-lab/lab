@@ -1,0 +1,56 @@
+{
+  "slug": "flashnext-unsloth-ud-iq3xxs-16k",
+  "model": "qwen3.8-flash-next-unsloth-ud-iq3_xxs",
+  "context": 16384,
+  "service": "llama-qwen38-flashnext-unsloth-ud-iq3xxs.service",
+  "port": 11455,
+  "tested_at": "2026-09-07T23:53:00-05:00",
+  "bios_split_observed": "64 GiB VRAM / 62 GiB Linux RAM",
+  "ram_floor_mib": 8192,
+  "loaded_vram_bytes": 53906284544,
+  "post_test_available_ram": "26 GiB",
+  "first_generation": {
+    "elapsed_seconds": 102.371,
+    "prompt_tokens": 702,
+    "completion_tokens": 2371,
+    "total_tokens": 3073,
+    "finish_reason": "stop",
+    "completion_tokens_per_second": 23.16
+  },
+  "repair_generation": {
+    "elapsed_seconds": 138.544,
+    "prompt_tokens": 3191,
+    "completion_tokens": 2758,
+    "total_tokens": 5949,
+    "finish_reason": "stop",
+    "completion_tokens_per_second": 19.91
+  },
+  "first_hidden": {
+    "passed": 5,
+    "total": 13,
+    "failures": "FAIL normalizes values and does not mutate input: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL deduplicates normalized identity: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL sorts assets and events deterministically: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL gap equality joins and greater gap splits: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL none closes segment and is omitted: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL same timestamp starts a new segment: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL computes distance speed and best fix: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL handles antimeridian: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value"
+  },
+  "first_adversarial": {
+    "passed": 0,
+    "total": 5,
+    "failures": "FAIL accepts read-only Mapping implementation: ValueError: Each event must be a mapping\nFAIL rejects RFC3339 offset containing seconds: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL rejects timestamp without seconds: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL rejects compact timezone offset: UnboundLocalError: cannot access local variable 'build_segment' where it is not associated with a value\nFAIL accepts lowercase RFC3339 t and z: ValueError: Invalid RFC3339 timestamp: 2026-01-01t00:00:00z"
+  },
+  "repair_hidden": {
+    "passed": 12,
+    "total": 13,
+    "failures": "FAIL computes distance speed and best fix: AssertionError: "
+  },
+  "repair_adversarial": {
+    "passed": 4,
+    "total": 5,
+    "failures": "FAIL accepts lowercase RFC3339 t and z: ValueError: Invalid RFC3339 timestamp: 2026-01-01t00:00:00z"
+  },
+  "first_combined": {
+    "passed": 5,
+    "total": 18
+  },
+  "repair_combined": {
+    "passed": 16,
+    "total": 18
+  }
+}

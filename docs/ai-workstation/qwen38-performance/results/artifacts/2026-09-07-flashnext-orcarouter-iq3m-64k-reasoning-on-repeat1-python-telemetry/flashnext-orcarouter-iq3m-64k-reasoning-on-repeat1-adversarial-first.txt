@@ -1,0 +1,6 @@
+FAIL accepts read-only Mapping implementation: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'
+FAIL rejects RFC3339 offset containing seconds: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'
+FAIL rejects timestamp without seconds: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'
+FAIL rejects compact timezone offset: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'
+FAIL accepts lowercase RFC3339 t and z: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'
+SUMMARY 0/5 passed

@@ -1,0 +1,48 @@
+{
+  "model": "qwen3.8-flash-next-uncensored-orcarouter-iq3_m",
+  "service": "llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service",
+  "context": 65536,
+  "ram_floor_mib": 4096,
+  "load_min_available_mib": 4535,
+  "load_max_swap_used_mib": 2501,
+  "first_generation": {
+    "elapsed_seconds": 84.393,
+    "prompt_tokens": 702,
+    "completion_tokens": 2336,
+    "total_tokens": 3038,
+    "finish_reason": "stop"
+  },
+  "repair_generation": {
+    "elapsed_seconds": 99.126,
+    "prompt_tokens": 3151,
+    "completion_tokens": 2346,
+    "total_tokens": 5497,
+    "finish_reason": "stop"
+  },
+  "first_hidden": {
+    "passed": 12,
+    "total": 13
+  },
+  "first_adversarial": {
+    "passed": 0,
+    "total": 5
+  },
+  "repair_hidden": {
+    "passed": 12,
+    "total": 13
+  },
+  "repair_adversarial": {
+    "passed": 1,
+    "total": 5
+  },
+  "first_combined": {
+    "passed": 12,
+    "total": 18
+  },
+  "repair_combined": {
+    "passed": 13,
+    "total": 18
+  },
+  "first_tps": 27.68,
+  "repair_tps": 23.67
+}

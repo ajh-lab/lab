@@ -1,0 +1,16 @@
+timestamp=2026-09-07T14:01:13-05:00
+variant=repeat1
+server_flags=--reasoning off --repeat-penalty 1.0
+hostname=fedora
+kernel=7.1.9-100.fc43.x86_64
+os=Fedora Linux 43 (Workstation Edition) x86_64
+hermes=Hermes Agent v0.21.0 (2026.8.31) · upstream 03f3b092
+litellm=1.97.0
+llama_server_version=version: 0.3.0-dev (build 10672, commit 590ac45bc)
+rocm_smi=ROCM-SMI version: 3.1.0+unknown
+model_alias=qwen3.8-flash-next-uncensored-orcarouter-iq3_m
+context=65536
+service=llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service
+port=11453
+memory=19Gi/30Gi swap 23Gi/71Gi
+vram=63207153664/103079215104/

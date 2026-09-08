@@ -1,0 +1,17 @@
+timestamp=2026-09-08T08:22-08:30 America/Chicago
+purpose=Reload IQ4_XS after BIOS returned to the 96 GiB VRAM / 31 GiB Linux RAM split, using the original successful full-offload flags.
+pre_load_mem_available_mib=26106
+pre_load_swap_used_mib=2776
+pre_load_vram_used_bytes=743464960
+pre_load_llama_processes=none
+pre_load_ollama_ps=empty
+service_backup=/home/helios/.config/systemd/user/backups/iq4xs-96gb-original-flags-20260908-082216
+service_enabled_after_load=disabled
+load_elapsed_seconds=193
+load_min_available_mib=518
+load_max_swap_used_mib=39897
+post_load_mem_available_mib=11669
+post_load_swap_used_mib=20797
+post_load_vram_used_bytes=70864687104
+post_load_llama_process=19150 llama-server with IQ4_XS full offload on port 11454
+direct_smoke=pong

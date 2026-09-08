@@ -1,0 +1,6 @@
+PASS accepts read-only Mapping implementation
+FAIL rejects RFC3339 offset containing seconds: AssertionError: accepted a timezone offset that is not RFC3339
+FAIL rejects timestamp without seconds: AssertionError: accepted RFC3339 timestamp without required seconds
+FAIL rejects compact timezone offset: AssertionError: accepted timezone offset without required colon
+FAIL accepts lowercase RFC3339 t and z: ValueError: invalid RFC3339 timestamp: '2026-01-01t00:00:00z'
+SUMMARY 1/5 passed

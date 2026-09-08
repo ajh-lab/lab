@@ -1,0 +1,5 @@
+provider=litellm repeat=1 temperature=0.2
+models=qwen3.8-flash-next-uncensored-orcarouter-iq3_m
+ok   litellm qwen3.8-flash-next-uncensored-orcarouter-iq3_m smoke            1.24s, prompt=37, out=4, total=41, out_tps=3.22
+ok   litellm qwen3.8-flash-next-uncensored-orcarouter-iq3_m rust-light       4.08s, prompt=63, out=104, total=167, out_tps=25.52
+ok   litellm qwen3.8-flash-next-uncensored-orcarouter-iq3_m code-review      5.20s, prompt=86, out=118, total=204, out_tps=22.69

@@ -1,0 +1,11 @@
+provider=litellm repeat=1 temperature=0.2
+models=qwen3.8-flash-next-unsloth-ud-iq3_xxs
+
+ollama ps:
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL
+ok   litellm qwen3.8-flash-next-unsloth-ud-iq3_xxs smoke            0.91s, prompt=37, out=4, total=41, out_tps=4.39
+ok   litellm qwen3.8-flash-next-unsloth-ud-iq3_xxs rust-light       4.79s, prompt=63, out=105, total=168, out_tps=21.92
+ok   litellm qwen3.8-flash-next-unsloth-ud-iq3_xxs code-review      6.23s, prompt=86, out=136, total=222, out_tps=21.84
+
+ollama ps:
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL

@@ -1,0 +1,54 @@
+{
+  "slug": "flashnext-orcarouter-iq4xs-64k-strict-system",
+  "variant": "strict_system",
+  "model": "qwen3.8-flash-next-uncensored-orcarouter-iq4_xs",
+  "context": 65536,
+  "service": "llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service",
+  "port": 11454,
+  "tested_at": "2026-09-07T18:03:10-05:00",
+  "system_prompt": "You are a meticulous Python 3.11 implementation engineer. Return only valid Python source, with no Markdown and no prose. Silently audit the complete contract before finalizing: accepted mapping protocols, exact keys and scalar types, timestamp/RFC3339 conformance, timezone normalization, sorting, deduplication, segment boundaries, numeric rounding, and large-input determinism. Prefer explicit validation over permissive parsing.",
+  "first_generation": {
+    "elapsed_seconds": 97.172,
+    "prompt_tokens": 792,
+    "completion_tokens": 2697,
+    "total_tokens": 3489,
+    "finish_reason": "stop",
+    "completion_tokens_per_second": 27.75
+  },
+  "repair_generation": {
+    "elapsed_seconds": 116.063,
+    "prompt_tokens": 3602,
+    "completion_tokens": 2959,
+    "total_tokens": 6561,
+    "finish_reason": "stop",
+    "completion_tokens_per_second": 25.49
+  },
+  "first_hidden": {
+    "passed": 13,
+    "total": 13,
+    "failures": ""
+  },
+  "first_adversarial": {
+    "passed": 1,
+    "total": 5,
+    "failures": "FAIL rejects RFC3339 offset containing seconds: AssertionError: accepted a timezone offset that is not RFC3339\nFAIL rejects timestamp without seconds: AssertionError: accepted RFC3339 timestamp without required seconds\nFAIL rejects compact timezone offset: AssertionError: accepted timezone offset without required colon\nFAIL accepts lowercase RFC3339 t and z: ValueError: Invalid RFC3339 timestamp: 2026-01-01t00:00:00z"
+  },
+  "repair_hidden": {
+    "passed": 10,
+    "total": 13,
+    "failures": "FAIL normalizes values and does not mutate input: ValueError: Invalid RFC3339 timezone offset format: 2026-01-01T01:02:03+01:00\nFAIL deduplicates normalized identity: ValueError: Invalid RFC3339 timezone offset format: 2025-12-31T19:00:00-05:00\nFAIL same timestamp starts a new segment: ValueError: Invalid RFC3339 timezone offset format: 2026-01-01T00:00:00+00:00"
+  },
+  "repair_adversarial": {
+    "passed": 4,
+    "total": 5,
+    "failures": "FAIL accepts lowercase RFC3339 t and z: ValueError: Invalid RFC3339 timestamp format: 2026-01-01t00:00:00z"
+  },
+  "first_combined": {
+    "passed": 14,
+    "total": 18
+  },
+  "repair_combined": {
+    "passed": 14,
+    "total": 18
+  }
+}

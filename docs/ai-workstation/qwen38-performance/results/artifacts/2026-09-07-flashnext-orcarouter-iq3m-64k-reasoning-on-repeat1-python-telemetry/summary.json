@@ -1,0 +1,54 @@
+{
+  "slug": "flashnext-orcarouter-iq3m-64k-reasoning-on-repeat1",
+  "variant": "reasoning-on-repeat1",
+  "server_flags": "--reasoning on --repeat-penalty 1.0",
+  "model": "qwen3.8-flash-next-uncensored-orcarouter-iq3_m",
+  "context": 65536,
+  "service": "llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service",
+  "port": 11453,
+  "tested_at": "2026-09-07T14:07:53-05:00",
+  "first_generation": {
+    "elapsed_seconds": 152.914,
+    "prompt_tokens": 742,
+    "completion_tokens": 4096,
+    "total_tokens": 4838,
+    "finish_reason": "length",
+    "completion_tokens_per_second": 26.79
+  },
+  "repair_generation": {
+    "elapsed_seconds": 145.116,
+    "prompt_tokens": 860,
+    "completion_tokens": 4096,
+    "total_tokens": 4956,
+    "finish_reason": "length",
+    "completion_tokens_per_second": 28.23
+  },
+  "first_hidden": {
+    "passed": null,
+    "total": null,
+    "failures": ""
+  },
+  "first_adversarial": {
+    "passed": 0,
+    "total": 5,
+    "failures": "FAIL accepts read-only Mapping implementation: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'\nFAIL rejects RFC3339 offset containing seconds: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'\nFAIL rejects timestamp without seconds: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'\nFAIL rejects compact timezone offset: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'\nFAIL accepts lowercase RFC3339 t and z: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'"
+  },
+  "repair_hidden": {
+    "passed": null,
+    "total": null,
+    "failures": ""
+  },
+  "repair_adversarial": {
+    "passed": 0,
+    "total": 5,
+    "failures": "FAIL accepts read-only Mapping implementation: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'\nFAIL rejects RFC3339 offset containing seconds: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'\nFAIL rejects timestamp without seconds: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'\nFAIL rejects compact timezone offset: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'\nFAIL accepts lowercase RFC3339 t and z: AttributeError: module 'candidate' has no attribute 'reconstruct_tracks'"
+  },
+  "first_combined": {
+    "passed": 0,
+    "total": 5
+  },
+  "repair_combined": {
+    "passed": 0,
+    "total": 5
+  }
+}
