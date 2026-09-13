@@ -88,6 +88,7 @@ For direct Hermes browser chat on the ai-workstation, use `qwen38-27b-uncensored
 - `automation/unifi/*`: UniFi (UDM Pro) inventory fetch + NetBox sync scripts.
 - `automation/wikijs/*`: Wiki.js API automation scripts.
 - `automation/ai-workstation/*`: AI workstation automation and Strix Halo backend sync scripts.
+- `automation/deepseek-harness/*`: local Windows DeepSeek Harness launcher and IQ4_XS patch template for testing the AI workstation LiteLLM LAN route.
 - `automation/hermes/*`: Hermes Kanban query/recovery helpers for local agents; prefer these over dashboard discovery or direct SQLite edits.
 - `automation/windows-upgrade/*`: Windows upgrade remediation helpers; generated outputs should go to `tmp/windows-upgrade/`.
 - `docs/windows-upgrade/*`: archived Windows upgrade troubleshooting logs/results.
