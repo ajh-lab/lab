@@ -81,6 +81,8 @@ write PostgreSQL directly from the gateway.
 
 ## Data Host Root Capacity
 
+This section is mirrored in the [BS01 storage runbook](https://wikijs.192.168.1.80.sslip.io/en/runbooks/bs01-longhorn-storage).
+
 On 2026-09-16, the owner-approved 20 GiB expansion grew bs01-data's ext4
 root LV `/dev/ubuntu-vg/ubuntu-lv` from 13918 to 19038 4 MiB extents
 (54.37 to 74.37 GiB; 79851159552 bytes). Existing free extents in
