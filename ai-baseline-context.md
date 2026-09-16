@@ -403,6 +403,8 @@ Worker recovery note:
 
 ### DroneOps Field Data Host
 
+- Capacity recovery, 2026-09-16: owner-approved root LV expansion from 54.37 to 74.37 GiB restored PostgreSQL availability without restart. The ext4 root is `/dev/ubuntu-vg/ubuntu-lv`; pre-expansion LVM metadata is retained under `/var/backups/issue-856-ubuntu-vg-before-expansion-20260916.conf` (root-only). See `docs/bs01-field-rack.md` for scope and point-in-time verification.
+
 - Host: `bs01-data` (`192.168.1.109`, Dell OptiPlex 3046, Ubuntu Server 24.04 LTS)
 - Role: dedicated data node for the DroneOps field base station. This host is intentionally outside k3s and separate from the gateway node.
 - Installed baseline as of 2026-08-19:

@@ -79,6 +79,26 @@ Future application integration should update the platform-owned BS01 node
 location. It must not represent base-station GPS as Tello/vehicle telemetry or
 write PostgreSQL directly from the gateway.
 
+## Data Host Root Capacity
+
+On 2026-09-16, the owner-approved 20 GiB expansion grew bs01-data's ext4
+root LV `/dev/ubuntu-vg/ubuntu-lv` from 13918 to 19038 4 MiB extents
+(54.37 to 74.37 GiB; 79851159552 bytes). Existing free extents in
+`ubuntu-vg` supplied the space; no partition or physical disk changed.
+Online resize2fs completed. Readback showed 74% used and approximately
+18.5 GiB available, a point-in-time measurement rather than a capacity SLA.
+PostgreSQL recovered from full-disk connection rejection without restart,
+authenticated DroneOps APIs returned 200, and the waiting Argo migration
+and fleet rollout completed successfully.
+
+The pre-expansion LVM metadata backup is retained root:root mode 0600 at
+`/var/backups/issue-856-ubuntu-vg-before-expansion-20260916.conf`, verified
+identical to the original `/run` copy. It is not a database backup and must
+not be applied blindly to shrink the grown filesystem. No data was deleted.
+Telemetry retention and database-aware readiness need separate scoped work;
+this recovery did not change either. The incident belongs to
+[DroneOps #856](https://github.com/ajh-lab/droneops-platform/issues/856).
+
 ## Longhorn Storage
 
 Each k3s node has a dedicated 256 GB NVMe drive mounted at `/var/lib/longhorn` for Longhorn replicated cluster storage. The OS disk remains `/dev/sda` on each worker and must not be touched during storage operations.
