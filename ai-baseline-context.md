@@ -208,6 +208,20 @@ did not improve speed, did not avoid startup pressure, and regressed repaired
 quality. Detailed results are in
 `docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-32k-nomtp-quality-retest.md`.
 
+Also on 2026-09-22, the smaller Unsloth Flash-Next `UD-IQ3_XXS` quant was
+retested at 131k context on the current 96 GiB VRAM / 31 GiB Linux RAM split,
+using the existing 16k service flags except `-c 131072`. It reached health
+after about 5 minutes 49 seconds and used about 56.6 GB VRAM after benchmark,
+but still dropped to about 432 MiB available RAM and about 43.4 GiB swap during
+load. Text and forced-tool smokes passed, but forced tool-call completion was
+only 5.71 tok/s. The controlled Python telemetry benchmark scored 5/18 first
+and 7/18 repaired at 23.66 tok/s first / 23.30 tok/s repair. Do not promote
+131k `UD-IQ3_XXS` as the default: it uses materially less VRAM than IQ4_XS, but
+does not avoid host-memory pressure and repaired quality collapsed compared
+with the earlier 16k `UD-IQ3_XXS` repaired score of 16/18. Detailed results are
+in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-unsloth-ud-iq3xxs-131k-quality.md`.
+
 Previous 2026-09-08 64 GiB VRAM split note: after the IQ3_M 4 GiB-floor test,
 IQ4_XS was retried at 64k on the observed 64 GiB VRAM / 62 GiB Linux RAM split
 with no available-RAM floor. Full offload failed before health because llama.cpp
