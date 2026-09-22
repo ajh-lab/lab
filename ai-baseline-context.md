@@ -62,6 +62,98 @@ Flash-Next fallback when an 8 GiB available-RAM floor matters. Detailed results
 are in
 `docs/ai-workstation/qwen38-performance/results/2026-09-08-flashnext-iq4xs-96gb-original-flags-64k.md`.
 
+Later on 2026-09-08, IQ4_XS was unloaded and reloaded as a no-RAM-floor 131k
+manual experiment on the same port `11454` using a transient user service
+`llama-qwen38-flashnext-iq4xs-131k-manual.service`. The runtime flags matched
+the reproduced 64k full-offload route except for `-c 131072`; llama.cpp
+reported `n_ctx=131072` and `n_ctx_train=262144`. The load reached health after
+173 seconds and direct plus LiteLLM sentinel smokes passed. Load-time pressure
+was slightly worse than the 64k run: minimum available RAM was 465 MiB and
+maximum swap use was 39571 MiB. Post-smoke state was about 10816 MiB available
+RAM, 20321 MiB swap used, and about 72.3 GB decimal VRAM used. LiteLLM
+advertised `max_input_tokens=131072`, and both the global Hermes default and
+the legacy Discord profile were updated to `model.context_length=131072`.
+This was superseded later the same day by the 262k smoke below; no controlled
+Python telemetry quality benchmark was run at 131k.
+
+Later on 2026-09-08, IQ4_XS was unloaded again and reloaded as a no-RAM-floor
+262k manual experiment on the same port `11454` using transient user service
+`llama-qwen38-flashnext-iq4xs-262k-manual.service`. The runtime flags matched
+the reproduced 64k full-offload route except for `-c 262144`; llama.cpp
+reported `n_ctx=262144` and `n_ctx_train=262144`. The load reached health after
+161 seconds and direct plus LiteLLM sentinel smokes passed. Load-time pressure
+was the worst successful run so far: minimum available RAM was 385 MiB and
+maximum swap use was 39340 MiB. Post-smoke state was about 11316 MiB available
+RAM, 20189 MiB swap used, and about 75.0 GB decimal VRAM used. LiteLLM
+advertised `max_input_tokens=262144`, and both the global Hermes default and
+the legacy Discord profile were updated to `model.context_length=262144`.
+Treat this as a backed-up higher-risk experiment; no controlled Python telemetry
+quality benchmark has been run at 262k yet, and all large llama.cpp model
+services should remain disabled for autostart.
+
+Latest AI workstation note from 2026-09-17: the live 262k transient state was
+captured before reducing IQ4_XS back to 131k for hands-on use. The captured
+262k state was `llama-qwen38-flashnext-iq4xs-262k-manual.service` on port
+`11454` with `-c 262144`, LiteLLM `max_input_tokens=262144` /
+`context_window=262144`, about 34 GiB swap used, and about 5.5 GiB available
+RAM. The active manual default is now transient
+`llama-qwen38-flashnext-iq4xs-131k-manual.service` with the same full-offload
+flags except `-c 131072`; LiteLLM, Hermes, and DSH should advertise 131k. Later
+on 2026-09-17, vision was enabled by downloading the matching OrcaRouter F16
+projector to
+`/mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs/mmproj-Qwen3.8-Flash-Next-Uncensored-F16.gguf`
+and adding `--mmproj` to the 131k launch. Projector SHA-256:
+`f0f352a97a62a057f3aecdb597cac664762cea2ca23f7b16ec92eee28c5572d9`. The
+active llama.cpp route reported `modalities={'vision': True, 'video': True,
+'audio': False}`, and both direct llama.cpp and internal LiteLLM red-image
+smokes returned `Red`. The durable manual IQ4_XS service file was also updated
+to the 131k vision command and remains disabled/inactive for autostart.
+
+2026-09-20 KV-cache tuning note: the active 131k IQ4_XS vision route was
+restarted with the safer KV-cache reduction `-ctk q4_0 -ctv q8_0` while keeping
+the same full-offload, context, batch, vision, reasoning-off, and repeat-penalty
+settings. The transient service reached health on port `11454`, reported
+`n_ctx=131072` with vision/video modalities still enabled, and passed direct
+llama.cpp plus internal LiteLLM text smokes. The live process RSS dropped from
+about 13.1 GiB to about 11.5 GiB, and steady-state available RAM improved from
+about 7.5 GiB to about 10 GiB; startup pressure remains severe, with observed
+minimum available RAM about 356 MiB and maximum swap used about 43.6 GiB during
+load. The disabled durable IQ4_XS service file was updated to the same
+`-ctk q4_0 -ctv q8_0` flags after backing up the old q8/q8 file at
+`/home/helios/.config/systemd/user/llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service.bak-kv-q4k-q8v-20260920-215314`.
+
+2026-09-22 stability note: after interactive Cline/DSH work showed stalls and
+heavy swap pressure well before the 131k context ceiling, the active IQ4_XS
+vision route was reduced to 64k context. The active transient unit is
+`llama-qwen38-flashnext-iq4xs-64k-manual.service` with the same full-offload,
+vision, batch, `-ctk q4_0 -ctv q8_0`, reasoning-off, and repeat-penalty
+settings except `-c 65536`. The durable disabled IQ4_XS service file, LiteLLM
+metadata (`max_input_tokens=65536`, `context_window=65536`), and global plus
+legacy Discord Hermes context metadata were updated to 64k. Direct llama.cpp
+reported `n_ctx=65536` with vision/video still enabled, and internal LiteLLM
+smoke returned `64K_OK`. Backups were written under
+`/home/helios/.config/ai-workstation-backups/qwen38-64k-20260922-010752`.
+
+2026-09-22 Qwen3-Coder-Next Uncensored Heretic note: Q8_0 and Q6_K GGUF files
+from `llmfan46/Qwen3-Coder-Next-Uncensored-Heretic-GGUF` were downloaded and
+smoke-tested with one resident model at a time through `llama-rocm-7.14-q4`.
+Q8_0 is stored at
+`/mnt/ai/models/qwen3-coder-next-uncensored-heretic-q8_0/Qwen3-Coder-Next-Uncensored-Heretic-Q8_0.gguf`
+with SHA-256
+`d516e8ede3a8477e39e5fe8b92ce79bf428aeeb0a4f0cf8b5c65795dd5ff9d38`. Q6_K is
+stored at
+`/mnt/ai/models/qwen3-coder-next-uncensored-heretic-q6_k/Qwen3-Coder-Next-Uncensored-Heretic-Q6_K.gguf`
+with SHA-256
+`7b82235501ed8835c0a2137185bf628ce8d45fc4dea3852e7dd2a2047cdfc245`. At both
+262k and 128k context, Q6_K cleared the 30 tok/s target on the standard coding
+smoke, passed a forced OpenAI-compatible tool-call smoke, and used about
+66.6-69.0 GiB VRAM after health. Q8_0 also cleared 30 tok/s but used about
+84.5-86.9 GiB VRAM. No model was left resident after testing. Detailed results
+are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q8-q6-context-comparison.md`;
+Q6_K is the preferred next Cline/DSH candidate, but it still needs the
+controlled Python telemetry quality benchmark before promotion.
+
 Previous 2026-09-08 64 GiB VRAM split note: after the IQ3_M 4 GiB-floor test,
 IQ4_XS was retried at 64k on the observed 64 GiB VRAM / 62 GiB Linux RAM split
 with no available-RAM floor. Full offload failed before health because llama.cpp
@@ -88,6 +180,7 @@ For direct Hermes browser chat on the ai-workstation, use `qwen38-27b-uncensored
 - `automation/unifi/*`: UniFi (UDM Pro) inventory fetch + NetBox sync scripts.
 - `automation/wikijs/*`: Wiki.js API automation scripts.
 - `automation/ai-workstation/*`: AI workstation automation and Strix Halo backend sync scripts.
+- `automation/deepseek-harness/*`: local Windows DeepSeek Harness launcher and IQ4_XS patch template for testing the AI workstation LiteLLM LAN route.
 - `automation/hermes/*`: Hermes Kanban query/recovery helpers for local agents; prefer these over dashboard discovery or direct SQLite edits.
 - `automation/windows-upgrade/*`: Windows upgrade remediation helpers; generated outputs should go to `tmp/windows-upgrade/`.
 - `docs/windows-upgrade/*`: archived Windows upgrade troubleshooting logs/results.
@@ -275,6 +368,7 @@ Current columns:
 - Secrets backend: `lab-secrets01` at `192.168.1.25`, OpenBao API `http://192.168.1.25:8200`
 - PostgreSQL service host: `lab-pgsql01` at `192.168.1.216`
 - Container registry host: `lab-registry01` at `192.168.1.15:5000`
+- Main GitHub Actions runner VM: `lab-gha-runner-01` at `192.168.1.48` (Ubuntu 24.04 LTS on `lab-vm-host`, 8 vCPU, 8 GiB RAM, 100 GB disk, planned at least 3 logical runners)
 - DroneOps field gateway host: `bs01-gw` at `192.168.1.108`
 - DroneOps field data host: `bs01-data` at `192.168.1.109`
 - DroneOps field k3s cluster servers: `bs01-wknd01` (`192.168.1.110`), `bs01-wknd02` (`192.168.1.111`), `bs01-wknd03` (`192.168.1.112`)
@@ -322,6 +416,27 @@ Worker recovery note:
   - service endpoints are populated
   - namespace creation admission works again
 - Deployment pinned to master node selector to avoid scheduling back onto unreachable worker nodes.
+
+### GitHub Actions Runner VM
+
+- Host: `lab-gha-runner-01` (`192.168.1.48`, Ubuntu 24.04 LTS)
+- Role: main GitHub Actions runner host for the lab.
+- Logical runners: 3 GitHub Actions organization runners.
+- Runner names: `lab-gha-runner-01-static`, `lab-gha-runner-01-static-02`, and `lab-gha-runner-01-static-03`.
+- Runner labels: `self-hosted`, `Linux`, `X64`, `lab-ai-workstation-x64`, and `lab-x86-build`.
+- Runner version: GitHub Actions runner `2.337.0`.
+- Install base: `/opt/github-actions-runners`.
+- Systemd services:
+  - `actions.runner.ajh-lab.lab-gha-runner-01-static.service`
+  - `actions.runner.ajh-lab.lab-gha-runner-01-static-02.service`
+  - `actions.runner.ajh-lab.lab-gha-runner-01-static-03.service`
+- Build tooling installed on 2026-09-08: Docker `29.8.0`, Node.js `v22.23.2`, npm `10.9.8`, git `2.43.0`, Python `3.12.3`, and jq `1.7`; user `helios` is in the `docker` group and `docker ps` works without sudo.
+- Virtualization host: `lab-vm-host` at `192.168.1.49` (VMware ESX / VMware host).
+- Current VM sizing: 8 vCPU, 8 GiB RAM, 100 GB disk.
+- Credential reference: OpenBao KV v2 path `secret/homelab/vms/lab-gha-runner-01`, fields `host`, `username`, and `password`; do not store the credential values in docs or committed files.
+- Bootstrap `.env` fallback keys: `LAB-GHA-RUNNER-01_Host`, `LAB-GHA-RUNNER-01_USER`, and `LAB-GHA-RUNNER-01_PASSWORD`.
+- Status on 2026-09-08: installed and registered. All three runner services are active, Docker is active, GitHub reports the three runners online and idle, and TCP/22 is reachable from the Windows workstation.
+- Migration note: the previous org runners on `ai-workstation-evox2` (`ai-workstation-evox2-static` and `ai-workstation-evox2-static-02`) were stopped, uninstalled, deleted from GitHub, and their `/opt/github-actions-runners/ajh-lab-ai-workstation-x64*` directories were removed. The ai-workstation should now stay focused on the local AI model and Hermes runtime.
 
 ### PostgreSQL Service Host
 
@@ -500,8 +615,8 @@ Worker recovery note:
     - LiteLLM internal backend: user systemd service `litellm-ollama-proxy.service`, config `/home/helios/.config/litellm/config.yaml`, venv `/home/helios/.local/share/litellm/venv`, bound to `127.0.0.1:4004`. It maps model names `hermes-qwen3-coder:30b-64k`, `hermes-qwen3-coder:30b-128k`, and `hermes-qwen3-coder:30b-256k` to Ollama at `http://127.0.0.1:11434`, maps local Qwen3.8 llama.cpp routes including `qwen3.8-27b-uncensored-bf16`, `qwen3.8-27b-uncensored-q4_k_m`, `qwen3.8-27b-uncensored-q6_k`, `qwen3.8-27b-uncensored-orcarouter-q4_k_m`, `qwen3.8-27b-uncensored-q4_k_m-mtp`, `qwen3.8-27b-uncensored-q6_k-mtp`, and `qwen3.8-flash-next-uncensored-orcarouter-iq3_m`, maps `deepseek-v4-flash` and `deepseek-v4-pro` to DeepSeek using `DEEPSEEK_API_KEY`, and exposes Prometheus metrics at `http://127.0.0.1:4004/metrics/`. Its wrapper `/home/helios/.local/bin/litellm-openbao-env` falls back to `/home/helios/.hermes/profiles/deepseek-v4-flash/.env` or `/home/helios/.hermes/profiles/deepseek-v4-pro/.env`; do not reintroduce the removed legacy `deepseek` profile path. LiteLLM was upgraded from `1.91.0` to `1.97.0` on 2026-08-18 after restoring `pip` in the venv; package freeze backups were written under `/home/helios/.local/share/litellm/backups/`.
     - LiteLLM LAN auth proxy: user systemd service `litellm-lan-auth-proxy.service`, script `/home/helios/.local/share/litellm-lan-auth-proxy/litellm_lan_auth_proxy.py`, bound to `0.0.0.0:4000`, forwards to the internal backend at `http://127.0.0.1:4004`, and requires `Authorization: Bearer <key>`. The LAN API key is stored in OpenBao at `secret/homelab/providers/litellm`, field `lan_api_key` (also mirrored as `api_key` for generic OpenAI-compatible clients). The local runtime copy is `/home/helios/.config/litellm/litellm-lan-api-key.env`; do not print or commit it. Cline should use OpenAI-compatible base URL `http://192.168.1.123:4000/v1` with this key so usage appears in LiteLLM/Prometheus/Grafana.
     - LiteLLM metrics proxy: user systemd service `litellm-metrics-proxy.service`, script `/home/helios/.local/share/litellm-metrics-proxy/litellm_metrics_proxy.py`, bound to `0.0.0.0:4001`. It exposes only `/metrics` and `/metrics/` to the lab network and forwards those requests to LiteLLM on loopback port `4004`.
-    - LiteLLM validation on 2026-08-18: `litellm-ollama-proxy.service`, `litellm-lan-auth-proxy.service`, and `litellm-metrics-proxy.service` were active after the `1.97.0` upgrade; ports `4004`, `4000`, and `4001` were listening; internal `/v1/models` included `hermes-qwen3-coder:30b-256k`, the BF16 Qwen3.8 route, and `deepseek-v4-flash`; LAN auth `/v1/models` returned HTTP 200 with the stored bearer key; metrics returned Prometheus output; and a LiteLLM completion through the BF16 route returned `OK_UPDATED_LITELLM`. Earlier 2026-07-08 checks also validated direct OpenAI-compatible non-streaming/streaming calls, Hermes `localmetered`, default Hermes through LiteLLM, and request/latency/token metrics.
-    - Runtime qwen3-coder model aliases point to `qwen3-coder:30b-a3b-q8_0`; aliases exist for `65536`, `131072`, and `262144` contexts. Matching Hermes profile configs set `model.context_length` and `model.ollama_num_ctx` to the same values. As of 2026-09-08, the active Hermes hands-on test default is `qwen3.8-flash-next-uncensored-orcarouter-iq4_xs` at 64k context for supervised manual testing; `qwen3.8-27b-uncensored-orcarouter-q4_k_m` at 131k remains the lower-VRAM quality rollback.
+    - LiteLLM validation on 2026-08-18: `litellm-ollama-proxy.service`, `litellm-lan-auth-proxy.service`, and `litellm-metrics-proxy.service` were active after the `1.97.0` upgrade; ports `4004`, `4000`, and `4001` were listening; internal `/v1/models` included `hermes-qwen3-coder:30b-256k`, `qwen3.8-27b-bf16`, and `deepseek-v4-flash`; LAN auth `/v1/models` returned HTTP 200 with the stored bearer key; metrics returned Prometheus output; and a LiteLLM completion through `qwen3.8-27b-bf16` returned `OK_UPDATED_LITELLM`. Earlier 2026-07-08 checks also validated direct OpenAI-compatible non-streaming/streaming calls, Hermes `localmetered`, default Hermes through LiteLLM, and request/latency/token metrics.
+    - Runtime qwen3-coder model aliases point to `qwen3-coder:30b-a3b-q8_0`; aliases exist for `65536`, `131072`, and `262144` contexts. Matching Hermes profile configs set `model.context_length` and `model.ollama_num_ctx` to the same values. As of 2026-09-22, the active Hermes hands-on test default is `qwen3.8-flash-next-uncensored-orcarouter-iq4_xs` at 64k context for supervised manual testing after backing up the swap-heavy 262k and 131k states; the controlled quality result is still from the reproduced 64k run, and `qwen3.8-27b-uncensored-orcarouter-q4_k_m` at 131k remains the lower-VRAM quality rollback.
     - Local model benchmark harness: `automation/ai-workstation/scripts/benchmark-hermes-models.py` runs dependency-free on the ai-workstation and can test either internal LiteLLM (`http://127.0.0.1:4004/v1`) or Ollama (`http://127.0.0.1:11434`). Use it before changing default model aliases, context windows, or profile routing. Store ad hoc JSONL outputs under `/tmp/` on the workstation.
     - Latency note: raw Ollama response for a trivial prompt is fast with the capped alias, but full Hermes browser/CLI chat remains dominated by tool-enabled agent prompt overhead. Simple chat without toolsets tested much faster than tool-enabled chat.
     - OpenBao env injected through systemd drop-in with read-only policy `hermes-bootstrap-env-read`; helper command `openbao-env-get FIELD_NAME` reads fields from `secret/homelab/bootstrap/env`. On 2026-09-07 this helper returned 403 on the workstation because the service token/policy no longer matched the documented KV v2 bootstrap path. The policy was updated for `secret/data/homelab/bootstrap/env` and the OpenBao CLI mount-discovery path, the workstation Hermes/OpenBao token was rotated, and `openbao-env-get AI_WORKSTATION_PASSWORD >/dev/null` now succeeds without printing the secret.
@@ -899,6 +1014,12 @@ Operational note for future agents:
     - `rancherweb01`
     - `lab-registry01`
   - Current VM cluster for lab guests: `homelab-vms`.
+- Targeted update on 2026-09-08:
+  - `lab-gha-runner-01` modeled in NetBox as a VM with primary IP `192.168.1.48/32`, DNS name `lab-gha-runner-01`, and tag `network-csv-import`.
+  - VM sizing captured in NetBox: `8` vCPU, `8192` MB memory, `100` GB disk.
+  - Comments reference `lab-vm-host` (`192.168.1.49`) as the VMware ESX / VMware host and OpenBao path `secret/homelab/vms/lab-gha-runner-01` for credentials.
+  - Follow-up on 2026-09-08 updated comments after runner migration: three org-level runners installed, former ai-workstation x64 labels mirrored for workflow compatibility, and Docker/Node build tooling captured.
+  - Full CSV sync scripts should still be preferred for routine inventory refreshes; this entry was updated with a targeted NetBox API call while the VM OS install and runner migration were in progress.
 
 ### Container Registry (Docker Registry v2)
 

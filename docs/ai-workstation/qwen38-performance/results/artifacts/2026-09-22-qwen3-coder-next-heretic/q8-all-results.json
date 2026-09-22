@@ -1,0 +1,260 @@
+[
+  {
+    "context": 131072,
+    "quant": "Q6_K",
+    "status": "failed_start"
+  },
+  {
+    "context": 262144,
+    "quant": "Q6_K",
+    "status": "failed_start"
+  },
+  {
+    "alias": "qwen3-coder-next-uncensored-heretic-q8_0-131072",
+    "context": 131072,
+    "load_seconds": 24,
+    "quant": "Q8_0",
+    "resources": {
+      "resource-after-coding": {
+        "mem_available_mib": 22921.2,
+        "mem_free_mib": 2310.1,
+        "swap_free_mib": 63633.5,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.5,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 84539.1
+      },
+      "resource-after-health": {
+        "mem_available_mib": 23463.5,
+        "mem_free_mib": 580.2,
+        "swap_free_mib": 63633.5,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.5,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 84479.2
+      },
+      "resource-after-long-prefill": {
+        "mem_available_mib": 22696.9,
+        "mem_free_mib": 2085.1,
+        "swap_free_mib": 63633.7,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.3,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 84615.9
+      },
+      "resource-after-sentinel": {
+        "mem_available_mib": 23385.2,
+        "mem_free_mib": 904.7,
+        "swap_free_mib": 63633.5,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.5,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 84516.6
+      },
+      "resource-after-tool-call": {
+        "mem_available_mib": 23103.0,
+        "mem_free_mib": 1027.1,
+        "swap_free_mib": 63633.5,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.5,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 84539.0
+      },
+      "resource-before-start": {
+        "mem_available_mib": 24623.9,
+        "mem_free_mib": 4993.1,
+        "swap_free_mib": 63633.5,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.5,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 713.6
+      }
+    },
+    "status": "completed",
+    "tests": {
+      "coding": {
+        "content_chars": 1058,
+        "name": "coding",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 7632.345,
+          "predicted_n": 242,
+          "predicted_per_second": 31.57614075359539,
+          "predicted_per_token_ms": 31.66948132780083,
+          "prompt_ms": 352.469,
+          "prompt_n": 72,
+          "prompt_per_second": 204.27328360792012,
+          "prompt_per_token_ms": 4.895402777777778
+        }
+      },
+      "long-prefill": {
+        "content_chars": 333,
+        "name": "long_prefill",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 5172.321,
+          "predicted_n": 128,
+          "predicted_per_second": 24.55377382803581,
+          "predicted_per_token_ms": 40.726937007874014,
+          "prompt_ms": 151924.95,
+          "prompt_n": 72045,
+          "prompt_per_second": 474.21440652111454,
+          "prompt_per_token_ms": 2.108750780762024
+        }
+      },
+      "sentinel": {
+        "content_chars": 104,
+        "name": "sentinel",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 978.881,
+          "predicted_n": 32,
+          "predicted_per_second": 31.668813676023948,
+          "predicted_per_token_ms": 31.576806451612903,
+          "prompt_ms": 206.579,
+          "prompt_n": 13,
+          "prompt_per_second": 62.929920272631776,
+          "prompt_per_token_ms": 15.890692307692309
+        }
+      },
+      "tool_call": {
+        "finish_reason": "tool_calls",
+        "has_error": false,
+        "tool_calls_count": 1,
+        "usage": {
+          "completion_tokens": 24,
+          "prompt_tokens": 291,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "total_tokens": 315
+        }
+      }
+    },
+    "unit": "llama-qwen3-coder-next-heretic-q8_0-131072-manual"
+  },
+  {
+    "alias": "qwen3-coder-next-uncensored-heretic-q8_0-262144",
+    "context": 262144,
+    "load_seconds": 24,
+    "quant": "Q8_0",
+    "resources": {
+      "resource-after-coding": {
+        "mem_available_mib": 22464.1,
+        "mem_free_mib": 2575.2,
+        "swap_free_mib": 63633.3,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 86940.1
+      },
+      "resource-after-health": {
+        "mem_available_mib": 23001.6,
+        "mem_free_mib": 498.6,
+        "swap_free_mib": 63633.3,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 86880.2
+      },
+      "resource-after-long-prefill": {
+        "mem_available_mib": 22174.5,
+        "mem_free_mib": 2543.8,
+        "swap_free_mib": 63633.5,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.5,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 87017.1
+      },
+      "resource-after-sentinel": {
+        "mem_available_mib": 22884.5,
+        "mem_free_mib": 767.6,
+        "swap_free_mib": 63633.3,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 86917.6
+      },
+      "resource-after-tool-call": {
+        "mem_available_mib": 22615.1,
+        "mem_free_mib": 896.9,
+        "swap_free_mib": 63633.3,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 86940.0
+      },
+      "resource-before-start": {
+        "mem_available_mib": 24555.1,
+        "mem_free_mib": 645.4,
+        "swap_free_mib": 63633.3,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 713.6
+      }
+    },
+    "status": "completed",
+    "tests": {
+      "coding": {
+        "content_chars": 1074,
+        "name": "coding",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 7328.123,
+          "predicted_n": 232,
+          "predicted_per_second": 31.522396662828942,
+          "predicted_per_token_ms": 31.723476190476187,
+          "prompt_ms": 373.281,
+          "prompt_n": 72,
+          "prompt_per_second": 192.8841810860987,
+          "prompt_per_token_ms": 5.184458333333334
+        }
+      },
+      "long-prefill": {
+        "content_chars": 19,
+        "name": "long_prefill",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 543.174,
+          "predicted_n": 14,
+          "predicted_per_second": 23.933398874025634,
+          "predicted_per_token_ms": 41.78261538461538,
+          "prompt_ms": 151920.787,
+          "prompt_n": 72045,
+          "prompt_per_second": 474.22740115215436,
+          "prompt_per_token_ms": 2.1086929974321604
+        }
+      },
+      "sentinel": {
+        "content_chars": 115,
+        "name": "sentinel",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 1017.407,
+          "predicted_n": 32,
+          "predicted_per_second": 30.469615404651236,
+          "predicted_per_token_ms": 32.81958064516129,
+          "prompt_ms": 205.637,
+          "prompt_n": 13,
+          "prompt_per_second": 63.218195169157305,
+          "prompt_per_token_ms": 15.81823076923077
+        }
+      },
+      "tool_call": {
+        "finish_reason": "tool_calls",
+        "has_error": false,
+        "tool_calls_count": 1,
+        "usage": {
+          "completion_tokens": 24,
+          "prompt_tokens": 291,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "total_tokens": 315
+        }
+      }
+    },
+    "unit": "llama-qwen3-coder-next-heretic-q8_0-262144-manual"
+  }
+]
