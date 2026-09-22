@@ -134,6 +134,18 @@ reported `n_ctx=65536` with vision/video still enabled, and internal LiteLLM
 smoke returned `64K_OK`. Backups were written under
 `/home/helios/.config/ai-workstation-backups/qwen38-64k-20260922-010752`.
 
+2026-09-22 Flash-Next IQ4_XS MTP rejection note: a transient 64k route on port
+`11456` tested `--spec-type draft-mtp` with the existing Flash-Next MTP draft
+sidecar while keeping the current IQ4_XS q4k/q8v flags. It passed direct
+health and forced tool-call smoke and improved decode speed to 34.73 tok/s
+first generation / 26.96 tok/s repair generation, with short coding generation
+reaching 42.41 tok/s. However, the controlled Python telemetry repaired score
+regressed from the no-MTP 17/18 baseline to 14/18, and a 14.3k-token native
+prompt still prefilling at only 75.73 prompt tok/s showed this MTP setup does
+not fix long prompt processing. Do not promote this exact MTP config as the
+Cline/DSH default. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-64k-mtp-test.md`.
+
 2026-09-22 Qwen3-Coder-Next Uncensored Heretic note: Q8_0 and Q6_K GGUF files
 from `llmfan46/Qwen3-Coder-Next-Uncensored-Heretic-GGUF` were downloaded and
 smoke-tested with one resident model at a time through `llama-rocm-7.14-q4`.
