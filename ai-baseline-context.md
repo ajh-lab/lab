@@ -185,6 +185,18 @@ VRAM, so do not promote Q8_0 as the Cline/DSH default either. Detailed results
 are in
 `docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q8-131k-quality.md`.
 
+Later on 2026-09-22, Flash-Next OrcaRouter IQ4_XS was retested at 32k context
+without MTP using the current vision-enabled no-MTP flags plus `-ctk q4_0
+-ctv q8_0`. The transient direct route on port `11460` did not reach health;
+after roughly 2.5 minutes `/health` still returned `Loading model`, available
+RAM had fallen to about 634 MiB, swap had climbed to about 37 GiB, and VRAM was
+about 69.3 GB. The service was stopped before benchmark traffic, and cleanup
+verified no resident llama process, `ollama ps` empty, and VRAM back to
+baseline. Treat this as evidence that dropping IQ4_XS to 32k context does not
+by itself fix the load-time host memory pressure on the 96 GiB VRAM / 31 GiB
+Linux RAM split. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-32k-nomtp-load-abort.md`.
+
 Previous 2026-09-08 64 GiB VRAM split note: after the IQ3_M 4 GiB-floor test,
 IQ4_XS was retried at 64k on the observed 64 GiB VRAM / 62 GiB Linux RAM split
 with no available-RAM floor. Full offload failed before health because llama.cpp
