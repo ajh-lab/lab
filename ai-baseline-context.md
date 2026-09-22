@@ -176,6 +176,14 @@ normalized deduplication, same-timestamp segmentation, timestamp-without-seconds
 acceptance, and lowercase RFC3339 `t`/`z`. Do not promote Q6_K as the default
 Cline/DSH model from this result. Detailed results are in
 `docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q6-131k-quality.md`.
+Qwen3-Coder-Next Uncensored Heretic Q8_0 was then tested with the same 128k
+controlled benchmark. It loaded in 22 seconds, used about 88.6 GB VRAM after
+health, passed forced tool calling, and generated at 34.88 tok/s first pass /
+33.12 tok/s repair, but matched Q6_K quality at only 11/18 first and 14/18
+repaired. Higher quant did not fix the quality gap and used materially more
+VRAM, so do not promote Q8_0 as the Cline/DSH default either. Detailed results
+are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q8-131k-quality.md`.
 
 Previous 2026-09-08 64 GiB VRAM split note: after the IQ3_M 4 GiB-floor test,
 IQ4_XS was retried at 64k on the observed 64 GiB VRAM / 62 GiB Linux RAM split
