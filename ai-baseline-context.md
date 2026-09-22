@@ -166,6 +166,17 @@ are in
 Q6_K is the preferred next Cline/DSH candidate, but it still needs the
 controlled Python telemetry quality benchmark before promotion.
 
+Follow-up on 2026-09-22: Qwen3-Coder-Next Uncensored Heretic Q6_K was tested
+at 128k context against the controlled Python telemetry quality benchmark on
+direct llama.cpp port `11460`. It loaded in 19 seconds, used about 69.9 GB VRAM
+after health, passed a forced OpenAI-compatible tool-call smoke, and generated
+at 36.60 tok/s first pass / 34.65 tok/s repair. Quality was not competitive:
+it scored 11/18 first and 14/18 repaired, with remaining failures around
+normalized deduplication, same-timestamp segmentation, timestamp-without-seconds
+acceptance, and lowercase RFC3339 `t`/`z`. Do not promote Q6_K as the default
+Cline/DSH model from this result. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q6-131k-quality.md`.
+
 Previous 2026-09-08 64 GiB VRAM split note: after the IQ3_M 4 GiB-floor test,
 IQ4_XS was retried at 64k on the observed 64 GiB VRAM / 62 GiB Linux RAM split
 with no available-RAM floor. Full offload failed before health because llama.cpp
