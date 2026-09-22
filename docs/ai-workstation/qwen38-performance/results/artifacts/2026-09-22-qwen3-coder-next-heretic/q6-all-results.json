@@ -1,0 +1,250 @@
+[
+  {
+    "alias": "qwen3-coder-next-uncensored-heretic-q6_k-131072",
+    "context": 131072,
+    "load_seconds": 18,
+    "quant": "Q6_K",
+    "resources": {
+      "resource-after-coding": {
+        "mem_available_mib": 22994.8,
+        "mem_free_mib": 2528.7,
+        "swap_free_mib": 63635.4,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10092.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 66683.6
+      },
+      "resource-after-health": {
+        "mem_available_mib": 23501.7,
+        "mem_free_mib": 409.7,
+        "swap_free_mib": 63635.4,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10092.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 66623.2
+      },
+      "resource-after-long-prefill": {
+        "mem_available_mib": 22721.2,
+        "mem_free_mib": 2908.3,
+        "swap_free_mib": 63635.4,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10092.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 66760.4
+      },
+      "resource-after-sentinel": {
+        "mem_available_mib": 23346.6,
+        "mem_free_mib": 507.7,
+        "swap_free_mib": 63635.4,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10092.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 66661.1
+      },
+      "resource-after-tool-call": {
+        "mem_available_mib": 23097.0,
+        "mem_free_mib": 646.6,
+        "swap_free_mib": 63635.4,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10092.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 66683.5
+      },
+      "resource-before-start": {
+        "mem_available_mib": 24546.3,
+        "mem_free_mib": 7233.1,
+        "swap_free_mib": 63635.4,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10092.6,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 713.6
+      }
+    },
+    "status": "completed",
+    "tests": {
+      "coding": {
+        "content_chars": 1044,
+        "name": "coding",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 6760.434,
+          "predicted_n": 239,
+          "predicted_per_second": 35.204840399299805,
+          "predicted_per_token_ms": 28.40518487394958,
+          "prompt_ms": 428.106,
+          "prompt_n": 72,
+          "prompt_per_second": 168.18264635394038,
+          "prompt_per_token_ms": 5.945916666666666
+        }
+      },
+      "long-prefill": {
+        "content_chars": 19,
+        "name": "long_prefill",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 525.681,
+          "predicted_n": 14,
+          "predicted_per_second": 24.729826643915224,
+          "predicted_per_token_ms": 40.437000000000005,
+          "prompt_ms": 162548.762,
+          "prompt_n": 72045,
+          "prompt_per_second": 443.2208471695405,
+          "prompt_per_token_ms": 2.256211562218058
+        }
+      },
+      "sentinel": {
+        "content_chars": 104,
+        "name": "sentinel",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 894.646,
+          "predicted_n": 32,
+          "predicted_per_second": 34.65057687621697,
+          "predicted_per_token_ms": 28.859548387096773,
+          "prompt_ms": 196.834,
+          "prompt_n": 13,
+          "prompt_per_second": 66.04550026926243,
+          "prompt_per_token_ms": 15.141076923076923
+        }
+      },
+      "tool_call": {
+        "finish_reason": "tool_calls",
+        "has_error": false,
+        "tool_calls_count": 1,
+        "usage": {
+          "completion_tokens": 24,
+          "prompt_tokens": 291,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "total_tokens": 315
+        }
+      }
+    },
+    "unit": "llama-qwen3-coder-next-heretic-q6_k-131072-manual"
+  },
+  {
+    "alias": "qwen3-coder-next-uncensored-heretic-q6_k-262144",
+    "context": 262144,
+    "load_seconds": 18,
+    "quant": "Q6_K",
+    "resources": {
+      "resource-after-coding": {
+        "mem_available_mib": 22464.0,
+        "mem_free_mib": 2726.5,
+        "swap_free_mib": 63633.9,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.1,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 69084.6
+      },
+      "resource-after-health": {
+        "mem_available_mib": 22986.4,
+        "mem_free_mib": 457.3,
+        "swap_free_mib": 63633.9,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.1,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 69024.2
+      },
+      "resource-after-long-prefill": {
+        "mem_available_mib": 22199.5,
+        "mem_free_mib": 3672.5,
+        "swap_free_mib": 63633.9,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.1,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 69161.6
+      },
+      "resource-after-sentinel": {
+        "mem_available_mib": 22874.5,
+        "mem_free_mib": 606.6,
+        "swap_free_mib": 63633.9,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.1,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 69062.1
+      },
+      "resource-after-tool-call": {
+        "mem_available_mib": 22621.6,
+        "mem_free_mib": 1024.9,
+        "swap_free_mib": 63633.9,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.1,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 69084.5
+      },
+      "resource-before-start": {
+        "mem_available_mib": 24600.7,
+        "mem_free_mib": 3968.2,
+        "swap_free_mib": 63633.9,
+        "swap_total_mib": 73728.0,
+        "swap_used_mib": 10094.1,
+        "vram_total_mib": 98304.0,
+        "vram_used_mib": 713.6
+      }
+    },
+    "status": "completed",
+    "tests": {
+      "coding": {
+        "content_chars": 1052,
+        "name": "coding",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 6516.592,
+          "predicted_n": 234,
+          "predicted_per_second": 35.754885375668756,
+          "predicted_per_token_ms": 27.96820600858369,
+          "prompt_ms": 444.792,
+          "prompt_n": 72,
+          "prompt_per_second": 161.87341498947825,
+          "prompt_per_token_ms": 6.177666666666666
+        }
+      },
+      "long-prefill": {
+        "content_chars": 292,
+        "name": "long_prefill",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 5062.527,
+          "predicted_n": 128,
+          "predicted_per_second": 25.086285959561305,
+          "predicted_per_token_ms": 39.862417322834645,
+          "prompt_ms": 161940.288,
+          "prompt_n": 72045,
+          "prompt_per_second": 444.88620398155643,
+          "prompt_per_token_ms": 2.2477658130335207
+        }
+      },
+      "sentinel": {
+        "content_chars": 104,
+        "name": "sentinel",
+        "timings": {
+          "cache_n": 0,
+          "predicted_ms": 884.731,
+          "predicted_n": 32,
+          "predicted_per_second": 35.03889882913564,
+          "predicted_per_token_ms": 28.539709677419356,
+          "prompt_ms": 237.798,
+          "prompt_n": 13,
+          "prompt_per_second": 54.66824784060421,
+          "prompt_per_token_ms": 18.292153846153845
+        }
+      },
+      "tool_call": {
+        "finish_reason": "tool_calls",
+        "has_error": false,
+        "tool_calls_count": 1,
+        "usage": {
+          "completion_tokens": 24,
+          "prompt_tokens": 291,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          },
+          "total_tokens": 315
+        }
+      }
+    },
+    "unit": "llama-qwen3-coder-next-heretic-q6_k-262144-manual"
+  }
+]

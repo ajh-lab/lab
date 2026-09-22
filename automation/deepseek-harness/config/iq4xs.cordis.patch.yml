@@ -1,0 +1,35 @@
+- id: agent-default-model
+  config:
+    provider: ai-workstation-litellm
+    model: qwen3.8-flash-next
+
+- id: llm-pi-ai
+  config:
+    providers:
+      ai-workstation-litellm:
+        displayName: AI Workstation LiteLLM
+        apiKeyEnv: LITELLM_API_KEY
+        api: openai-completions
+        baseURL: http://192.168.1.123:4000/v1
+        reasoning: off
+        defaultContextWindow: 131072
+        defaultMaxTokens: 16384
+        timeoutMs: 5400000
+        models:
+          - id: qwen3.8-flash-next
+            name: qwen3.8-flash-next
+            contextWindow: 131072
+            maxTokens: 16384
+            reasoningEfforts: false
+
+- id: llm-deepseek
+  disabled: true
+
+- id: deepseek-llm-api-extensions
+  disabled: true
+
+- id: session-log-deepseek
+  disabled: true
+
+- id: plugin-package-inventory-deepseek
+  disabled: true
