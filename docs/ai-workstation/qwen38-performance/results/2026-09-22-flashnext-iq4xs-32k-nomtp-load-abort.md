@@ -32,7 +32,7 @@ f0f352a97a62a057f3aecdb597cac664762cea2ca23f7b16ec92eee28c5572d9  /mnt/ai/models
 
 ## Result
 
-The route did not reach health. After roughly 2.5 minutes, `/health` still returned:
+The route had not reached health when the run was stopped. After roughly 2.5 minutes, `/health` still returned:
 
 ```json
 {"error":{"message":"Loading model","type":"unavailable_error","code":503}}
@@ -54,7 +54,7 @@ The service was stopped before the host became unstable. Cleanup verification im
 
 ## Decision
 
-Do not treat 32k context as a fix for IQ4_XS on the current 96 GiB VRAM / 31 GiB Linux RAM split. The smaller context did not avoid the load-time system RAM and swap pressure; the model could not be safely brought to health under this no-MTP q4k/q8v configuration.
+Do not treat 32k context as a proven fix for IQ4_XS on the current 96 GiB VRAM / 31 GiB Linux RAM split. This was an aborted safety run, not proof that 32k cannot load. The smaller context did not avoid the load-time system RAM and swap pressure seen in larger-context runs, and the model was stopped before benchmark traffic.
 
 The useful conclusion is that the current failure mode is dominated by Flash-Next IQ4_XS load-time host memory pressure, not just active context length. Further IQ4_XS retesting should use a materially different lever, such as a smaller quant, a different BIOS memory split, fit/spill mode with explicit quality acceptance, or a lower-risk fallback model.
 
