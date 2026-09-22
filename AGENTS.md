@@ -60,6 +60,10 @@ for their own scope.
   transfer a small LF-normalized script or send it over SSH stdin.
 - Use the relevant lab skills and runbooks for remote Linux, k3s/GitOps,
   OpenBAO, Hermes, AI-workstation, and documentation work.
+- When testing local ai-workstation models, capture timestamp, model source,
+  quantization, service, port, context, MTP status, memory split,
+  VRAM/RAM/swap, Hermes, LiteLLM, llama.cpp, ROCm, OS/kernel versions, smoke
+  results, controlled benchmark scores, and rollback state.
 
 ## Secrets And Infrastructure
 

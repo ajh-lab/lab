@@ -3,7 +3,7 @@ You are operating or recovering the Fedora AI workstation (`ai-workstation-evox2
 
 ## CURRENT OPERATIONAL CONTEXT
 
-Last verified: 2026-09-08 08:35 America/Chicago.
+Last verified: 2026-09-22 12:55 America/Chicago.
 
 Start with the root lab `ai-baseline-context.md`, then use:
 
@@ -16,21 +16,25 @@ Start with the root lab `ai-baseline-context.md`, then use:
 Current Hermes experimental manual-test default:
 
 - Model alias: `qwen3.8-flash-next-uncensored-orcarouter-iq4_xs`
-- Service: `llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service`
+- Active service: transient `llama-qwen38-flashnext-iq4xs-64k-manual.service`
+- Durable service: `llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service`,
+  disabled for autostart
 - llama.cpp route: `http://127.0.0.1:11454/v1`
 - LiteLLM route: `http://127.0.0.1:4004/v1`
 - Context: `65536`
 - Runtime: Flash-Next ROCm toolbox `llama-rocm-10.0-qwen38-flash-next`
-- Runtime flags: `-ngl 999 -c 65536 -b 1024 -ub 256 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui`
+- Runtime flags: `--mmproj /mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs/mmproj-Qwen3.8-Flash-Next-Uncensored-F16.gguf -ngl 999 -c 65536 -b 1024 -ub 256 -fa on -ctk q4_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui`
 - Model files: `/mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs`
 - Host memory split during current test: observed 96 GiB VRAM / 31 GiB Linux
   RAM, with disk-backed swap persisted at `/mnt/ai/swap/qwen-flashnext-test.swap`.
 - Guardrail: the current IQ4_XS full-offload route reproduced the 17/18
-  repaired score, but startup is still dangerous. The 2026-09-08 reload reached
-  health after 193 seconds, with only 518 MiB minimum available RAM and 39897
-  MiB maximum swap used during load. The service is active now for manual Hermes
-  testing, but all large llama.cpp model services should stay disabled for
-  autostart.
+  repaired score at the original 64k q8/q8 setting, but startup and interactive
+  use remained memory-pressure sensitive at larger context windows. The active
+  route was reduced back to 64k on 2026-09-22 after the 131k q4k/q8v route
+  showed swap-heavy Cline/DSH stalls well before the context ceiling. Keep all
+  large llama.cpp model services disabled for autostart, keep only one large
+  model resident at a time, and verify `ollama ps` is empty before controlled
+  Flash-Next tests.
 - Previous 64 GiB VRAM split during test: observed 64 GiB VRAM / 62 GiB Linux
   RAM, with disk-backed swap persisted at `/mnt/ai/swap/qwen-flashnext-test.swap`.
 - Previous 64 GiB split guardrail: the IQ4_XS test had no available-RAM floor. Full offload
@@ -38,9 +42,23 @@ Current Hermes experimental manual-test default:
   service temporarily used fit mode. The successful fit-mode load reached health after 119
   seconds, with 8054 MiB minimum available RAM and 28299 MiB maximum swap used
   during load.
-- Current residency expectation: only IQ4_XS should be resident for normal
-  manual testing. `ollama ps` should remain empty before controlled Flash-Next
-  tests.
+- Current 64k manual state from 2026-09-22: active transient service
+  `llama-qwen38-flashnext-iq4xs-64k-manual.service` uses full offload, the
+  OrcaRouter F16 multimodal projector, `-ctk q4_0 -ctv q8_0`, `--reasoning off`,
+  `--temp 0`, and `--repeat-penalty 1.0`. Direct llama.cpp reported
+  `n_ctx=65536` with vision/video enabled, and internal LiteLLM returned
+  `64K_OK`. The durable disabled service file, LiteLLM metadata
+  (`max_input_tokens=65536`, `context_window=65536`), and global plus legacy
+  Discord Hermes context metadata were updated to 64k. Backups were written
+  under `/home/helios/.config/ai-workstation-backups/qwen38-64k-20260922-010752`.
+- Rejected MTP state from 2026-09-22: a transient 64k route on port `11456`
+  added `--spec-type draft-mtp` with the Flash-Next MTP draft sidecar. It passed
+  health and tool-call smoke and improved first-pass decode to 34.73 tok/s, but
+  the controlled repaired score regressed from the no-MTP 17/18 baseline to
+  14/18 and large prompt prefill still averaged only 75.73 prompt tok/s over a
+  14.3k-token native prompt. Do not promote this exact MTP config as the
+  Cline/DSH default. Detailed report:
+  `docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-64k-mtp-test.md`
 
 Current controlled-quality rollback:
 

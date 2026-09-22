@@ -134,6 +134,18 @@ reported `n_ctx=65536` with vision/video still enabled, and internal LiteLLM
 smoke returned `64K_OK`. Backups were written under
 `/home/helios/.config/ai-workstation-backups/qwen38-64k-20260922-010752`.
 
+2026-09-22 Flash-Next IQ4_XS MTP rejection note: a transient 64k route on port
+`11456` tested `--spec-type draft-mtp` with the existing Flash-Next MTP draft
+sidecar while keeping the current IQ4_XS q4k/q8v flags. It passed direct
+health and forced tool-call smoke and improved decode speed to 34.73 tok/s
+first generation / 26.96 tok/s repair generation, with short coding generation
+reaching 42.41 tok/s. However, the controlled Python telemetry repaired score
+regressed from the no-MTP 17/18 baseline to 14/18, and a 14.3k-token native
+prompt still prefilling at only 75.73 prompt tok/s showed this MTP setup does
+not fix long prompt processing. Do not promote this exact MTP config as the
+Cline/DSH default. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-64k-mtp-test.md`.
+
 2026-09-22 Qwen3-Coder-Next Uncensored Heretic note: Q8_0 and Q6_K GGUF files
 from `llmfan46/Qwen3-Coder-Next-Uncensored-Heretic-GGUF` were downloaded and
 smoke-tested with one resident model at a time through `llama-rocm-7.14-q4`.
@@ -153,6 +165,62 @@ are in
 `docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q8-q6-context-comparison.md`;
 Q6_K is the preferred next Cline/DSH candidate, but it still needs the
 controlled Python telemetry quality benchmark before promotion.
+
+Follow-up on 2026-09-22: Qwen3-Coder-Next Uncensored Heretic Q6_K was tested
+at 128k context against the controlled Python telemetry quality benchmark on
+direct llama.cpp port `11460`. It loaded in 19 seconds, used about 69.9 GB VRAM
+after health, passed a forced OpenAI-compatible tool-call smoke, and generated
+at 36.60 tok/s first pass / 34.65 tok/s repair. Quality was not competitive:
+it scored 11/18 first and 14/18 repaired, with remaining failures around
+normalized deduplication, same-timestamp segmentation, timestamp-without-seconds
+acceptance, and lowercase RFC3339 `t`/`z`. Do not promote Q6_K as the default
+Cline/DSH model from this result. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q6-131k-quality.md`.
+Qwen3-Coder-Next Uncensored Heretic Q8_0 was then tested with the same 128k
+controlled benchmark. It loaded in 22 seconds, used about 88.6 GB VRAM after
+health, passed forced tool calling, and generated at 34.88 tok/s first pass /
+33.12 tok/s repair, but matched Q6_K quality at only 11/18 first and 14/18
+repaired. Higher quant did not fix the quality gap and used materially more
+VRAM, so do not promote Q8_0 as the Cline/DSH default either. Detailed results
+are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q8-131k-quality.md`.
+
+Later on 2026-09-22, Flash-Next OrcaRouter IQ4_XS was retested at 32k context
+without MTP using the current vision-enabled no-MTP flags plus `-ctk q4_0
+-ctv q8_0`. The transient direct route on port `11460` had not reached health
+when the run was stopped; after roughly 2.5 minutes `/health` still returned
+`Loading model`, available RAM had fallen to about 634 MiB, swap had climbed
+to about 37 GiB, and VRAM was about 69.3 GB. The service was stopped before
+benchmark traffic, and cleanup verified no resident llama process, `ollama ps`
+empty, and VRAM back to baseline. Treat this as an aborted safety run, not
+proof that 32k cannot load. It is evidence that dropping IQ4_XS to 32k context
+does not by itself avoid the load-time host memory pressure on the 96 GiB VRAM
+/ 31 GiB Linux RAM split. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-32k-nomtp-load-abort.md`.
+A follow-up supervised rerun the same day used the same 32k flags with a longer
+load window. It reached health after about 3 minutes 47 seconds, but still
+dipped to about 420 MiB available RAM and about 44.1 GiB swap during load.
+Text and forced-tool smokes passed. The controlled Python telemetry benchmark
+scored 13/18 first and 14/18 repaired at 25.33 tok/s first / 23.34 tok/s
+repair, which is worse than the 64k IQ4_XS no-MTP baseline of 13/18 first and
+17/18 repaired. Do not promote 32k no-MTP as the default: it can load, but it
+did not improve speed, did not avoid startup pressure, and regressed repaired
+quality. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-32k-nomtp-quality-retest.md`.
+
+Also on 2026-09-22, the smaller Unsloth Flash-Next `UD-IQ3_XXS` quant was
+retested at 131k context on the current 96 GiB VRAM / 31 GiB Linux RAM split,
+using the existing 16k service flags except `-c 131072`. It reached health
+after about 5 minutes 49 seconds and used about 56.6 GB VRAM after benchmark,
+but still dropped to about 432 MiB available RAM and about 43.4 GiB swap during
+load. Text and forced-tool smokes passed, but forced tool-call completion was
+only 5.71 tok/s. The controlled Python telemetry benchmark scored 5/18 first
+and 7/18 repaired at 23.66 tok/s first / 23.30 tok/s repair. Do not promote
+131k `UD-IQ3_XXS` as the default: it uses materially less VRAM than IQ4_XS, but
+does not avoid host-memory pressure and repaired quality collapsed compared
+with the earlier 16k `UD-IQ3_XXS` repaired score of 16/18. Detailed results are
+in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-unsloth-ud-iq3xxs-131k-quality.md`.
 
 Previous 2026-09-08 64 GiB VRAM split note: after the IQ3_M 4 GiB-floor test,
 IQ4_XS was retried at 64k on the observed 64 GiB VRAM / 62 GiB Linux RAM split
