@@ -197,6 +197,16 @@ proof that 32k cannot load. It is evidence that dropping IQ4_XS to 32k context
 does not by itself avoid the load-time host memory pressure on the 96 GiB VRAM
 / 31 GiB Linux RAM split. Detailed results are in
 `docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-32k-nomtp-load-abort.md`.
+A follow-up supervised rerun the same day used the same 32k flags with a longer
+load window. It reached health after about 3 minutes 47 seconds, but still
+dipped to about 420 MiB available RAM and about 44.1 GiB swap during load.
+Text and forced-tool smokes passed. The controlled Python telemetry benchmark
+scored 13/18 first and 14/18 repaired at 25.33 tok/s first / 23.34 tok/s
+repair, which is worse than the 64k IQ4_XS no-MTP baseline of 13/18 first and
+17/18 repaired. Do not promote 32k no-MTP as the default: it can load, but it
+did not improve speed, did not avoid startup pressure, and regressed repaired
+quality. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-32k-nomtp-quality-retest.md`.
 
 Previous 2026-09-08 64 GiB VRAM split note: after the IQ3_M 4 GiB-floor test,
 IQ4_XS was retried at 64k on the observed 64 GiB VRAM / 62 GiB Linux RAM split

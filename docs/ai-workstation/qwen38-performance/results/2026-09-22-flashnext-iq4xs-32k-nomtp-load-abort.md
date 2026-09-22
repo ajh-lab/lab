@@ -5,6 +5,8 @@ Host: `ai-workstation-evox2`
 Runtime: `toolbox run -c llama-rocm-10.0-qwen38-flash-next llama-server`
 Purpose: retest OrcaRouter Qwen3.8 Flash Next IQ4_XS without MTP at a smaller 32k context window to see whether the lower context avoided the load-time host memory pressure seen at 64k and 131k.
 
+Superseded by `2026-09-22-flashnext-iq4xs-32k-nomtp-quality-retest.md`. This first run was stopped too early to prove that 32k could not load; the later retest reached health after about 3 minutes 47 seconds, passed smokes, and completed the controlled benchmark.
+
 ## Launch
 
 The test used a transient user unit on direct port `11460`; no durable Cline, DSH, Hermes, or LiteLLM route was changed.
