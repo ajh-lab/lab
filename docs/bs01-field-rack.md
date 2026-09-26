@@ -81,7 +81,7 @@ write PostgreSQL directly from the gateway.
 
 ## Data Host Root Capacity
 
-This section is mirrored in the [BS01 storage runbook](https://wikijs.192.168.1.80.sslip.io/en/runbooks/bs01-longhorn-storage).
+This section has a [BS01 storage runbook mirror](https://wikijs.192.168.1.80.sslip.io/en/runbooks/bs01-longhorn-storage). The 2026-09-26 update below is verified in source control; Wiki mirror synchronization was not performed.
 
 On 2026-09-16, the owner-approved 20 GiB expansion grew bs01-data's ext4
 root LV `/dev/ubuntu-vg/ubuntu-lv` from 13918 to 19038 4 MiB extents
@@ -100,6 +100,41 @@ not be applied blindly to shrink the grown filesystem. No data was deleted.
 Telemetry retention and database-aware readiness need separate scoped work;
 this recovery did not change either. The incident belongs to
 [DroneOps #856](https://github.com/ajh-lab/droneops-platform/issues/856).
+
+On 2026-09-26, the owner authorized a second bounded capacity recovery.
+Before mutation, the 74.37 GiB root LV's 72.9 GiB ext4 filesystem had
+848,072,704 bytes (about 809 MiB) available, and PostgreSQL was active.
+The only PV was `/dev/sda3` in `ubuntu-vg`; its 8,798 free 4 MiB extents
+supplied an online expansion of the same root LV to 108.73 GiB. Online
+`resize2fs` grew the filesystem to 106.7 GiB, with 35,685,191,680 bytes
+(33.2 GiB) available immediately afterward. No partition, second LV,
+physical disk, or reboot was changed. A root-only mode 0600 LVM metadata
+backup was created at
+`/var/backups/issue-669-ubuntu-vg-before-capacity-expansion-20260926.conf`.
+As with the prior backup, this is not a database backup or a shrink plan.
+
+The dominant consumer was `droneops.public.telemetry` at about 61 GB, with
+46 GB of table data and 15 GB of indexes. A full read-only classification
+counted 35,373,014 rows: 35,373,006 carried the exact simulator envelope
+and explicit simulated payload markers, and eight did not. Platform
+[PR #1102](https://github.com/ajh-lab/droneops-platform/pull/1102) disabled
+automatic field simulation through GitOps. After the observed simulator
+write rate reached zero, a guarded transaction copied the eight other rows
+into a staging table, checked their count, truncated only the telemetry
+table without cascade while retaining the sequence, restored the eight
+original rows, and checked their full-row content before commit. A second
+post-commit comparison found zero missing or extra rows; the staging copy
+was then removed. No real, unknown, or unclassified row was deleted.
+
+Post-change telemetry occupied 172,032 bytes, and the ext4 root had
+100,687,859,712 bytes (93.8 GiB) available at 8% use. PostgreSQL remained
+in production and ready, Flyway V064 successful, and DroneOps Argo
+`Synced`/`Healthy` with all seven deployments Ready. The simulator auto-tick
+remained off. Durable opt-in, retention, partitioning, idempotency, and
+capacity alerts are tracked by
+[DroneOps #1101](https://github.com/ajh-lab/droneops-platform/issues/1101),
+separate from native Secret issue #669. These are point-in-time observations,
+not a storage or backup retention guarantee.
 
 ## Longhorn Storage
 

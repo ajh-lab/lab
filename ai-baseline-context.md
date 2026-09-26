@@ -1,6 +1,6 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-09-08 (America/Chicago)
+Last updated: 2026-09-26 (America/Chicago)
 
 ## Purpose
 
@@ -587,6 +587,7 @@ Worker recovery note:
 ### DroneOps Field Data Host
 
 - Capacity recovery, 2026-09-16: owner-approved root LV expansion from 54.37 to 74.37 GiB restored PostgreSQL availability without restart. The ext4 root is `/dev/ubuntu-vg/ubuntu-lv`; pre-expansion LVM metadata is retained under `/var/backups/issue-856-ubuntu-vg-before-expansion-20260916.conf` (root-only). See `docs/bs01-field-rack.md` for scope and point-in-time verification.
+- Capacity recovery, 2026-09-26: an owner-approved online expansion used the remaining 8,798 `ubuntu-vg` extents to grow the same root LV from 74.37 to 108.73 GiB; the ext4 filesystem became 106.7 GiB. A strict full-table classification found 35,373,006 definitively simulated telemetry rows and eight other rows. The simulator auto-tick was disabled through platform GitOps, then a guarded transaction removed only the simulated rows and restored all eight others. Post-change root availability was 100,687,859,712 bytes (93.8 GiB), PostgreSQL was ready, and Argo was Synced/Healthy. Pre-change LVM metadata is retained root-only at `/var/backups/issue-669-ubuntu-vg-before-capacity-expansion-20260926.conf`; it is not a database backup. Retention and capacity alerts remain owned by DroneOps issue #1101. See `docs/bs01-field-rack.md`.
 
 - Host: `bs01-data` (`192.168.1.109`, Dell OptiPlex 3046, Ubuntu Server 24.04 LTS)
 - Role: dedicated data node for the DroneOps field base station. This host is intentionally outside k3s and separate from the gateway node.
