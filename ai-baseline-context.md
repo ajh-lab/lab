@@ -1293,23 +1293,25 @@ Secret resolution model is **OpenBAO-first with `.env` fallback**.
 3. Automation scripts must use `automation/common/SecretResolver.psm1` and `Resolve-LabSecret`.
 4. Preferred reads are service-specific OpenBAO paths; fallback reads use `.env` only when necessary.
 
-### Temporary bootstrap safety gate (2026-09-26)
+### Temporary bootstrap safety gate (2026-09-27)
 
 Issue ajh-lab/droneops-platform#669 exposed a host password that had been
 reused across lab machines. The reachable host accounts and their OpenBao
-records were rotated, but the ignored local `.env` fallback still contains
-stale values for nine rotated host-password keys. Automatic approval review
-rejected an atomic correction of that local file as blocked by policy; it was
-not changed. The OpenBao bootstrap snapshot was independently reconciled and
-verified against the rotated host records.
+records were rotated. After `bs01-wknd03` returned to service, its exposed
+credential was rotated and the old SSH login was rejected. Its VM record and
+OpenBao bootstrap snapshot match. The five rotated BS01 host-password fields
+in the ignored local `.env` fallback were then reconciled from authoritative
+OpenBao records and verified against the bootstrap snapshot without printing
+values. An earlier broad local correction had been rejected by automatic
+approval review; only these five BS01 fields were changed afterward.
 
 Do not run `sync-env-to-openbao.ps1` or the mandatory
-`bootstrap-lab-context.ps1` below until the local `.env` fields are corrected
-and checked against OpenBao without printing values. The bootstrap script
-calls the sync script and would copy stale values back to OpenBao. Use the
-read-only `SecretResolver.psm1` helpers for context in the meantime. SPT01
-and `bs01-wknd03` remain unreachable with the exposed host password, and the
-Wiki.js administrator field needs separate application-credential disposition.
+`bootstrap-lab-context.ps1` below until the remaining rotated-host fields in
+the local `.env` fallback are checked and corrected without printing values.
+The bootstrap script calls the sync script and could copy stale values back
+to OpenBao. Use the read-only `SecretResolver.psm1` helpers for context in the
+meantime. Wiki.js administrator credential disposition is a separate
+application matter, outside DroneOps issue #669.
 
 ### AI Workstation Sudo Credential
 
