@@ -422,6 +422,12 @@ Current columns:
 - The BS01 DroneOps field k3s cluster uses `.kubeconfig-bs01-field.yaml` with
   API endpoint `https://192.168.1.110:6443`; its ArgoCD namespace is `argocd`
   and its DroneOps application is `droneops-platform`.
+- As verified 2026-09-27, all three BS01 K3s servers have Secret encryption
+  enabled after key rotation and re-encryption, with matching server hashes.
+  DroneOps runtime fields use native Kubernetes Secrets; the registry pull
+  credential remains ESO-owned under DroneOps #1087. Protected encrypted
+  snapshot/token generations and isolated restore evidence are on independent
+  `bs01-data`; see `docs/bs01-field-rack.md`. This is rack-local recovery.
 - For DroneOps BS01 live deployment, ArgoCD, NATS, Flyway, and runtime
   verification, use the BS01 field kubeconfig, not the main Raspberry Pi
   cluster, unless explicitly instructed otherwise.
