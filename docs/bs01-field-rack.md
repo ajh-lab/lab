@@ -49,6 +49,32 @@ The field k3s cluster is a three-server HA k3s install using embedded etcd. All 
   - Fields: `api_endpoint`, `primary_server`, `nodes`, `kubeconfig`
   - Treat `kubeconfig` as sensitive.
 
+### Encrypted runtime Secrets and local recovery (2026-09-27)
+
+All three K3s servers reported Secret encryption `Enabled`, rotation stage
+`reencrypt_finished`, and matching server encryption hashes after the
+documented HA enable and key-rotation sequence. K3s was restarted one server
+at a time; no host was rebooted. The BS01 DroneOps runtime now consumes two
+native Secrets for its database URL, NATS token, and recording-context
+projection token. The two runtime ExternalSecrets and their ESO-owned targets
+were removed after a guarded value-equivalent transfer. The registry pull
+ExternalSecret remains under DroneOps #1087 for artifact delivery.
+
+Independent `bs01-data` holds protected root-owned generations under
+`/srv/droneops/k3s-recovery/`: `2026-09-27-pre-encryption/`,
+`2026-09-27-encrypted/`, `2026-09-27-native-staged/`, and
+`2026-09-27-native-cutover/`. Directories are `0700`, artifacts `0600`.
+The final generation includes fresh encrypted etcd snapshots and matching
+server tokens/configuration from all three nodes, plus the exact K3s binary;
+source/destination SHA-256 checks passed. A loopback-only isolated restore
+from that generation started a ready API and returned metadata for nine
+namespaces, seven DroneOps deployments, and four Secret names including both
+native targets, without displaying values. The sandbox and transfer staging
+were removed. This is recovery on another rack host, not off-rack disaster
+recovery. DroneOps #670 owns a physical disconnected cold boot. The detailed
+operational record is in the platform repository's
+`docs/runbooks/bs01-local-secret-commissioning.md`.
+
 Verification from `bs01-wknd01`:
 
 ```bash
