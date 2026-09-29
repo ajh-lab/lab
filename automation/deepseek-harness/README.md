@@ -12,7 +12,7 @@ proxy.
 - API base: `http://192.168.1.123:4000/v1`
 - DSH provider: `AI Workstation LiteLLM` (`ai-workstation-litellm`)
 - Model: `qwen3.8-flash-next`
-- Context: `196608`
+- Context: `163840`
 - Max output tokens: `16384`
 - Installed web plugins:
   - `dsh-web` from `github:zhu1090093659/dsh-web`
