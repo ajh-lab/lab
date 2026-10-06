@@ -23,10 +23,11 @@ opencost:
         memory: 256Mi
   prometheus:
     internal:
-      enabled: true
+      enabled: false
       serviceName: prometheus-server
       namespaceName: observability
       port: 80
       scheme: http
     external:
-      enabled: false
+      enabled: true
+      url: http://192.168.1.50:9090

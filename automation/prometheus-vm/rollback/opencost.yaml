@@ -1,0 +1,10 @@
+opencost:
+  prometheus:
+    internal:
+      enabled: true
+      serviceName: prometheus-server
+      namespaceName: observability
+      port: 80
+      scheme: http
+    external:
+      enabled: false
