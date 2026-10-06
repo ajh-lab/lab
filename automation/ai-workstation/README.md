@@ -2,6 +2,11 @@
 
 This folder tracks automation and runbooks for the Fedora AI workstation (`192.168.1.123`).
 
+Current model route, 2026-10-06: [Flash Next IQ4_XS Vulkan MTP3 real-workload trial](../../docs/ai-workstation/flashnext-mtp3-workload-trial-20261006.md).
+The owner selected the faster Q5_K FR-Spec head with three-token drafting,
+one 262k slot and unchanged IQ4_XS trunk. The runbook records the active manual
+unit, unchanged client alias and preserved no-MTP rollback.
+
 ## OpenClaw Runtime (Side-by-Side with Hermes)
 
 - Installed: `OpenClaw 2026.5.7`
