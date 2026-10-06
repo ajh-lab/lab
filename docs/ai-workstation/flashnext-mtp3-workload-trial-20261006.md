@@ -41,7 +41,7 @@ long-context or engineering-quality acceptance.
 ## Evidence and limits
 
 The benchmark repository owns the detailed
-[paired result and exact launch arguments](https://github.com/AJHeitzman/llm-hardware-bench/blob/codex/flashnext-q5k-frspec-mtp-test-20261006/results/2026-10-06/gmktec-evo-x2-flashnext-vulkan-262k-q5k-frspec-mtp-screening.md).
+[paired result and exact launch arguments](https://github.com/AJHeitzman/llm-hardware-bench/blob/f1648965925073ae9f9498dfe1a1eb5cb998e0d8/results/2026-10-06/gmktec-evo-x2-flashnext-vulkan-262k-q5k-frspec-mtp-screening.md).
 With the same cold-cache requests, three-token drafting measured 41.80 output
 tok/s on an 8006-token coding prompt versus 24.79 without MTP, and 39.01 on a
 31785-token workflow rewrite versus 24.47. Two-token drafting was slower,
