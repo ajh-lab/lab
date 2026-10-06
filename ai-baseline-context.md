@@ -4,6 +4,14 @@ Last updated: 2026-09-26 (America/Chicago)
 
 ## Purpose
 
+Current ai-workstation model update (2026-10-06): the owner selected the
+[Flash Next IQ4_XS Vulkan MTP3 workload trial](docs/ai-workstation/flashnext-mtp3-workload-trial-20261006.md).
+The existing `qwen3.8-flash-next` alias now uses a Q5_K FR-Spec draft head,
+one 262144-token slot and 2048/2048 batches. The no-MTP manual unit remains
+intact for rollback. This newer runtime observation supersedes older model
+status entries below; full-context and engineering-quality acceptance remain
+under owner evaluation.
+
 This repository is the baseline operational context and working area for the home lab. It is intended to be AI-ingestable and kept current as infrastructure changes.
 
 ## AI Workspace Model
