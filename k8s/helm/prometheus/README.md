@@ -31,6 +31,7 @@ The node exporter and GPU exporter run as user systemd services on the workstati
 
 Prometheus retains samples for up to 90 days, with a 48 GB TSDB size ceiling.
 The earlier limit wins: sustained growth may shorten the effective history.
+Changing retention does not restore samples already deleted under the old 15-day limit.
 The local-path volume shares the control-plane node filesystem; its 8 GiB PVC
 request is not a filesystem quota. Check free space on that node and the
 Prometheus TSDB size regularly, and move the database to dedicated storage if
