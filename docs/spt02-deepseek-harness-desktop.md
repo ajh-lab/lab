@@ -37,8 +37,36 @@ configured. The model requires the existing ai-workstation/LiteLLM service.
   limited privileges, no automatic trigger.
 
 Desktop uses a separate home from the existing `.dsh-lab-iq4xs` web service.
-Existing web sessions and its knowledge MCP configuration were not migrated.
-The web task `DeepSeekHarness-FlashNext` continues serving port 3080.
+Browser projects and history were copied into Desktop on 2026-10-07 as
+described below. The web task `DeepSeekHarness-FlashNext` continues serving
+port 3080. Its knowledge MCP configuration was not migrated.
+
+## Browser project import
+
+The import copied 15 session histories and 50 attachment files from browser
+Harness `0.1.6-alpha.2`, retaining the original session IDs and project paths.
+Desktop now has `wd_radar` (11 main chats and three subagent histories) and
+`SPT` (one chat), alongside its existing `default-workspace` chat. The formerly
+ungrouped `C:\SPT` conversation is registered under the `SPT` project.
+
+Source data and destination data were backed up on SPT02 under:
+
+```text
+C:\Users\helios\AppData\Local\DeepSeekHarnessDesktopInstall\backups\browser-import-20261007-003412
+```
+
+`source` contains the hash-verified browser snapshot; `desktop-before` contains
+the Desktop data before import. `source-manifest.json` records relative paths
+and SHA-256 hashes. Import preserved existing Desktop history, merged the
+workspace registry and copied attachments without replacing unequal files.
+Both apps reported idle before Desktop was stopped for the import.
+
+This is a one-time copy, not ongoing synchronization. Browser data, project
+working directories, credentials, plugin packages and runtime configuration
+were not modified. Continue imported work in Desktop; future browser and
+Desktop conversations evolve independently. Desktop reads the historical V3
+logs through its newer persistence implementation; do not copy newer Desktop
+logs back into the older browser runtime.
 
 Official installer:
 <https://download.deepseek.com/desktop/dsh-latest-windows-x64.exe>.
