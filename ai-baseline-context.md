@@ -4,6 +4,13 @@ Last updated: 2026-09-26 (America/Chicago)
 
 ## Purpose
 
+SPT02 Desktop client update (2026-10-07): official DeepSeek Harness Desktop
+`0.2.0-rc.2` is installed for `helios`. Use **DeepSeek Harness Desktop - Lab**
+to load the separate `.dsh-lab-desktop` home and existing authenticated
+LiteLLM `qwen3.8-flash-next` route. Desktop authenticated HTTP, provider/default
+settings and a direct model completion passed; the port-3080 web service remains
+available. See [installation and recovery](docs/spt02-deepseek-harness-desktop.md).
+
 Current ai-workstation model update (2026-10-06): the owner selected the
 [Flash Next IQ4_XS Vulkan MTP3 workload trial](docs/ai-workstation/flashnext-mtp3-workload-trial-20261006.md).
 The existing `qwen3.8-flash-next` alias now uses a Q5_K FR-Spec draft head,
