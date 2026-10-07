@@ -35,6 +35,11 @@ configured. The model requires the existing ai-workstation/LiteLLM service.
   `lan_api_key`; the installation reused the existing DPAPI materialization.
 - Manual launch task: `DeepSeekHarness-Desktop-Manual`, interactive `helios`,
   limited privileges, no automatic trigger.
+- Launcher source:
+  `automation/deepseek-harness/scripts/Start-SPT02DeepSeekHarnessDesktop.ps1`.
+  The deployed copy is named `Start-LabDesktop.ps1`. It uses
+  `Start-Process -Wait` with separate timestamped stdout/stderr logs so the
+  redirecting PowerShell process remains alive for Desktop's lifetime.
 
 Desktop uses a separate home from the existing `.dsh-lab-iq4xs` web service.
 Browser projects and history were copied into Desktop on 2026-10-07 as
@@ -76,6 +81,30 @@ Authenticode status was `Valid`, signed by Hangzhou DeepSeek Artificial
 Intelligence Co., Ltd.; silent installer exit code was 0.
 
 ## Verification and recovery
+
+### EPIPE updater error corrected on 2026-10-07
+
+The initial launcher used `& DeepSeek Harness.exe` with PowerShell stream
+redirection. Windows PowerShell returned immediately for the GUI executable
+and exited, leaving Desktop with closed output pipes. The update checker's
+later `console.info` call raised `EPIPE: broken pipe, write` in the Electron
+main process. The failed installation's launcher task was Ready and its
+PowerShell parent no longer existed while Desktop remained running.
+
+An isolated delayed-write test using the installed Electron executable
+reproduced `stdout:EPIPE` and `stderr:EPIPE` with that launch method. The same
+test using `Start-Process -Wait -RedirectStandardOutput
+-RedirectStandardError` succeeded. The corrected launcher was deployed after
+confirming all 16 sessions were idle. After restart, its task remained Running,
+its PowerShell parent remained present, updater log writes succeeded with no
+EPIPE matches, and authenticated Desktop/provider checks passed. Imported
+sessions remained available. The app and model versions were not changed.
+
+The previous launcher is retained on SPT02 at
+`Start-LabDesktop.ps1.before-epipe-fix-20261007-004146` in the launcher directory.
+Do not restore its asynchronous redirection pattern.
+
+### Readiness checks
 
 - Desktop processes and Host were running in the active `helios` RDP session.
 - Authenticated Desktop HTTP returned 200.
