@@ -88,6 +88,16 @@ signed artifacts; it holds no unique field operational data.
 
 ## Evidence boundary
 
-This source phase defines the service and executable TLS regression checks.
-Deployment, production trust issuance and live bundle acceptance are not yet
-recorded. They must be recorded before claiming platform #1087 completion.
+Lab PRs #41-#43 are merged. On 2026-10-09 the dedicated nginx service is active
+on the documented runner, with protected TLS files and the BS01 certificate
+allowlist. A real BS01 client request succeeds and an anonymous request is
+rejected. Signing custody remains off BS01 and off the catalog host. Device
+access, pinned SSH and the fixed read-only Flyway probe are installed; direct
+Secret reads, pod exec, PVC deletion and unrelated sudo commands are denied.
+
+The service is recorded as NetBox service 2 on VM `lab-gha-runner-01` and at
+[Wiki.js](https://wikijs.192.168.1.80.sslip.io/en/services/droneops-release-catalog),
+with API readback verification. The platform issue separately tracks signed
+bundle consumption, all-node imports, ownership handoff, upgrade and rollback.
+Catalog installation alone does not establish those results or physical
+isolation/cold boot, which remain under platform #670.
