@@ -14,6 +14,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  droneops-release-catalog:
+    name: DroneOps Catalog Mutual TLS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install test dependencies
+        run: sudo apt-get update && sudo apt-get install -y nginx openssl
+      - name: Verify real TLS authentication and read-only serving
+        run: python3 -m unittest automation.droneops.releases.tests.test_catalog
+
   issue-link:
     name: Owning Issue Link
     runs-on: ubuntu-latest
