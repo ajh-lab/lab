@@ -1,0 +1,99 @@
+# This identity is provisioned separately by an approved client CSR.
+# Helm must use HELM_DRIVER=configmap; this role grants no Secret access.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: droneops-bs01-updater-inventory
+rules:
+  - apiGroups: [""]
+    resources: [nodes]
+    verbs: [get, list]
+  - apiGroups: [""]
+    resources: [namespaces]
+    resourceNames: [droneops]
+    verbs: [get, patch, update]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: droneops-bs01-updater-inventory
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: droneops-bs01-updater-inventory
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: droneops-bs01-updater
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: droneops-bs01-updater
+  namespace: droneops
+rules:
+  - apiGroups: [""]
+    resources: [configmaps, services, serviceaccounts]
+    verbs: [get, list, watch, create, update, patch, delete]
+  - apiGroups: [""]
+    resources: [persistentvolumeclaims]
+    verbs: [get, list, watch, create, update, patch]
+  - apiGroups: [""]
+    resources: [pods, events]
+    verbs: [get, list, watch]
+  - apiGroups: [apps]
+    resources: [deployments, statefulsets, replicasets]
+    verbs: [get, list, watch, create, update, patch, delete]
+  - apiGroups: [batch]
+    resources: [jobs]
+    verbs: [get, list, watch, create, update, patch, delete]
+  - apiGroups: [networking.k8s.io]
+    resources: [ingresses, networkpolicies]
+    verbs: [get, list, watch, create, update, patch, delete]
+  - apiGroups: [cert-manager.io]
+    resources: [certificates]
+    resourceNames: [droneops-console-tls]
+    verbs: [get, update, patch]
+  - apiGroups: [traefik.io]
+    resources: [middlewares]
+    resourceNames: [droneops-console-auth, droneops-https-redirect, droneops-strip-prefix]
+    verbs: [get, update, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: droneops-bs01-updater
+  namespace: droneops
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: droneops-bs01-updater
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: droneops-bs01-updater
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: droneops-bs01-updater-snapshots
+  namespace: longhorn-system
+rules:
+  - apiGroups: [longhorn.io]
+    resources: [recurringjobs]
+    resourceNames: [droneops-attachment-snapshots]
+    verbs: [get, update, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: droneops-bs01-updater-snapshots
+  namespace: longhorn-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: droneops-bs01-updater-snapshots
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: droneops-bs01-updater
