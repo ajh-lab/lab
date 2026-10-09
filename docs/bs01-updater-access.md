@@ -50,7 +50,7 @@ PTY or password login is needed. Node sudo rules allow only these commands:
 
 - `k3s ctr -n k8s.io images list`
 - `k3s ctr -n k8s.io images check --quiet`
-- `k3s ctr -n k8s.io images import --digests --base-name REPOSITORY -`,
+- `k3s ctr -n k8s.io images import --local --digests --base-name REPOSITORY -`,
   with the repository constrained by an anchored sudo argument regex.
 
 On the data node, grant only the exact fixed
@@ -80,3 +80,10 @@ Secrets or persistent volumes as an updater recovery step.
 
 Provisioning, credential tests and Helm activation remain separate measured
 evidence; source configuration alone does not prove live access or an install.
+
+On 2026-10-09, the installed source advanced to platform `6fcb0393` and all
+three exact sudo rules were updated to require local import mode. `visudo`
+passed and unrelated K3s/sudo commands remained denied. The fixed Flyway
+probe read 67. Bootstrap registered independently verified product 1.1.0 at
+Helm revision 2 after the authorized ownership handoff. The final live update
+and rollback record belongs to platform `docs/context/issue-1087-acceptance.md`.

@@ -83,6 +83,23 @@ matches allowlisted repository names independently of prior pull records.
 Live success after applying this policy must be recorded separately; the
 configuration test only checks its scope and selected policy.
 
+On 2026-10-09, merged lab #45 (`a563c9d`) was installed on all three BS01
+servers. Sequential K3s service restarts completed with three Ready nodes,
+effective policy and all seven platform deployments plus NATS checked after
+each server. A disposable migration-image Pod using `Never`, no pull secret
+and no mounted Secret succeeded; it was removed. No OS reboot or physical
+cold boot ran. The policy must be restored explicitly after recovery from
+the tested pre-handoff K3s snapshot, which predates this configuration.
+
+The reviewed importer verified all 35 signed immutable references ready and
+unpacked on all three nodes. The separate 25-reference infrastructure audit
+also passed on every node after creating 16 previously absent aliases from
+approved content without overwriting existing references. Helm baseline
+revision 2 and the subsequent sequential cleanup of legacy pull-secret
+references left eight ready workloads with digest images, `Never`, and no
+`imagePullSecrets`. Native Secret identities and content hashes were unchanged.
+See platform `docs/context/issue-1087-acceptance.md` for final updater outcomes.
+
 ## Verification
 
 Run `python -m unittest automation.droneops.releases.tests.test_oci_archive`.
