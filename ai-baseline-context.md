@@ -4,6 +4,16 @@ Last updated: 2026-09-26 (America/Chicago)
 
 ## Purpose
 
+DroneOps release catalog (2026-10-09): `lab-gha-runner-01` (`192.168.1.48`)
+serves `https://releases.droneops.home.arpa:8443/releases/catalog.json` through
+the dedicated `droneops-release-catalog.service`. BS01 uses outbound mTLS and
+an individually allowlisted client identity; release verification uses a public
+Ed25519 key, while the private signer remains in OpenBao-backed operator custody.
+The service is not a field runtime dependency. See
+[catalog custody and recovery](docs/droneops-release-catalog.md), NetBox service
+2, and Wiki.js `services/droneops-release-catalog`. Platform #1087 owns live
+updater acceptance; physical isolation and cold boot remain #670.
+
 Current ai-workstation model update (2026-10-06): the owner selected the
 [Flash Next IQ4_XS Vulkan MTP3 workload trial](docs/ai-workstation/flashnext-mtp3-workload-trial-20261006.md).
 The existing `qwen3.8-flash-next` alias now uses a Q5_K FR-Spec draft head,
