@@ -50,3 +50,5 @@ jobs:
 
       - name: Validate BS01 PKI GitOps contracts
         run: python3 -m unittest k8s.field.bs01.tests.test_pki_manifests
+      - name: Validate exact offline image repository policy
+        run: python3 -m unittest k8s.field.bs01.tests.test_offline_images

@@ -38,12 +38,50 @@ mandatory before signing and every device activation.
    inventory. Review that configuration/layer digests match the selected
    original image. Only after verification, remove task-owned raw exports.
 
-The archive's `appliance` tag is a packaging label; the updater's `--digests`
-and `--base-name` import makes the signed immutable reference available. A
+The archive's `appliance` tag is a packaging label; the updater's `--local`,
+`--digests` and `--base-name` import makes the signed immutable reference available. A
 cached immutable reference does not by itself prove an existing infrastructure
 tag is available or that every Pod uses `Never`/`IfNotPresent`. Audit those
 separately before claiming restart independence. Do not silently modify
 infrastructure tags or manifests as a side effect of artifact preparation.
+
+## Kubelet credential verification
+
+On K3s 1.36.3, the live default `NeverVerifyPreloadedImages` policy still
+requires matching credentials for an image previously pulled by kubelet.
+Containerd and CRI can report that image present while a Pod without those
+credentials fails with `ErrImageNeverPull`. This was observed in the first
+BS01 baseline migration hook; Helm was interrupted before application rollout,
+and the pending hook was removed. The failed Helm revision remains recorded.
+
+The appliance profile supplies
+`k8s/field/bs01/updater/90-droneops-offline-images.conf` as a root-owned kubelet
+drop-in. It selects `NeverVerifyAllowlistedImages` with exactly 35 repository
+names from the reviewed application and infrastructure inventory. There are
+no registry-wide wildcards. Other repositories require credential verification.
+The allowlist granularity is a repository, not a tag or digest: any Pod allowed
+onto the node can use a locally present image from those repositories. Signed
+bundle verification and the restricted importer remain the artifact admission
+boundary; this kubelet setting is not a substitute for signature verification
+or Kubernetes workload authorization. Do not disable the feature gate, use
+`NeverVerify`, or delete kubelet credential records as a shortcut.
+
+After the separate operational approval and a current recovery point, install
+the reviewed file as root:root mode 0644 into
+`/var/lib/rancher/k3s/agent/etc/kubelet.conf.d/`. Restart the `k3s` service on
+one server at a time. Require three Ready nodes before each restart, then
+verify that node's API readiness, effective `/configz` policy and all workload
+health before proceeding. This is a service restart, not a physical cold boot.
+If readiness or policy verification fails, restore only the prior task-owned
+drop-in (or remove the newly introduced file), restart that same service and
+reverify quorum and workloads. Preserve other kubelet configuration files.
+
+K3s documents this [drop-in directory](https://docs.k3s.io/installation/configuration).
+The pinned Kubernetes 1.36.3
+[policy implementation](https://github.com/kubernetes/kubernetes/blob/v1.36.3/pkg/kubelet/images/pullmanager/image_pull_policies.go)
+matches allowlisted repository names independently of prior pull records.
+Live success after applying this policy must be recorded separately; the
+configuration test only checks its scope and selected policy.
 
 ## Verification
 
