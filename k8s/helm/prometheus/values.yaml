@@ -4,6 +4,12 @@
 prometheus-pushgateway:
   enabled: false
 
+serverFiles:
+  prometheus.yml:
+    rule_files: null
+    remote_write:
+      - url: http://192.168.1.50:9090/api/v1/write
+
 extraScrapeConfigs: |
   - job_name: litellm-ai-workstation
     metrics_path: /metrics
@@ -31,6 +37,14 @@ extraScrapeConfigs: |
           host: ai-workstation-evox2
 
 server:
+  # The Pi keeps in-cluster service discovery but forwards samples to the VM.
+  # Explicit flags exclude server-only TSDB options in agent mode.
+  defaultFlagsOverride:
+    - --config.file=/etc/config/prometheus.yml
+    - --storage.agent.path=/data/agent
+    - --web.enable-lifecycle
+    - --agent
+  remoteWrite: []
   service:
     type: NodePort
     nodePort: 32091
@@ -38,6 +52,19 @@ server:
     enabled: true
     storageClass: local-path
     size: 8Gi
+  retention: 90d
+  retentionSize: 48GB
+  startupProbe:
+    enabled: true
+    failureThreshold: 40
+    periodSeconds: 15
+    timeoutSeconds: 10
+  readinessProbeFailureThreshold: 12
+  readinessProbePeriodSeconds: 10
+  readinessProbeTimeout: 10
+  livenessProbeFailureThreshold: 20
+  livenessProbePeriodSeconds: 30
+  livenessProbeTimeout: 30
   resources:
     requests:
       cpu: 200m

@@ -1247,10 +1247,14 @@ Operational note for future agents:
 ### Prometheus
 
 - Namespace: `observability`
-- Helm chart: `prometheus-community/prometheus` (`29.2.0`)
-- Service: NodePort `32091`
-- URL: `http://192.168.1.80:32091`
+- Helm chart: `prometheus-community/prometheus` (`29.14.0`)
+- Pi k3s service: NodePort `32091`; now an agent that scrapes in-cluster targets
+  and remote-writes to the VM, not a query endpoint.
+- Query/storage server: `lab-prometheus01` (`192.168.1.50`), Prometheus 3.13.0
+  at `http://192.168.1.50:9090`, with 90-day/48-GB retention.
 - Lab repo Helm values: `k8s/helm/prometheus/values.yaml`
+- VM configuration, migration evidence, and rollback:
+  `automation/prometheus-vm/README.md`. The old Pi TSDB remains on its PVC.
 - Scrapes ai-workstation metrics using static targets:
   - `litellm-ai-workstation`: `192.168.1.123:4001`
   - `ai-workstation-node`: `192.168.1.123:9100`
@@ -1262,6 +1266,9 @@ Operational note for future agents:
 - Helm chart: `grafana/grafana` (`10.5.15`)
 - Service: NodePort `32030`
 - URL: `http://192.168.1.80:32030`
+- Prometheus datasource queries `http://192.168.1.50:9090`. Keep the
+  provisioned UID `PBFA97CFB590B2093`; `initChownData` is disabled for the
+  existing local-path PVC because its directories reject chown on restart.
 - Grafana credentials are stored in `.env` (`GRAFANA_ADMIN_PASSWORD`, user `admin`).
 - LiteLLM/Hermes usage dashboard: `http://192.168.1.80:32030/d/litellm-hermes-usage/litellm-hermes-usage`
 - Dashboard source of truth: `lab-monitoring` repo (`dashboards/grafana/litellm-hermes-usage.json`); the old file at `k8s/helm/grafana/dashboards/litellm-hermes-usage.json` now contains only a pointer
@@ -1301,7 +1308,7 @@ Operational note for future agents:
 - Helm chart: `opencost/opencost` (`2.5.12`)
 - Service: NodePort `32093` (UI)
 - URL: `http://192.168.1.80:32093`
-- OpenCost is configured to use internal Prometheus at `prometheus-server.observability.svc.cluster.local`.
+- OpenCost queries the external Prometheus server at `http://192.168.1.50:9090`.
 
 ### Falco
 
