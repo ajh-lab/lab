@@ -23,6 +23,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y nginx openssl
       - name: Verify real TLS authentication and read-only serving
         run: python3 -m unittest automation.droneops.releases.tests.test_catalog
+      - name: Verify offline OCI payload preservation and rejection
+        run: python3 -m unittest automation.droneops.releases.tests.test_oci_archive
 
   issue-link:
     name: Owning Issue Link
