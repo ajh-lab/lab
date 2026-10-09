@@ -14,6 +14,17 @@ The service is not a field runtime dependency. See
 2, and Wiki.js `services/droneops-release-catalog`. Platform #1087 owns live
 updater acceptance; physical isolation and cold boot remain #670.
 
+BS01 field ownership changed during the authorized #1087 handoff: the signed
+Helm baseline is registered and catalog-selected product 1.1.1 installed at
+revision 3. The release is `droneops-platform` in namespace `droneops`, using
+`HELM_DRIVER=configmap`. Argo reconciliation and Image Updater promotion are
+suspended for this application; its Application and finalizer remain intact.
+Main merges and image builds no longer deploy automatically to BS01. Do not
+resume development automation as a routine deployment step. Consult platform
+`docs/context/issue-1087-acceptance.md` for later rollback/current-revision
+evidence and `docs/runbooks/bs01-appliance-release-recovery.md` before updates.
+The native Secret values remain unchanged, and physical #670 is undispatched.
+
 Current ai-workstation model update (2026-10-06): the owner selected the
 [Flash Next IQ4_XS Vulkan MTP3 workload trial](docs/ai-workstation/flashnext-mtp3-workload-trial-20261006.md).
 The existing `qwen3.8-flash-next` alias now uses a Q5_K FR-Spec draft head,
