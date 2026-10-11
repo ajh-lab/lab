@@ -1402,6 +1402,19 @@ Bootstrap behavior:
 
 ## Operational Notes for Future AI Agents
 
+### BS01 network and recovery update (2026-10-11)
+
+BS01 now uses rack LAN 192.168.0.0/24 behind the ER605, not the old
+192.168.1.x worker addresses. Gateway/data/workers are .2/.3/.4/.5/.6;
+gateway maintenance Wi-Fi is 192.168.1.108. The ingress VIP is 192.168.0.10.
+The ER605 WAN has an upstream reservation for 192.168.1.139 and restricted
+home HTTPS forwarding. Read `k8s/field/bs01/ingress-ha/README.md` before
+changing networking, NATS placement, Longhorn recovery, or appliance updates.
+The owner accepts brief automatic service recovery, not an assertion of
+zero-downtime operation. Aircraft failsafes are separate from cluster recovery.
+
+### General operating rules
+
 1. Run `automation/agent/scripts/bootstrap-lab-context.ps1` first.
 2. Load inventory context from `network_devices.csv` first.
 3. Resolve credentials with `Resolve-LabSecret`; do not implement new direct `.env` reads in automation scripts.
