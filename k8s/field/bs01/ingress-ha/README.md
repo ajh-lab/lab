@@ -165,7 +165,17 @@ prove authenticated user workflows or live aircraft continuity.
 - Initial wknd03 test passed at 170 seconds before the DNS/multipath fixes.
 - Initial wknd01 test failed its bounded window; restored and repaired above.
 - Wknd02 passed at 229 seconds with NATS moved to wknd01. Victim restored Ready.
+- Wknd01 retest passed at 239 seconds after the DNS/multipath fixes, with
+  NATS moved off the unavailable node. Victim restored Ready.
+- Wknd03 retest passed at 311 seconds with fleet/map volumes moved to wknd01
+  without manual intervention. Victim restored Ready.
 
 Elapsed times start at shutdown initiation, including orderly host-service and
 storage-unmount delays; they are not an availability SLA or measured durations
 of every individual endpoint's outage.
+
+Known separate warning: ExternalSecret droneops-registry-pull reports that its
+OpenBao SecretStore is not ready. These tests used images already present on
+the workers; they do not prove fresh-node image pulls or disconnected bootstrap.
+Keep signed-profile integration, authenticated workflow acceptance, non-home
+ACL denial, and physical/partition validation open in lab#48 / platform#670.
