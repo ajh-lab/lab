@@ -17,8 +17,9 @@ the console with CA and hostname validation. This is not a backend health test.
 Home URL: https://droneops.192.168.1.139.sslip.io/
 Rack URL: https://droneops.192.168.0.10.sslip.io/
 
-ER605 WAN1 currently obtains 192.168.1.139 by DHCP, MAC 18:69:45:b2:da:d6.
-An upstream reservation is still required before treating this URL as durable.
+ER605 WAN1 obtains 192.168.1.139 by DHCP, MAC 18:69:45:b2:da:d6.
+An upstream UniFi reservation was saved and read back on 2026-10-11 after
+checking active clients and existing reservations for conflicts.
 No upstream Internet port forward was added. sslip.io resolution also depends
 on DNS availability; this is not disconnected-field DNS acceptance.
 
@@ -78,8 +79,93 @@ before doing so. Do not apply full exported Kubernetes objects blindly.
   reports base station access code unavailable; authenticated login was not
   tested and no credentials were changed.
 
-These are controlled VIP-owner failovers, not physical node power-loss tests.
-Fleet-coordination, mission-control, NATS and raster still have singleton
-deployments; several use RWO volumes. Full application continuity requires
-separate backend/storage recovery validation. The router, switch and data host
-also remain single points of failure. Do not claim whole-application HA.
+The initial checks above are controlled VIP-owner failovers, not physical node
+power-loss tests. The runtime-loss tests below extend this evidence, but are
+still not physical power cuts. Fleet-coordination, mission-control, NATS and
+raster remain singletons; several use RWO volumes. The router, switch and data
+host remain single points of failure. Do not claim whole-application HA.
+
+## Automatic recovery follow-up
+
+The owner accepts a brief interruption followed by automatic recovery; zero
+downtime is not the requirement. Do not claim authenticated workflows have been
+tested based on HTTP 401 alone. The disabled access-code control is an intentional
+placeholder in apps/web/src/App.tsx, not evidence of a session outage.
+
+NATS was pinned to wknd02 to avoid NodePort source NAT conflicting with the
+gateway-only NetworkPolicy. That pin is now removed. The gateway runs the
+loopback-only HAProxy configuration in this directory, checking the NATS INFO
+greeting on all three workers. Its DRONEOPS_NATS_URL is nats://127.0.0.1:30422.
+The external nats-gateway Service uses externalTrafficPolicy Local, preserving
+the gateway source IP. The NetworkPolicy permits only 192.168.0.2/32 on 4222
+instead of the stale 192.168.1.108/32. No NATS authentication or role was changed.
+Gateway env backup: /etc/droneops-gateway/gateway.env.before-ha (root-only).
+HAProxy package-default backup: /etc/haproxy/haproxy.cfg.before-bs01.
+Wait for backend health checks to settle before switching clients; HAProxy 2.8
+initially treats servers as up and does not support the newer init-state option.
+
+NATS moved from wknd02 to wknd03 during rollout. Longhorn reattached its volume,
+the broker reported health ok, three streams and nine consumers, and connections
+from the gateway's wired IP were observed after the move.
+
+Longhorn nodeDownPodDeletionPolicy is now
+delete-both-statefulset-and-deployment-pod, also recorded in its Argo values.
+Deployment and StatefulSet not-ready/unreachable tolerations are 60 seconds.
+This allows replacement after Kubernetes detects node failure; it is not an
+instant failover or an assertion that network partitions are equivalent to
+confirmed power loss. Physical fencing and partition testing remain separate.
+Merge these tolerations with any existing workload-specific tolerations.
+
+For rollback, restore the saved NATS StatefulSet/Service specs and gateway env
+as a coordinated change, then remove the proxy after verifying direct access.
+Restore Longhorn's do-nothing policy and original workload tolerations if
+automatic failed-node pod cleanup must be disabled. Configuration backups live
+under /root/bs01-ingress-ha-backup on wknd01. No PVC is deleted by this runbook.
+
+Aircraft safety is tracked separately in ajh-lab/droneops-platform#1170:
+independent pilot takeover, flight-controller link-loss behavior, valid home/RTH
+prerequisites, and stale-command rejection. Never rely on the failed platform to
+issue a return command. No aircraft settings were changed during this work.
+
+## DNS and storage host prerequisites
+
+Run ensure-dns-ha.sh on a control-plane host. CoreDNS's K3s-managed manifest
+already spreads pods across hostnames but does not specify replicas; manage its
+replica count as three without editing the generated manifest. Verify one Ready
+DNS pod per worker after commissioning and K3s upgrades. Rollback is scaling to
+the previously saved count (one), which restores the former DNS failure risk.
+
+Install longhorn-multipath.conf at /etc/multipath/conf.d/bs01-longhorn.conf on
+each worker, then validate with multipath -t and run multipathd reconfigure.
+This excludes IET VIRTUAL-DISK devices used by the Longhorn v1 engine, not
+physical disks or all multipath devices. Confirm the host has no unrelated IET
+storage before applying. Never flush an in-use device mapping. During this
+repair, reconfiguration itself released wknd03's unused mpatha mapping; the
+subsequent guarded flush found no device and did not perform a removal.
+Rollback removes this one drop-in and reconfigures multipath, but can reintroduce
+the mounting conflict. No filesystem formatting or PVC deletion is involved.
+
+The first wknd01 runtime-loss test exceeded the bounded recovery window. Its
+singleton DNS delayed CSI detach, then host multipath claimed the GIS volume
+on wknd03. Both defects were corrected before further tests. Restoring node
+availability by the safety timer is not counted as failover success.
+
+## Runtime-loss acceptance
+
+Tests stop K3s and its containers on one worker with k3s-killall.sh, with a
+nine-minute safety restore timer and a finally path that restores K3s. Tests
+wait for healthy active Longhorn volumes before the next outage. No test
+removes power or simulates an asymmetric network partition.
+
+Success requires the victim still NotReady, all seven backend component types
+Ready on other workers, at least two Ready web pods, home HTTPS 200, session
+HTTP 401, and a NATS INFO greeting through the gateway proxy. This does not
+prove authenticated user workflows or live aircraft continuity.
+
+- Initial wknd03 test passed at 170 seconds before the DNS/multipath fixes.
+- Initial wknd01 test failed its bounded window; restored and repaired above.
+- Wknd02 passed at 229 seconds with NATS moved to wknd01. Victim restored Ready.
+
+Elapsed times start at shutdown initiation, including orderly host-service and
+storage-unmount delays; they are not an availability SLA or measured durations
+of every individual endpoint's outage.
