@@ -1328,6 +1328,19 @@ Secret resolution model is **OpenBAO-first with `.env` fallback**.
 3. Automation scripts must use `automation/common/SecretResolver.psm1` and `Resolve-LabSecret`.
 4. Preferred reads are service-specific OpenBAO paths; fallback reads use `.env` only when necessary.
 
+### Password change and recovery policy
+
+- Do not reset, rotate, or otherwise change any lab host or service account password unless Adam explicitly requests that specific change or approves it before execution. An SSH key, sudo failure, broken helper, or general troubleshooting request is not approval to change a password.
+- Before an approved change, identify the account, the authoritative OpenBAO path and field, the existing fallback copies, and a recovery path. Never assume a readable OpenBAO value is the current host password; verify authentication separately without printing the value.
+- Treat the host change and OpenBAO update as one operation. Preserve a rollback path until a fresh OpenBAO read and an actual login or sudo check both succeed with the new value. Reconcile any documented local bootstrap fallback so a later sync cannot overwrite OpenBAO with an old password. Record only the path, field, approval, and verification status, never the value.
+- If OpenBAO cannot be updated or either verification fails, stop and report the mismatch immediately. Do not silently leave a host-only password, guess a replacement, or run a broad bootstrap sync as a recovery shortcut.
+
+### OpenBAO token exposure
+
+- A root token is currently persisted in the Windows user environment and in the ai-workstation `helios` user environment file. This is a temporary high-risk access pattern: processes running as those users can inherit the token. Do not add further root-token consumers.
+- The bootstrap snapshot `secret/homelab/bootstrap/env` also contains root-token fields. A token allowed to read that whole KV v2 secret can retrieve those fields, so `hermes-bootstrap-env-read` must not be treated as least privilege merely because its policy is read-only.
+- Migrate the ai-workstation password and other runtime-only fields to dedicated secrets, issue narrowly scoped renewable tokens for each consumer, verify those consumers, remove the persisted root-token environment variables and stale service drop-ins, then rotate the exposed root token after checking dependencies. Make those live credential changes only with explicit approval and a rollback plan.
+
 ### Temporary bootstrap safety gate (2026-09-27)
 
 Issue ajh-lab/droneops-platform#669 exposed a host password that had been
@@ -1354,6 +1367,7 @@ application matter, outside DroneOps issue #669.
 - KV mount: `secret`
 - Field/key: `AI_WORKSTATION_PASSWORD`
 - Purpose: sudo password for the `helios` user on `ai-workstation-evox2`.
+- On 2026-10-12, the OpenBAO field was readable but its value initially failed `sudo` on the host. At Adam's explicit request, the host password was restored from that field; a fresh OpenBAO read and `sudo -S -k` succeeded afterward. This is a verified recovery, not permission for future automatic resets.
 - Do not copy the password into `ai-baseline-context.md`, Jira, Slack, command logs, or committed files.
 - To test resolution without printing the secret: `openbao-env-get AI_WORKSTATION_PASSWORD >/dev/null && echo OK`
 - Hermes integration: Hermes terminal sudo support reads `SUDO_PASSWORD` from its process environment. Do not put the password in `~/.hermes/config.yaml`; use the systemd wrapper/drop-ins that resolve the value from OpenBao at service start.
