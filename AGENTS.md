@@ -70,6 +70,14 @@ for their own scope.
 - Never print, commit, or persist credentials, tokens, private keys, connection
   strings, environment dumps, or secret values. Use documented OpenBAO and
   External Secrets patterns and record only secret paths and field names.
+- Do not reset, rotate, or otherwise change a lab host or service account
+  password unless Adam explicitly requests that exact change or approves it
+  before execution. Troubleshooting access is not approval to change it.
+- For an approved password change, identify its OpenBAO path and field first.
+  Update the authoritative OpenBAO value, verify a fresh read and actual login
+  or sudo with the new value, and reconcile any documented bootstrap fallback.
+  If either side cannot be verified, stop and report the mismatch; never leave
+  an undocumented host-only password or run a broad `.env` sync to repair it.
 - Prefer repository and GitOps changes over imperative live-cluster mutation.
   Verify the actual immutable deployed revision before reporting readiness.
 - Use the BS01 field kubeconfig for BS01 work and the main lab kubeconfig only
