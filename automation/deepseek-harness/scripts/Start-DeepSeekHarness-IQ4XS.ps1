@@ -14,7 +14,7 @@ $envPath = Join-Path $repoRoot '.env'
 $resolverPath = Join-Path $repoRoot 'automation\common\SecretResolver.psm1'
 $patchTemplatePath = Join-Path $repoRoot 'automation\deepseek-harness\config\iq4xs.cordis.patch.yml'
 $modelId = 'qwen3.8-flash-next'
-$modelContextWindow = 131072
+$modelContextWindow = 163840
 $modelMaxTokens = 16384
 $modelTimeoutMs = 5400000
 
