@@ -2,6 +2,21 @@
 
 Last updated: 2026-09-26 (America/Chicago)
 
+Current ai-workstation context test (2026-10-13): Halogen 0.18.1 serves the
+existing Flash Next IQ4_XS alias with two 262144-token conversations sharing a
+524288-position KV pool. The owner requested this increase for testing. Live
+health confirms context/slot_ctx 262144, slots 2, pool 524288. Container
+`halogen-two-262k-20261013` remains manual, without autostart. Thinking low,
+vision, sampling defaults and prompt cache mode 2 are preserved. LiteLLM and
+saved local Windows DSH root/web profiles advertise 262144; reload DSH before
+testing. Input plus output must fit within each window. Startup snapshot had
+21374 MiB available RAM and 1 MiB swap used; full dual-long-context behavior
+remains untested. This supersedes older Vulkan and smaller-context entries below.
+The stopped `halogen-two-slots-20261013` container and private proxy snapshot at
+`/home/helios/benchmarks/halogen-two-262k-20261013/litellm-before.yaml` provide
+rollback; check active requests and unload the current engine before restoring.
+Evidence and the canonical profile are in the sibling `llm-hardware-bench` repo.
+
 ## Purpose
 
 DroneOps release catalog (2026-10-09): `lab-gha-runner-01` (`192.168.1.48`)
