@@ -2,6 +2,11 @@
 
 Last updated: 2026-09-26 (America/Chicago)
 
+
+LiteLLM LAN access policy (2026-10-13): source IP `192.168.86.2` is blocked
+Monday-Friday 08:00-17:00 America/Chicago on port 4000; ordinary authenticated
+access applies outside those hours. See [policy and rollback](automation/ai-workstation/litellm-lan-proxy/README.md).
+
 ## Purpose
 
 DroneOps release catalog (2026-10-09): `lab-gha-runner-01` (`192.168.1.48`)
