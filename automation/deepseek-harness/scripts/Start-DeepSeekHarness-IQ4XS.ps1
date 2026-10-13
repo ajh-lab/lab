@@ -14,7 +14,7 @@ $envPath = Join-Path $repoRoot '.env'
 $resolverPath = Join-Path $repoRoot 'automation\common\SecretResolver.psm1'
 $patchTemplatePath = Join-Path $repoRoot 'automation\deepseek-harness\config\iq4xs.cordis.patch.yml'
 $modelId = 'qwen3.8-flash-next'
-$modelContextWindow = 131072
+$modelContextWindow = 262144
 $modelMaxTokens = 16384
 $modelTimeoutMs = 5400000
 
@@ -180,7 +180,7 @@ if (Test-Path -LiteralPath (Join-Path $bundledNodeBin 'node.exe')) {
 
 Set-Location -LiteralPath $Workspace
 
-$args = @('--yes', '@deepseek-ai/dsh@0.1.6-alpha.2', 'web', '--port', "$Port")
+$args = @('--yes', '@deepseek-ai/dsh@0.2.0-rc.2', 'web', '--port', "$Port")
 if ($NoOpen) {
   $args += '--no-open'
 }

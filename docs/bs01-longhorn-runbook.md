@@ -46,6 +46,23 @@ sudo modprobe iscsi_tcp
 
 The Longhorn disk is mounted by UUID in `/etc/fstab` with `noatime` at `/var/lib/longhorn`.
 
+Each k3s node must also have a systemd drop-in at
+`/etc/systemd/system/k3s.service.d/20-longhorn-mount.conf` so k3s cannot start
+against an unmounted directory:
+
+```ini
+[Unit]
+RequiresMountsFor=/var/lib/longhorn
+After=var-lib-longhorn.mount
+
+[Service]
+ExecStartPre=/usr/bin/mountpoint -q /var/lib/longhorn
+```
+
+After creating or changing the drop-in, run `sudo systemctl daemon-reload`.
+Confirm `findmnt /var/lib/longhorn` reports the dedicated NVMe partition before
+enabling or starting k3s.
+
 ## Verification
 
 Run these commands from `bs01-wknd01`:
@@ -159,6 +176,8 @@ Do not expose the Longhorn UI publicly without authentication and network contro
 
 - Keep the default replica count at `3` while all three worker nodes are available.
 - Check Longhorn node and disk health after any field-rack power event.
+- If the mount is absent, keep k3s stopped, validate the filesystem read-only, and compare the Longhorn disk UUID with the UUID expected by the Longhorn node custom resource before restoring the mount.
+- Preserve any files written to the unmounted OS directory separately until all attached volumes have rebuilt and returned to `healthy`; do not merge replica directories manually.
 - Treat `/var/lib/longhorn` as Longhorn-owned. Do not manually write service data there.
 - For cluster rebuilds, confirm `/dev/nvme0n1` is still the dedicated Longhorn disk before reusing it.
 - PostgreSQL backups and DroneOps video retention are separate concerns and should not be solved by Longhorn alone.

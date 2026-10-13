@@ -12,7 +12,7 @@ proxy.
 - API base: `http://192.168.1.123:4000/v1`
 - DSH provider: `AI Workstation LiteLLM` (`ai-workstation-litellm`)
 - Model: `qwen3.8-flash-next`
-- Context: `131072`
+- Context: `163840`
 - Max output tokens: `16384`
 - Installed web plugins:
   - `dsh-web` from `github:zhu1090093659/dsh-web`
@@ -34,6 +34,12 @@ over SSH. The key is injected only into the Harness process environment as
 The launcher keeps the root and web-profile Harness patch files aligned with
 the tracked IQ4_XS patch template before startup.
 
+On SPT02, the `DeepSeekHarness-FlashNext` scheduled task launches from
+`C:\Users\helios\AppData\Local\DeepSeekHarness\Start-DeepSeekHarness.ps1`. That
+launcher copies its local `iq4xs.cordis.patch.yml` into the root and web-profile
+DSH patches at startup. Keep that source patch aligned with this template and
+restart the scheduled task to apply context changes.
+
 The launcher sets provider/model `maxTokens` to `16384`. DSH still needs a
 finite cap, and upstream providers may enforce their own lower output limits.
 
@@ -45,11 +51,15 @@ finite cap, and upstream providers may enforce their own lower output limits.
   the current ai-workstation model alias so DSH does not surface stale model
   routes while Cline and other harnesses are being kept to one selectable
   model.
-- Harness is currently launched through `npx --yes @deepseek-ai/dsh@0.1.6-alpha.2`
+- Harness is currently launched through `npx --yes @deepseek-ai/dsh@0.2.0-rc.2`
   so the version is pinned without requiring a global npm install.
-- DSH `0.1.6-alpha.2` requires a newer Node runtime than the Windows system
+- DSH `0.2.0-rc.2` requires a newer Node runtime than the Windows system
   Node `22.17.0`; the launcher prepends the bundled Codex Node runtime when
   present.
+- DSH `0.2.0-rc.2` disables the installed `dsh-better-sidebar@0.19.1` because
+  its DSH peer dependencies target the 0.1.x releases. The `dsh-web` aggregate
+  also pins that sidebar version. Do not grant a version exemption; update the
+  plugin bundle to a compatible version before restoring the sidebar.
 - `dsh-web` is added to the web profile bundle list. Its aggregate package
   mounts `web-ui-better-sidebar`, so the standalone Better Sidebar row may
   disable itself when duplicate detection sees the aggregate row already

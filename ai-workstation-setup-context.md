@@ -21,7 +21,8 @@ Current Hermes experimental manual-test default:
   disabled for autostart
 - llama.cpp route: `http://127.0.0.1:11454/v1`
 - LiteLLM route: `http://127.0.0.1:4004/v1`
-- Context: `65536`
+- Context: `131072` for the current transient manual test; durable 64k service
+  remains disabled for autostart
 - Runtime: Flash-Next ROCm toolbox `llama-rocm-10.0-qwen38-flash-next`
 - Runtime flags: `--mmproj /mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs/mmproj-Qwen3.8-Flash-Next-Uncensored-F16.gguf -ngl 999 -c 65536 -b 1024 -ub 256 -fa on -ctk q4_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui`
 - Model files: `/mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs`

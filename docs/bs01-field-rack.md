@@ -9,12 +9,19 @@ The BS01 field rack is the portable Iron Meridian Systems base-station environme
 | Host | IP | Hardware | Role |
 | --- | --- | --- | --- |
 | `bs01-gw` | `192.168.1.108` | Dell OptiPlex 3060 Micro | Field gateway for hardware adapters and DroneOps gateway daemon |
-| `bs01-data` | `192.168.1.109` | Dell OptiPlex 3046 Micro | Field data server for PostgreSQL/PostGIS and video/object-storage staging paths |
+| `bs01-data` | `192.168.1.109` | Dell OptiPlex 7040 Micro | Field data server for PostgreSQL/PostGIS and video/object-storage staging paths |
 | `bs01-wknd01` | `192.168.1.110` | Dell OptiPlex 7040 Micro | k3s server/control-plane, embedded etcd, schedulable worker |
 | `bs01-wknd02` | `192.168.1.111` | Dell OptiPlex 7040 Micro | k3s server/control-plane, embedded etcd, schedulable worker |
 | `bs01-wknd03` | `192.168.1.112` | Dell OptiPlex 7040 Micro | k3s server/control-plane, embedded etcd, schedulable worker |
 
 All five nodes use static addresses on `192.168.1.0/24` with gateway/DNS `192.168.1.1`.
+
+`bs01-data` was moved to an OptiPlex 7040 Micro motherboard on 2026-10-05. It
+has 32 GB RAM and uses `enp0s31f6` (`64:00:6a:88:f2:e4`) for its static address.
+On 2026-10-06, Ubuntu boot/root was migrated to the 1 TB Patriot P300 NVMe at
+`/dev/nvme0n1` (serial `P300ZDCB25080613911`). Its LVM root logical volume is
+950.82 GiB with a 936 GiB ext4 filesystem. The former 120 GB WDC SATA system
+disk was removed after the migration was verified.
 
 ## Secrets
 
