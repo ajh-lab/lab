@@ -1,0 +1,54 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: pr-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  droneops-release-catalog:
+    name: DroneOps Catalog Mutual TLS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install test dependencies
+        run: sudo apt-get update && sudo apt-get install -y nginx openssl
+      - name: Verify real TLS authentication and read-only serving
+        run: python3 -m unittest automation.droneops.releases.tests.test_catalog
+      - name: Verify offline OCI payload preservation and rejection
+        run: python3 -m unittest automation.droneops.releases.tests.test_oci_archive
+
+  issue-link:
+    name: Owning Issue Link
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate owning issue
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: python3 automation/github/validate-pr-issue-link.py
+
+      - name: Run focused validator tests
+        run: python3 -m unittest automation/github/tests/test_validate_pr_issue_link.py
+
+  bs01-pki-manifests:
+    name: BS01 PKI Manifest Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate BS01 PKI GitOps contracts
+        run: python3 -m unittest k8s.field.bs01.tests.test_pki_manifests
+      - name: Validate exact offline image repository policy
+        run: python3 -m unittest k8s.field.bs01.tests.test_offline_images

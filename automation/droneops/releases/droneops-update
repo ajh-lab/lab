@@ -1,0 +1,6 @@
+#!/bin/sh
+set -eu
+# No runtime credential values are stored in Helm's release metadata.
+export HELM_DRIVER=configmap
+cd /opt/droneops/updater/source
+exec /usr/bin/python3 -m scripts.bs01_operator_cli --config /etc/droneops/updater/config.json "$@"

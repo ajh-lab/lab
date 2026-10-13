@@ -1,8 +1,37 @@
 # Home Lab AI Baseline Context
 
-Last updated: 2026-09-08 (America/Chicago)
+Last updated: 2026-09-26 (America/Chicago)
 
 ## Purpose
+
+DroneOps release catalog (2026-10-09): `lab-gha-runner-01` (`192.168.1.48`)
+serves `https://releases.droneops.home.arpa:8443/releases/catalog.json` through
+the dedicated `droneops-release-catalog.service`. BS01 uses outbound mTLS and
+an individually allowlisted client identity; release verification uses a public
+Ed25519 key, while the private signer remains in OpenBao-backed operator custody.
+The service is not a field runtime dependency. See
+[catalog custody and recovery](docs/droneops-release-catalog.md), NetBox service
+2, and Wiki.js `services/droneops-release-catalog`. Platform #1087 owns live
+updater acceptance; physical isolation and cold boot remain #670.
+
+BS01 field ownership changed during the authorized #1087 handoff: the signed
+Helm baseline is registered and catalog-selected product 1.1.1 installed at
+revision 3. The release is `droneops-platform` in namespace `droneops`, using
+`HELM_DRIVER=configmap`. Argo reconciliation and Image Updater promotion are
+suspended for this application; its Application and finalizer remain intact.
+Main merges and image builds no longer deploy automatically to BS01. Do not
+resume development automation as a routine deployment step. Consult platform
+`docs/context/issue-1087-acceptance.md` for later rollback/current-revision
+evidence and `docs/runbooks/bs01-appliance-release-recovery.md` before updates.
+The native Secret values remain unchanged, and physical #670 is undispatched.
+
+Current ai-workstation model update (2026-10-06): the owner selected the
+[Flash Next IQ4_XS Vulkan MTP3 workload trial](docs/ai-workstation/flashnext-mtp3-workload-trial-20261006.md).
+The existing `qwen3.8-flash-next` alias now uses a Q5_K FR-Spec draft head,
+one 262144-token slot and 2048/2048 batches. The no-MTP manual unit remains
+intact for rollback. This newer runtime observation supersedes older model
+status entries below; full-context and engineering-quality acceptance remain
+under owner evaluation.
 
 This repository is the baseline operational context and working area for the home lab. It is intended to be AI-ingestable and kept current as infrastructure changes.
 
@@ -134,6 +163,18 @@ reported `n_ctx=65536` with vision/video still enabled, and internal LiteLLM
 smoke returned `64K_OK`. Backups were written under
 `/home/helios/.config/ai-workstation-backups/qwen38-64k-20260922-010752`.
 
+2026-09-22 Flash-Next IQ4_XS MTP rejection note: a transient 64k route on port
+`11456` tested `--spec-type draft-mtp` with the existing Flash-Next MTP draft
+sidecar while keeping the current IQ4_XS q4k/q8v flags. It passed direct
+health and forced tool-call smoke and improved decode speed to 34.73 tok/s
+first generation / 26.96 tok/s repair generation, with short coding generation
+reaching 42.41 tok/s. However, the controlled Python telemetry repaired score
+regressed from the no-MTP 17/18 baseline to 14/18, and a 14.3k-token native
+prompt still prefilling at only 75.73 prompt tok/s showed this MTP setup does
+not fix long prompt processing. Do not promote this exact MTP config as the
+Cline/DSH default. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-64k-mtp-test.md`.
+
 2026-09-22 Qwen3-Coder-Next Uncensored Heretic note: Q8_0 and Q6_K GGUF files
 from `llmfan46/Qwen3-Coder-Next-Uncensored-Heretic-GGUF` were downloaded and
 smoke-tested with one resident model at a time through `llama-rocm-7.14-q4`.
@@ -154,6 +195,62 @@ are in
 Q6_K is the preferred next Cline/DSH candidate, but it still needs the
 controlled Python telemetry quality benchmark before promotion.
 
+Follow-up on 2026-09-22: Qwen3-Coder-Next Uncensored Heretic Q6_K was tested
+at 128k context against the controlled Python telemetry quality benchmark on
+direct llama.cpp port `11460`. It loaded in 19 seconds, used about 69.9 GB VRAM
+after health, passed a forced OpenAI-compatible tool-call smoke, and generated
+at 36.60 tok/s first pass / 34.65 tok/s repair. Quality was not competitive:
+it scored 11/18 first and 14/18 repaired, with remaining failures around
+normalized deduplication, same-timestamp segmentation, timestamp-without-seconds
+acceptance, and lowercase RFC3339 `t`/`z`. Do not promote Q6_K as the default
+Cline/DSH model from this result. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q6-131k-quality.md`.
+Qwen3-Coder-Next Uncensored Heretic Q8_0 was then tested with the same 128k
+controlled benchmark. It loaded in 22 seconds, used about 88.6 GB VRAM after
+health, passed forced tool calling, and generated at 34.88 tok/s first pass /
+33.12 tok/s repair, but matched Q6_K quality at only 11/18 first and 14/18
+repaired. Higher quant did not fix the quality gap and used materially more
+VRAM, so do not promote Q8_0 as the Cline/DSH default either. Detailed results
+are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-qwen3-coder-next-heretic-q8-131k-quality.md`.
+
+Later on 2026-09-22, Flash-Next OrcaRouter IQ4_XS was retested at 32k context
+without MTP using the current vision-enabled no-MTP flags plus `-ctk q4_0
+-ctv q8_0`. The transient direct route on port `11460` had not reached health
+when the run was stopped; after roughly 2.5 minutes `/health` still returned
+`Loading model`, available RAM had fallen to about 634 MiB, swap had climbed
+to about 37 GiB, and VRAM was about 69.3 GB. The service was stopped before
+benchmark traffic, and cleanup verified no resident llama process, `ollama ps`
+empty, and VRAM back to baseline. Treat this as an aborted safety run, not
+proof that 32k cannot load. It is evidence that dropping IQ4_XS to 32k context
+does not by itself avoid the load-time host memory pressure on the 96 GiB VRAM
+/ 31 GiB Linux RAM split. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-32k-nomtp-load-abort.md`.
+A follow-up supervised rerun the same day used the same 32k flags with a longer
+load window. It reached health after about 3 minutes 47 seconds, but still
+dipped to about 420 MiB available RAM and about 44.1 GiB swap during load.
+Text and forced-tool smokes passed. The controlled Python telemetry benchmark
+scored 13/18 first and 14/18 repaired at 25.33 tok/s first / 23.34 tok/s
+repair, which is worse than the 64k IQ4_XS no-MTP baseline of 13/18 first and
+17/18 repaired. Do not promote 32k no-MTP as the default: it can load, but it
+did not improve speed, did not avoid startup pressure, and regressed repaired
+quality. Detailed results are in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-iq4xs-32k-nomtp-quality-retest.md`.
+
+Also on 2026-09-22, the smaller Unsloth Flash-Next `UD-IQ3_XXS` quant was
+retested at 131k context on the current 96 GiB VRAM / 31 GiB Linux RAM split,
+using the existing 16k service flags except `-c 131072`. It reached health
+after about 5 minutes 49 seconds and used about 56.6 GB VRAM after benchmark,
+but still dropped to about 432 MiB available RAM and about 43.4 GiB swap during
+load. Text and forced-tool smokes passed, but forced tool-call completion was
+only 5.71 tok/s. The controlled Python telemetry benchmark scored 5/18 first
+and 7/18 repaired at 23.66 tok/s first / 23.30 tok/s repair. Do not promote
+131k `UD-IQ3_XXS` as the default: it uses materially less VRAM than IQ4_XS, but
+does not avoid host-memory pressure and repaired quality collapsed compared
+with the earlier 16k `UD-IQ3_XXS` repaired score of 16/18. Detailed results are
+in
+`docs/ai-workstation/qwen38-performance/results/2026-09-22-flashnext-unsloth-ud-iq3xxs-131k-quality.md`.
+
 Previous 2026-09-08 64 GiB VRAM split note: after the IQ3_M 4 GiB-floor test,
 IQ4_XS was retried at 64k on the observed 64 GiB VRAM / 62 GiB Linux RAM split
 with no available-RAM floor. Full offload failed before health because llama.cpp
@@ -165,7 +262,7 @@ fit/spill configuration, not as representative of the reproduced 96 GiB
 full-offload IQ4_XS result. Detailed results are in
 `docs/ai-workstation/qwen38-performance/results/2026-09-08-flashnext-iq4xs-64k-fit-no-floor.md`.
 
-For direct Hermes browser chat on the ai-workstation, use `qwen3-coder-128k-fast-chat` for normal lightweight Q&A and `qwen3-coder-256k-fast-chat` only when a very large browser-chat context is needed. These profiles route through the same local LiteLLM/Ollama qwen3-coder aliases but restrict CLI tools to web only, disable local action tools, set `agent.max_turns: 4`, and disable environment probing. Keep the default/full qwen3-coder profile for Kanban and implementation work where file, terminal, and code execution tools are expected.
+For direct Hermes browser chat on the ai-workstation, use `qwen38-27b-uncensored-q6_k-web-terminal-128k` when Q6 plus web and terminal access are needed, or `qwen3-coder-30b-a3b-q8_0-web-128k` for the faster web-only qwen3-coder profile. Model profile names follow `<model>-<variant>-<role>-<context>`, with the context window last; do not recreate `-fast-chat` names. Use the current default, `qwen3-coder-30b-a3b-q8_0-worker-128k`, or explicit `full` profiles for implementation work according to the required tool surface.
 
 ## Source of Truth Files
 
@@ -186,7 +283,9 @@ For direct Hermes browser chat on the ai-workstation, use `qwen3-coder-128k-fast
 - `docs/windows-upgrade/*`: archived Windows upgrade troubleshooting logs/results.
 - `docs/bs01-field-rack.md`: DroneOps BS01 field rack roles, static IPs, OpenBAO paths, MOTD, field k3s cluster verification notes, and Longhorn storage summary.
 - `docs/bs01-longhorn-runbook.md`: BS01 Longhorn GitOps source, NVMe disk mapping, host prerequisites, verification, smoke test, and operations notes.
+- `docs/bs01-pki-runbook.md`: BS01 cert-manager v1.21.1/issuer GitOps ordering, Kubernetes 1.36 compatibility, secret-safe validation, rotation, rack-local recovery, and owner approval boundaries.
 - `repositories/droneops-platform/docs/context/repository-context-map.md`: DroneOps cross-repo context map; use it before copying context between DroneOps repos.
+- `repositories/droneops-platform/docs/context/agent-issue-delivery-workflow.md`: Canonical manual DroneOps issue-to-worker standard. Read it before manually claiming a DroneOps Delivery Project issue; issue edits never dispatch work.
 - `repositories/droneops-platform/docs/context/field-data-architecture.md`: DroneOps field data architecture, base-station roles, persistence priority, event backbone direction, and video data-plane boundaries.
 - `repositories/droneops-platform/docs/context/service-architecture.md`: DroneOps service and repo boundary strategy, naming conventions, split triggers, and field/HQ product separation guidance.
 - `repositories/droneops-platform/docs/context/replay-and-video-retention.md`: DroneOps replay, UTC timestamp, video segment metadata, storage reference, retention, and playback context.
@@ -215,6 +314,7 @@ detail into custom instructions or every project repo.
 | BS01 field rack infrastructure | `docs/bs01-field-rack.md` | `docs/bs01-longhorn-runbook.md`, DroneOps platform field context |
 | DroneOps platform work | `repositories/droneops-platform/ai-baseline-context.md` | `repositories/droneops-platform/docs/context/project-status.md` immediately after |
 | DroneOps gateway work | `repositories/droneops-gateway/ai-baseline-context.md` | Gateway context files plus DroneOps platform context map as needed |
+| DroneOps Delivery issue claim | `repositories/droneops-platform/docs/context/agent-issue-delivery-workflow.md` | Project item, owning-repository baseline/status, and focused referenced context |
 
 Custom instructions should stay host-agnostic and short. Project-specific facts
 such as BS01 host roles, DroneOps architecture, deployment state, and OpenBAO
@@ -351,6 +451,12 @@ Current columns:
 - The BS01 DroneOps field k3s cluster uses `.kubeconfig-bs01-field.yaml` with
   API endpoint `https://192.168.1.110:6443`; its ArgoCD namespace is `argocd`
   and its DroneOps application is `droneops-platform`.
+- As verified 2026-09-27, all three BS01 K3s servers have Secret encryption
+  enabled after key rotation and re-encryption, with matching server hashes.
+  DroneOps runtime fields use native Kubernetes Secrets; the registry pull
+  credential remains ESO-owned under DroneOps #1087. Protected encrypted
+  snapshot/token generations and isolated restore evidence are on independent
+  `bs01-data`; see `docs/bs01-field-rack.md`. This is rack-local recovery.
 - For DroneOps BS01 live deployment, ArgoCD, NATS, Flyway, and runtime
   verification, use the BS01 field kubeconfig, not the main Raspberry Pi
   cluster, unless explicitly instructed otherwise.
@@ -515,6 +621,9 @@ Worker recovery note:
 
 ### DroneOps Field Data Host
 
+- Capacity recovery, 2026-09-16: owner-approved root LV expansion from 54.37 to 74.37 GiB restored PostgreSQL availability without restart. The ext4 root is `/dev/ubuntu-vg/ubuntu-lv`; pre-expansion LVM metadata is retained under `/var/backups/issue-856-ubuntu-vg-before-expansion-20260916.conf` (root-only). See `docs/bs01-field-rack.md` for scope and point-in-time verification.
+- Capacity recovery, 2026-09-26: an owner-approved online expansion used the remaining 8,798 `ubuntu-vg` extents to grow the same root LV from 74.37 to 108.73 GiB; the ext4 filesystem became 106.7 GiB. A strict full-table classification found 35,373,006 definitively simulated telemetry rows and eight other rows. The simulator auto-tick was disabled through platform GitOps, then a guarded transaction removed only the simulated rows and restored all eight others. Post-change root availability was 100,687,859,712 bytes (93.8 GiB), PostgreSQL was ready, and Argo was Synced/Healthy. Pre-change LVM metadata is retained root-only at `/var/backups/issue-669-ubuntu-vg-before-capacity-expansion-20260926.conf`; it is not a database backup. Retention and capacity alerts remain owned by DroneOps issue #1101. See `docs/bs01-field-rack.md`.
+
 - Host: `bs01-data` (`192.168.1.109`, Dell OptiPlex 7040 Micro, Ubuntu Server 24.04 LTS)
 - Role: dedicated data node for the DroneOps field base station. This host is intentionally outside k3s and separate from the gateway node.
 - Hardware baseline as of 2026-10-06:
@@ -596,11 +705,12 @@ Worker recovery note:
   - cockpit socket active (`https://192.168.1.123:9090`)
   - `hermes-gateway` user systemd service active (`Hermes Agent v0.21.1 / 2026.9.7`, upstream `a529ecfe`, verified up to date on 2026-09-08; gateway/dashboard restarted and healthy after update)
     - Post-panic local model state as of 2026-09-07: `qwen3.8-flash-next-uncensored-orcarouter-iq4_xs` remains a strong benchmarked experiment, but its full-offload user service `llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service` is disabled and inactive after repeated deadlocks/OOM pressure on the current 32 GiB system RAM / 96 GiB VRAM BIOS split. Earlier direct and LiteLLM testing scored 13/18 first pass and 17/18 repaired on the controlled Python telemetry benchmark; a clean confirmation run with `ollama ps` empty reproduced 13/18 first and 17/18 repaired at 27.24 tok/s first / 25.41 tok/s repair. Guarded current-split tests with `-ngl 44`, `-ngl 47`, and full offload at 32k context all failed to reach healthy before RAM/swap guardrails tripped. Do not auto-start IQ4_XS on the 32/96 split. `/mnt/ai/swap/qwen-flashnext-test.swap` remains persisted in `/etc/fstab` with `nofail,x-systemd.requires-mounts-for=/mnt/ai`. Flash-Next IQ3_M on port `11453` remains a smaller Flash-Next rollback, and the lower-VRAM controlled-quality rollback remains `qwen3.8-27b-uncensored-orcarouter-q4_k_m` on `llama-qwen38-orcarouter-uncensored-q4km.service` / port `11448`, which scored 14/18 first pass and 17/18 repaired. Backup state for the OrcaRouter promotion was captured under `/home/helios/.hermes/backups/switch-default-orca-q4km-131k-20260905-183559`, the IQ3_M switch backup is `/home/helios/.hermes/config.yaml.bak-flashnext-iq3m-20260907-053115`, and the IQ4_XS promotion backup is `/home/helios/.hermes/backups/promote-flashnext-iq4xs-20260907-180340`. Detailed comparison records are in `docs/ai-workstation/qwen38-performance/model-comparison.md`.
-    - Long-context qwen3-coder profiles: `qwen3-coder-128k` and `qwen3-coder-256k` use aliases `hermes-qwen3-coder:30b-128k` and `hermes-qwen3-coder:30b-256k` through LiteLLM. They are backed by the same `qwen3-coder:30b-a3b-q8_0` weights with larger Ollama `PARAMETER num_ctx` values. On 2026-07-09, both profiles returned through Hermes and LiteLLM, and Prometheus showed `requested_model="hermes-qwen3-coder:30b-128k"` and `requested_model="hermes-qwen3-coder:30b-256k"` under job `litellm-ai-workstation`. Ollama allocated about 42.7 GiB total for 128k (`12.0 GiB` KV cache) and about 55.0 GiB total for 256k (`24.0 GiB` KV cache), fully offloading 49/49 layers to ROCm. The global default was switched to `hermes-qwen3-coder:30b-256k` on 2026-07-09.
-    - Fast browser-chat profiles: `qwen3-coder-128k-fast-chat` and `qwen3-coder-256k-fast-chat` were created on 2026-07-09 to prevent lightweight browser chat from running the full local-action agent loop. Their configs live under `/home/helios/.hermes/profiles/<profile>/config.yaml`, route through LiteLLM, set `platform_toolsets.cli` to `web` plus `no_mcp`, disable terminal/file/code-execution/browser/computer-use and other local-action toolsets via `agent.disabled_toolsets`, set `agent.max_turns: 4`, and set `agent.environment_probe: false`. Use `qwen3-coder-128k-fast-chat` for normal direct browser Q&A, `qwen3-coder-256k-fast-chat` for large-context direct browser Q&A, and keep the default/full qwen3-coder profiles for Kanban or implementation tasks that need tools.
+    - Long-context qwen3-coder profiles use the canonical names `qwen3-coder-30b-a3b-q8_0-full-128k` and `qwen3-coder-30b-a3b-q8_0-full-256k` with aliases `hermes-qwen3-coder:30b-128k` and `hermes-qwen3-coder:30b-256k` through LiteLLM. They are backed by the same `qwen3-coder:30b-a3b-q8_0` weights with larger Ollama `PARAMETER num_ctx` values. On 2026-07-09, both aliases returned through Hermes and LiteLLM, and Prometheus recorded the requested model names. Ollama allocated about 42.7 GiB total for 128k (`12.0 GiB` KV cache) and about 55.0 GiB total for 256k (`24.0 GiB` KV cache), fully offloading 49/49 layers to ROCm.
+    - Restricted browser profiles use the canonical names `qwen38-27b-uncensored-q6_k-web-terminal-128k` and `qwen3-coder-30b-a3b-q8_0-web-128k`. Do not recreate the removed `-fast-chat` profile names.
+    - Hermes update recovery: the 2026-09-01 update from `v0.20.5` to `v0.21.0` created the full restore archive `/home/helios/.hermes/backups/pre-update-2026-09-01-223739.zip`. The prior local Kanban heartbeat/dashboard patch remains intentionally parked as git stash `hermes-update-autostash-20260902-033801` and as `/home/helios/.hermes/backups/hermes-update-20260902T033737Z/local-source-changes.patch`; do not reapply it blindly because upstream now contains a substantially expanded heartbeat and stale-worker implementation.
     - Hermes Discord route note: the legacy profile name `qwen38-27b-uncensored-q6_k-discord-128k` is still used by the `@Helios` Discord bot path. On 2026-09-07 it was updated from the stopped Q6_K backend to the live `qwen3.8-flash-next-uncensored-orcarouter-iq3_m` route at 64k context after gateway logs showed HTTP 500 failures for `qwen3.8-27b-uncensored-q6_k`, then updated again to `qwen3.8-flash-next-uncensored-orcarouter-iq4_xs` after IQ4_XS promotion. Backup: `/home/helios/.hermes/profiles/qwen38-27b-uncensored-q6_k-discord-128k/config.yaml.bak-flashnext-route-20260907-133709` plus the IQ4_XS promotion backup under `/home/helios/.hermes/backups/promote-flashnext-iq4xs-20260907-180340`. A CLI profile smoke returned `DISCORD_ROUTE_OK`, and actual outbound delivery to `discord:helios` returned `sent` on 2026-09-07 after unloading an Ollama model that was holding VRAM and making IQ4_XS reload fail.
-    - Lean Kanban worker profile: `qwen3-coder-128k-worker` was created on 2026-07-09 as the preferred local worker for normal coding cards. It uses `hermes-qwen3-coder:30b-128k` through LiteLLM, keeps only terminal/file/code-execution/todo/skills tools, disables browser/image/TTS/computer-use/delegation/cron/memory extras, sets `agent.max_turns: 28`, sets `agent.reasoning_effort: none` so Ollama does not receive unsupported thinking requests, and sets `agent.environment_probe: false` with a fixed lab workspace hint. Use this profile for focused repo implementation and validation cards. Reserve full/default or 256k profiles for cards that need broader tools or very large context.
-    - Qwen3.8 BF16 tool-enabled test profile: `qwen38bf16tools` was created on 2026-08-18 for Hermes Web UI/CLI testing of `qwen3.8-27b-bf16` at full BF16 weight precision. The Ollama tag `qwen3.8:27b-bf16` is installed in the isolated model store `/mnt/ai/ollama-qwen38/models`, but Ollama `0.32.14` was not usable for this dense BF16 model on Strix Halo because it only offloaded 30/66 layers and was OOM-killed after spilling about 28 GiB to CPU memory. The working runtime is `llama-qwen38-bf16.service`, a user systemd service backed by the refreshed `llama-rocm-7.14` toolbox and `llama-server` on `http://127.0.0.1:11437/v1`. LiteLLM maps `qwen3.8-27b-bf16` through `http://127.0.0.1:4004/v1`, and the alias `/home/helios/.local/bin/qwen38-bf16-tools` launches the Hermes profile. The profile keeps the full default Hermes tool surface enabled; actual `web` tool use still requires a configured search/tool-gateway provider key. On 2026-08-18, the profile-scoped Custom endpoint model picker lists were restored from LiteLLM `/v1/models` for `default`, qwen3-coder long-context profiles, fast-chat profiles, and worker profile so the Web UI shows the qwen3-coder aliases, both DeepSeek models, and `qwen3.8-27b-bf16`.
+    - Lean Kanban worker profile: `qwen3-coder-30b-a3b-q8_0-worker-128k` is the preferred qwen3-coder worker for normal coding cards. It uses `hermes-qwen3-coder:30b-128k` through LiteLLM, keeps only terminal/file/code-execution/todo/skills tools, disables browser/image/TTS/computer-use/delegation/cron/memory extras, sets `agent.max_turns: 28`, sets `agent.reasoning_effort: none`, and disables environment probing with a fixed lab workspace hint. Use larger/full profiles only when the card needs broader tools or 256k context.
+    - Qwen3.8 BF16 profiles: `qwen38-27b-uncensored-bf16-full-128k` keeps the full tool surface, while `qwen38-27b-uncensored-bf16-web-terminal-128k` is the restricted web/terminal profile. Both use LiteLLM model `qwen3.8-27b-uncensored-bf16` and the user service `llama-qwen38-uncensored-bf16.service` on `http://127.0.0.1:11439/v1`.
     - Qwen3.8 Q6_K MTP test route: `qwen3.8-27b-uncensored-q6_k-mtp` was created on 2026-09-05 for manual Hermes Web UI testing at 64k context. It uses `llama-qwen38-uncensored-q6k-mtp.service`, target GGUF `/mnt/ai/models/qwen38-uncensored-q6k/Qwen3.8-27B-Uncensored-Q6_K.gguf`, draft GGUF `/mnt/ai/models/qwen38-uncensored-q4km-mtp-draft/Qwen3.8-27B-Uncensored-draft-Q4_0.gguf`, and llama.cpp port `11450`. It passed health, LiteLLM discovery, and a smoke completion, but scored only 5/18 first pass and 6/18 repaired on the controlled Python telemetry benchmark. It is stopped/disabled; keep the non-MTP Q6_K result as the stronger quality baseline.
     - Qwen3.8 64k comparison routes: `qwen3.8-27b-uncensored-q6_k-64k` (`llama-qwen38-uncensored-q6k-64k.service`, port `11451`) and `qwen3.8-27b-uncensored-orcarouter-q4_k_m-64k` (`llama-qwen38-orcarouter-uncensored-q4km-64k.service`, port `11452`) were created on 2026-09-05 as test routes. Both matched their 131k controlled Python telemetry scores at 64k: Q6_K remained 14/18 first and 16/18 repaired, while OrcaRouter Q4_K_M remained 14/18 first and 17/18 repaired. Use the 64k routes when lower VRAM matters and the task fits in 64k context; the 131k OrcaRouter route remains the best controlled-quality rollback while Flash-Next is under manual evaluation.
     - Qwen3.8 Flash-Next OrcaRouter IQ3_M test route: `qwen3.8-flash-next-uncensored-orcarouter-iq3_m` uses split GGUF files under `/mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq3m`, service `llama-qwen38-flashnext-orcarouter-uncensored-iq3m.service`, port `11453`, and the Flash-Next ROCm toolbox `llama-rocm-10.0-qwen38-flash-next`. The earlier 30 GiB system-RAM split required a 64 GiB disk-backed swap file under `/mnt/ai/swap/` for service load; it is persisted in `/etc/fstab` with `nofail`. It passed direct llama.cpp and LiteLLM smoke on 2026-09-07, scored 13/18 first pass and 15/18 repaired on the controlled Python telemetry benchmark, and produced 26.71 tok/s first generation / 24.39 tok/s repair generation. Runtime tuning changed the service flags to `--reasoning off --repeat-penalty 1.0`, which kept the same 13/18 -> 15/18 score and improved telemetry speed to 27.58 tok/s first / 25.24 tok/s repair. A strict Python contract-audit system prompt improved the score to 14/18 first / 16/18 repaired, but is not yet globally applied in Hermes. Unbounded reasoning and reasoning-budget 512 variants were rejected. A config sweep found no meaningful win from explicit thread count, larger `-b/-ub` values were slightly faster but repaired to only 14/18, `--fit on --fit-target 1536` and `--cache-ram 32768 --kv-unified --ctx-checkpoints 64` did not help, and `ngram-mod` speculative decoding preserved 13/18 -> 15/18 while raising the long repair generation to 54.51 tok/s. `ngram-mod` is promising for repeated coding/repair prompts but is not yet promoted as the live default. A guarded retry before the BIOS split change found that 131k, 64k, and 16k service starts all dropped below the requested 12 GiB available system-RAM floor before health. A 2026-09-08 post-BIOS 64k retry on the observed 64 GiB VRAM / 62 GiB Linux RAM split still dropped below the operator-approved 8 GiB floor before health. The inactive unit is currently set to the 64k retry definition. Detailed reports are `docs/ai-workstation/qwen38-performance/results/2026-09-07-flashnext-orcarouter-iq3m-64k-python-telemetry-eval.md`, `docs/ai-workstation/qwen38-performance/results/2026-09-07-flashnext-iq3m-runtime-tuning-eval.md`, `docs/ai-workstation/qwen38-performance/results/2026-09-07-flashnext-iq3m-config-sweep-eval.md`, `docs/ai-workstation/qwen38-performance/results/2026-09-07-flashnext-iq3m-131k-manual-test.md`, and `docs/ai-workstation/qwen38-performance/results/2026-09-08-flashnext-iq3m-64k-post-bios-ram-floor.md`.
@@ -611,7 +721,7 @@ Worker recovery note:
     - Dashboard websocket token fix: on 2026-07-09, repeated browser chat failures were traced to stale dashboard tokens after `hermes-dashboard.service` restarts (`pty auth rejected reason=token_mismatch`). The dashboard now uses a stable local `HERMES_DASHBOARD_SESSION_TOKEN` EnvironmentFile at `/home/helios/.config/hermes-dashboard/session-token.env`, injected by `/home/helios/.config/systemd/user/hermes-dashboard.service.d/50-stable-session-token.conf`. Do not print or commit the token value. If the browser still shows connection failed after a restart, hard-refresh or reopen the dashboard so the current injected token is loaded.
     - DeepSeek cloud profiles: `deepseek-v4-flash` and `deepseek-v4-pro` use LiteLLM at `http://127.0.0.1:4004/v1`, aliases `/home/helios/.local/bin/deepseek-v4-flash` and `/home/helios/.local/bin/deepseek-v4-pro`, and profile env files under `/home/helios/.hermes/profiles/<profile>/.env`. `deepseek-v4-flash` is the normal paid profile; `deepseek-v4-pro` is reserved for complex planning, review, difficult debugging, or failed-card recovery. The older `deepseek` profile and `/home/helios/.local/bin/deepseek` alias were removed on 2026-07-08 to avoid confusion. On 2026-07-09, `hermes -z ...` and `deepseek-v4-flash -z ...` both returned successfully through the secured split-port LiteLLM setup.
     - Metered local profile: `localmetered` uses the same `hermes-qwen3-coder:30b-64k` model through LiteLLM at `http://127.0.0.1:4004/v1`, alias `/home/helios/.local/bin/localmetered`, and profile config `/home/helios/.hermes/profiles/localmetered/config.yaml`. This profile was created on 2026-07-08 for explicit local usage tracking tests; the default Discord-backed Hermes profile now uses the same LiteLLM backend.
-    - LiteLLM internal backend: user systemd service `litellm-ollama-proxy.service`, config `/home/helios/.config/litellm/config.yaml`, venv `/home/helios/.local/share/litellm/venv`, bound to `127.0.0.1:4004`. It maps model names `hermes-qwen3-coder:30b-64k`, `hermes-qwen3-coder:30b-128k`, and `hermes-qwen3-coder:30b-256k` to Ollama at `http://127.0.0.1:11434`, maps local Qwen3.8 llama.cpp routes including `qwen3.8-27b-bf16`, `qwen3.8-27b-uncensored-q4_k_m`, `qwen3.8-27b-uncensored-q6_k`, `qwen3.8-27b-uncensored-orcarouter-q4_k_m`, `qwen3.8-27b-uncensored-q4_k_m-mtp`, `qwen3.8-27b-uncensored-q6_k-mtp`, and `qwen3.8-flash-next-uncensored-orcarouter-iq3_m`, maps `deepseek-v4-flash` and `deepseek-v4-pro` to DeepSeek using `DEEPSEEK_API_KEY`, and exposes Prometheus metrics at `http://127.0.0.1:4004/metrics/`. Its wrapper `/home/helios/.local/bin/litellm-openbao-env` falls back to `/home/helios/.hermes/profiles/deepseek-v4-flash/.env` or `/home/helios/.hermes/profiles/deepseek-v4-pro/.env`; do not reintroduce the removed legacy `deepseek` profile path. LiteLLM was upgraded from `1.91.0` to `1.97.0` on 2026-08-18 after restoring `pip` in the venv; package freeze backups were written under `/home/helios/.local/share/litellm/backups/`.
+    - LiteLLM internal backend: user systemd service `litellm-ollama-proxy.service`, config `/home/helios/.config/litellm/config.yaml`, venv `/home/helios/.local/share/litellm/venv`, bound to `127.0.0.1:4004`. It maps model names `hermes-qwen3-coder:30b-64k`, `hermes-qwen3-coder:30b-128k`, and `hermes-qwen3-coder:30b-256k` to Ollama at `http://127.0.0.1:11434`, maps local Qwen3.8 llama.cpp routes including `qwen3.8-27b-uncensored-bf16`, `qwen3.8-27b-uncensored-q4_k_m`, `qwen3.8-27b-uncensored-q6_k`, `qwen3.8-27b-uncensored-orcarouter-q4_k_m`, `qwen3.8-27b-uncensored-q4_k_m-mtp`, `qwen3.8-27b-uncensored-q6_k-mtp`, and `qwen3.8-flash-next-uncensored-orcarouter-iq3_m`, maps `deepseek-v4-flash` and `deepseek-v4-pro` to DeepSeek using `DEEPSEEK_API_KEY`, and exposes Prometheus metrics at `http://127.0.0.1:4004/metrics/`. Its wrapper `/home/helios/.local/bin/litellm-openbao-env` falls back to `/home/helios/.hermes/profiles/deepseek-v4-flash/.env` or `/home/helios/.hermes/profiles/deepseek-v4-pro/.env`; do not reintroduce the removed legacy `deepseek` profile path. LiteLLM was upgraded from `1.91.0` to `1.97.0` on 2026-08-18 after restoring `pip` in the venv; package freeze backups were written under `/home/helios/.local/share/litellm/backups/`.
     - LiteLLM LAN auth proxy: user systemd service `litellm-lan-auth-proxy.service`, script `/home/helios/.local/share/litellm-lan-auth-proxy/litellm_lan_auth_proxy.py`, bound to `0.0.0.0:4000`, forwards to the internal backend at `http://127.0.0.1:4004`, and requires `Authorization: Bearer <key>`. The LAN API key is stored in OpenBao at `secret/homelab/providers/litellm`, field `lan_api_key` (also mirrored as `api_key` for generic OpenAI-compatible clients). The local runtime copy is `/home/helios/.config/litellm/litellm-lan-api-key.env`; do not print or commit it. Cline should use OpenAI-compatible base URL `http://192.168.1.123:4000/v1` with this key so usage appears in LiteLLM/Prometheus/Grafana.
     - LiteLLM metrics proxy: user systemd service `litellm-metrics-proxy.service`, script `/home/helios/.local/share/litellm-metrics-proxy/litellm_metrics_proxy.py`, bound to `0.0.0.0:4001`. It exposes only `/metrics` and `/metrics/` to the lab network and forwards those requests to LiteLLM on loopback port `4004`.
     - LiteLLM validation on 2026-08-18: `litellm-ollama-proxy.service`, `litellm-lan-auth-proxy.service`, and `litellm-metrics-proxy.service` were active after the `1.97.0` upgrade; ports `4004`, `4000`, and `4001` were listening; internal `/v1/models` included `hermes-qwen3-coder:30b-256k`, `qwen3.8-27b-bf16`, and `deepseek-v4-flash`; LAN auth `/v1/models` returned HTTP 200 with the stored bearer key; metrics returned Prometheus output; and a LiteLLM completion through `qwen3.8-27b-bf16` returned `OK_UPDATED_LITELLM`. Earlier 2026-07-08 checks also validated direct OpenAI-compatible non-streaming/streaming calls, Hermes `localmetered`, default Hermes through LiteLLM, and request/latency/token metrics.
@@ -642,7 +752,7 @@ Worker recovery note:
   - `hermes-qwen3-coder:latest-64k` (local alias, lower-precision 64k comparison)
   - `qwen3-coder:30b-a3b-q8_0`
   - `qwen3-coder:latest`
-  - `qwen3.8:27b-bf16` (isolated Qwen3.8 model store `/mnt/ai/ollama-qwen38/models`; served for Hermes through `llama-qwen38-bf16.service` and LiteLLM model `qwen3.8-27b-bf16`)
+  - Qwen3.8 27B uncensored BF16 (isolated Qwen3.8 model store `/mnt/ai/ollama-qwen38/models`; served for Hermes through `llama-qwen38-uncensored-bf16.service` and LiteLLM model `qwen3.8-27b-uncensored-bf16`)
   - `gpt-oss:120b`
   - `gemma4:latest`
   - `qwen2.5vl:7b`
@@ -1223,12 +1333,46 @@ Secret resolution model is **OpenBAO-first with `.env` fallback**.
 3. Automation scripts must use `automation/common/SecretResolver.psm1` and `Resolve-LabSecret`.
 4. Preferred reads are service-specific OpenBAO paths; fallback reads use `.env` only when necessary.
 
+### Password change and recovery policy
+
+- Do not reset, rotate, or otherwise change any lab host or service account password unless Adam explicitly requests that specific change or approves it before execution. An SSH key, sudo failure, broken helper, or general troubleshooting request is not approval to change a password.
+- Before an approved change, identify the account, the authoritative OpenBAO path and field, the existing fallback copies, and a recovery path. Never assume a readable OpenBAO value is the current host password; verify authentication separately without printing the value.
+- Treat the host change and OpenBAO update as one operation. Preserve a rollback path until a fresh OpenBAO read and an actual login or sudo check both succeed with the new value. Reconcile any documented local bootstrap fallback so a later sync cannot overwrite OpenBAO with an old password. Record only the path, field, approval, and verification status, never the value.
+- If OpenBAO cannot be updated or either verification fails, stop and report the mismatch immediately. Do not silently leave a host-only password, guess a replacement, or run a broad bootstrap sync as a recovery shortcut.
+
+### OpenBAO token exposure
+
+- A root token is currently persisted in the Windows user environment and in the ai-workstation `helios` user environment file. This is a temporary high-risk access pattern: processes running as those users can inherit the token. Do not add further root-token consumers.
+- The bootstrap snapshot `secret/homelab/bootstrap/env` also contains root-token fields. A token allowed to read that whole KV v2 secret can retrieve those fields, so `hermes-bootstrap-env-read` must not be treated as least privilege merely because its policy is read-only.
+- Migrate the ai-workstation password and other runtime-only fields to dedicated secrets, issue narrowly scoped renewable tokens for each consumer, verify those consumers, remove the persisted root-token environment variables and stale service drop-ins, then rotate the exposed root token after checking dependencies. Make those live credential changes only with explicit approval and a rollback plan.
+
+### Temporary bootstrap safety gate (2026-09-27)
+
+Issue ajh-lab/droneops-platform#669 exposed a host password that had been
+reused across lab machines. The reachable host accounts and their OpenBao
+records were rotated. After `bs01-wknd03` returned to service, its exposed
+credential was rotated and the old SSH login was rejected. Its VM record and
+OpenBao bootstrap snapshot match. The five rotated BS01 host-password fields
+in the ignored local `.env` fallback were then reconciled from authoritative
+OpenBao records and verified against the bootstrap snapshot without printing
+values. An earlier broad local correction had been rejected by automatic
+approval review; only these five BS01 fields were changed afterward.
+
+Do not run `sync-env-to-openbao.ps1` or the mandatory
+`bootstrap-lab-context.ps1` below until the remaining rotated-host fields in
+the local `.env` fallback are checked and corrected without printing values.
+The bootstrap script calls the sync script and could copy stale values back
+to OpenBao. Use the read-only `SecretResolver.psm1` helpers for context in the
+meantime. Wiki.js administrator credential disposition is a separate
+application matter, outside DroneOps issue #669.
+
 ### AI Workstation Sudo Credential
 
 - Secret path: `secret/homelab/bootstrap/env`
 - KV mount: `secret`
 - Field/key: `AI_WORKSTATION_PASSWORD`
 - Purpose: sudo password for the `helios` user on `ai-workstation-evox2`.
+- On 2026-10-12, the OpenBAO field was readable but its value initially failed `sudo` on the host. At Adam's explicit request, the host password was restored from that field; a fresh OpenBAO read and `sudo -S -k` succeeded afterward. This is a verified recovery, not permission for future automatic resets.
 - Do not copy the password into `ai-baseline-context.md`, Jira, Slack, command logs, or committed files.
 - To test resolution without printing the secret: `openbao-env-get AI_WORKSTATION_PASSWORD >/dev/null && echo OK`
 - Hermes integration: Hermes terminal sudo support reads `SUDO_PASSWORD` from its process environment. Do not put the password in `~/.hermes/config.yaml`; use the systemd wrapper/drop-ins that resolve the value from OpenBao at service start.
@@ -1276,6 +1420,19 @@ Bootstrap behavior:
 3. Fails fast if OpenBAO connectivity/policy is broken.
 
 ## Operational Notes for Future AI Agents
+
+### BS01 network and recovery update (2026-10-11)
+
+BS01 now uses rack LAN 192.168.0.0/24 behind the ER605, not the old
+192.168.1.x worker addresses. Gateway/data/workers are .2/.3/.4/.5/.6;
+gateway maintenance Wi-Fi is 192.168.1.108. The ingress VIP is 192.168.0.10.
+The ER605 WAN has an upstream reservation for 192.168.1.139 and restricted
+home HTTPS forwarding. Read `k8s/field/bs01/ingress-ha/README.md` before
+changing networking, NATS placement, Longhorn recovery, or appliance updates.
+The owner accepts brief automatic service recovery, not an assertion of
+zero-downtime operation. Aircraft failsafes are separate from cluster recovery.
+
+### General operating rules
 
 1. Run `automation/agent/scripts/bootstrap-lab-context.ps1` first.
 2. Load inventory context from `network_devices.csv` first.

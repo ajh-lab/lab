@@ -1,0 +1,49 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bs01-ingress-ca-2026
+  namespace: cert-manager
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-options: Prune=false
+  labels:
+    app.kubernetes.io/name: bs01-ingress-ca
+    app.kubernetes.io/part-of: bs01-pki
+spec:
+  secretName: bs01-ingress-ca-2026
+  commonName: DroneOps BS01 Ingress CA 2026
+  subject:
+    organizations:
+      - Iron Meridian Systems
+    organizationalUnits:
+      - BS01 Field Rack Ingress
+  isCA: true
+  duration: 26280h
+  renewBefore: 4380h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+    rotationPolicy: Always
+  usages:
+    - digital signature
+    - cert sign
+    - crl sign
+  issuerRef:
+    name: bs01-root-ca-2026
+    kind: Issuer
+    group: cert-manager.io
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: bs01-ingress-ca-2026
+  annotations:
+    argocd.argoproj.io/sync-wave: "4"
+    argocd.argoproj.io/sync-options: Prune=false
+  labels:
+    app.kubernetes.io/name: bs01-ingress-ca
+    app.kubernetes.io/part-of: bs01-pki
+spec:
+  ca:
+    secretName: bs01-ingress-ca-2026
+
