@@ -1,0 +1,54 @@
+# One-shot kaniko build for the OpenBrain MCP server image (native arm64 on-cluster).
+# Docker Desktop is not available on the Windows workstation, so builds run here.
+#
+# Kaniko reads ConfigMap-mounted files as symlinks, which end up dangling in the
+# pushed image; mount each context file via subPath so the layers get real files.
+#
+#   kubectl --kubeconfig .\.kubeconfig-192.168.1.80.yaml -n openbrain create configmap openbrain-build-ctx `
+#     --from-file=k8s/openbrain/server/Dockerfile --from-file=k8s/openbrain/server/deno.json `
+#     --from-file=k8s/openbrain/server/index.ts --dry-run=client -o yaml | kubectl apply -f -
+#   kubectl --kubeconfig .\.kubeconfig-192.168.1.80.yaml apply -f automation/openbrain/kaniko-build-job.yaml
+#
+# After the push completes: kubectl -n openbrain rollout restart deployment/openbrain-mcp
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: openbrain-build
+  namespace: openbrain
+spec:
+  backoffLimit: 1
+  activeDeadlineSeconds: 900
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: kaniko
+          image: gcr.io/kaniko-project/executor:v1.23.2
+          args:
+            - --context=dir:///workspace
+            - --dockerfile=Dockerfile
+            - --destination=192.168.1.15:5000/openbrain-mcp-server:0.2.0
+            - --skip-tls-verify
+            - --skip-unused-stages
+          volumeMounts:
+            - name: build-ctx
+              mountPath: /workspace/Dockerfile
+              subPath: Dockerfile
+            - name: build-ctx
+              mountPath: /workspace/deno.json
+              subPath: deno.json
+            - name: build-ctx
+              mountPath: /workspace/index.ts
+              subPath: index.ts
+            - name: dockerconfig
+              mountPath: /kaniko/.docker
+      volumes:
+        - name: build-ctx
+          configMap:
+            name: openbrain-build-ctx
+        - name: dockerconfig
+          secret:
+            secretName: lab-registry-pull
+            items:
+              - key: .dockerconfigjson
+                path: config.json

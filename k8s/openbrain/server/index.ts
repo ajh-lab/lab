@@ -13,7 +13,9 @@
  *   CHAT_API_BASE - Base URL for OpenAI-compatible chat API (defaults to EMBEDDING_API_BASE)
  *   CHAT_API_KEY - API key for chat service (defaults to EMBEDDING_API_KEY)
  *   CHAT_MODEL - Model name for metadata extraction (default: gpt-4o-mini)
- *   MCP_ACCESS_KEY - Authentication key for MCP endpoint
+ *   MCP_ACCESS_KEY - Authentication key for MCP endpoint (legacy; grants all scopes)
+ *   MCP_KEYS_JSON - Optional JSON map of key -> { harness, scopes[], default_scope? };
+ *                 "*" in scopes means all scopes.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -21,6 +23,7 @@ import { StreamableHTTPTransport } from "@hono/mcp";
 import { Hono } from "hono";
 import { z } from "zod";
 import { Pool } from "postgres";
+import { AsyncLocalStorage } from "node:async_hooks";
 
 // --- Configuration ---
 
@@ -38,7 +41,63 @@ const CHAT_API_BASE = Deno.env.get("CHAT_API_BASE") || EMBEDDING_API_BASE;
 const CHAT_API_KEY = Deno.env.get("CHAT_API_KEY") || EMBEDDING_API_KEY;
 const CHAT_MODEL = Deno.env.get("CHAT_MODEL") || "openai/gpt-4o-mini";
 
-const MCP_ACCESS_KEY = Deno.env.get("MCP_ACCESS_KEY")!;
+const MCP_ACCESS_KEY = Deno.env.get("MCP_ACCESS_KEY") || "";
+
+// --- Scope / harness-key auth model ---
+// MCP_KEYS_JSON: JSON map of access key -> { harness, scopes[], default_scope? }.
+// MCP_ACCESS_KEY (legacy) grants all scopes as "*".
+
+interface CallerIdentity {
+  harness: string;
+  scopes: string[]; // ["*"] = all scopes
+  defaultScope: string;
+}
+
+const KEY_MAP: Record<string, { harness: string; scopes: string[]; default_scope?: string }> =
+  (() => {
+    try {
+      return JSON.parse(Deno.env.get("MCP_KEYS_JSON") || "{}");
+    } catch {
+      return {};
+    }
+  })();
+
+const authStore = new AsyncLocalStorage<CallerIdentity>();
+
+function currentCaller(): CallerIdentity {
+  return authStore.getStore() || { harness: "unknown", scopes: ["*"], defaultScope: "global" };
+}
+
+function resolveScopes(requested?: string[]): string[] | null {
+  const caller = currentCaller();
+  const allowed = caller.scopes;
+  if (!requested || !requested.length) {
+    return allowed.includes("*") ? null : allowed; // null = no scope filter (all)
+  }
+  if (!allowed.includes("*")) {
+    for (const s of requested) {
+      if (!allowed.includes(s)) return null; // denied -> handled by caller
+    }
+  }
+  return requested;
+}
+
+function scopeDenied(requested?: string[]): string | null {
+  if (!requested || !requested.length) return null;
+  const allowed = currentCaller().scopes;
+  if (allowed.includes("*")) return null;
+  const bad = requested.filter((s) => !allowed.includes(s));
+  return bad.length ? `scope(s) not allowed for this key: ${bad.join(", ")}` : null;
+}
+
+function captureScope(requested?: string): string {
+  const caller = currentCaller();
+  const scope = requested || caller.defaultScope || "global";
+  if (!caller.scopes.includes("*") && !caller.scopes.includes(scope)) {
+    throw new Error(`scope not allowed for this key: ${scope}`);
+  }
+  return scope;
+}
 
 // --- PostgreSQL Connection Pool ---
 
@@ -123,28 +182,34 @@ server.registerTool(
       query: z.string().describe("What to search for"),
       limit: z.number().optional().default(10),
       threshold: z.number().optional().default(0.5),
+      scopes: z.array(z.string()).optional().describe("Restrict search to these scopes (e.g. [\"lab\", \"global\"])"),
     },
   },
-  async ({ query, limit, threshold }) => {
+  async ({ query, limit, threshold, scopes }) => {
+    const denied = scopeDenied(scopes);
+    if (denied) return { content: [{ type: "text" as const, text: `Denied: ${denied}` }], isError: true };
     try {
       const qEmb = await getEmbedding(query);
       const embStr = `[${qEmb.join(",")}]`;
+      const scopeFilter = resolveScopes(scopes);
 
       const client = await pool.connect();
       try {
         const result = await client.queryObject<{
           content: string;
           metadata: Record<string, unknown>;
+          scope: string;
           similarity: number;
           created_at: string;
         }>(
-          `SELECT content, metadata, created_at,
+          `SELECT content, metadata, scope, created_at,
                   1 - (embedding <=> $1::vector) AS similarity
            FROM thoughts
            WHERE 1 - (embedding <=> $1::vector) >= $2
+             AND ($3::text[] IS NULL OR scope = ANY($3))
            ORDER BY embedding <=> $1::vector
-           LIMIT $3`,
-          [embStr, threshold, limit]
+           LIMIT $4`,
+          [embStr, threshold, scopeFilter, limit]
         );
 
         if (!result.rows.length) {
@@ -157,6 +222,7 @@ server.registerTool(
           const m = t.metadata || {};
           const parts = [
             `--- Result ${i + 1} (${(t.similarity * 100).toFixed(1)}% match) ---`,
+            `Scope: ${t.scope} | Provenance: ${m.provenance || "captured"} | Harness: ${m.harness || "unknown"}`,
             `Captured: ${new Date(t.created_at).toLocaleDateString()}`,
             `Type: ${m.type || "unknown"}`,
           ];
@@ -203,13 +269,23 @@ server.registerTool(
       topic: z.string().optional().describe("Filter by topic tag"),
       person: z.string().optional().describe("Filter by person mentioned"),
       days: z.number().optional().describe("Only thoughts from the last N days"),
+      scopes: z.array(z.string()).optional().describe("Restrict to these scopes"),
     },
   },
-  async ({ limit, type, topic, person, days }) => {
+  async ({ limit, type, topic, person, days, scopes }) => {
+    const denied = scopeDenied(scopes);
+    if (denied) return { content: [{ type: "text" as const, text: `Denied: ${denied}` }], isError: true };
     try {
       const conditions: string[] = [];
       const params: unknown[] = [];
       let paramIdx = 1;
+
+      const scopeFilter = resolveScopes(scopes);
+      if (scopeFilter) {
+        conditions.push(`scope = ANY($${paramIdx})`);
+        params.push(scopeFilter);
+        paramIdx++;
+      }
 
       if (type) {
         conditions.push(`metadata->>'type' = $${paramIdx}`);
@@ -286,18 +362,27 @@ server.registerTool(
     inputSchema: {},
   },
   async () => {
+    const caller = currentCaller();
+    const scopeParams: unknown[] = [];
+    let scopeWhere = "";
+    if (!caller.scopes.includes("*")) {
+      scopeWhere = "WHERE scope = ANY($1)";
+      scopeParams.push(caller.scopes);
+    }
     try {
       const client = await pool.connect();
       try {
         const countResult = await client.queryObject<{ count: number }>(
-          "SELECT COUNT(*)::int AS count FROM thoughts"
+          `SELECT COUNT(*)::int AS count FROM thoughts ${scopeWhere}`,
+          scopeParams
         );
 
         const dataResult = await client.queryObject<{
           metadata: Record<string, unknown>;
           created_at: string;
         }>(
-          "SELECT metadata, created_at FROM thoughts ORDER BY created_at DESC"
+          `SELECT metadata, created_at FROM thoughts ${scopeWhere} ORDER BY created_at DESC`,
+          scopeParams
         );
 
         const count = countResult.rows[0]?.count || 0;
@@ -367,30 +452,35 @@ server.registerTool(
       "Save a new thought to the Open Brain. Generates an embedding and extracts metadata automatically.",
     inputSchema: {
       content: z.string().describe("The thought to capture"),
+      scope: z.string().optional().describe("Scope to capture into (must be allowed for this key); defaults to the key's default scope"),
+      provenance: z.enum(["captured", "human"]).optional().default("captured").describe("Who authored this capture"),
     },
   },
-  async ({ content }) => {
+  async ({ content, scope, provenance }) => {
     try {
+      const targetScope = captureScope(scope);
+      const caller = currentCaller();
+
       const [embedding, metadata] = await Promise.all([
         getEmbedding(content),
         extractMetadata(content),
       ]);
 
       const embStr = `[${embedding.join(",")}]`;
-      const meta = { ...metadata, source: "mcp" };
+      const meta = { ...metadata, source: "mcp", provenance, harness: caller.harness };
 
       const client = await pool.connect();
       try {
         await client.queryObject(
-          `INSERT INTO thoughts (content, embedding, metadata)
-           VALUES ($1, $2::vector, $3::jsonb)`,
-          [content, embStr, JSON.stringify(meta)]
+          `INSERT INTO thoughts (content, embedding, metadata, scope)
+           VALUES ($1, $2::vector, $3::jsonb, $4)`,
+          [content, embStr, JSON.stringify(meta), targetScope]
         );
       } finally {
         client.release();
       }
 
-      let confirmation = `Captured as ${meta.type || "thought"}`;
+      let confirmation = `Captured as ${meta.type || "thought"} in scope ${targetScope}`;
       if (Array.isArray(meta.topics) && meta.topics.length)
         confirmation += ` -- ${(meta.topics as string[]).join(", ")}`;
       if (Array.isArray(meta.people) && meta.people.length)
@@ -416,13 +506,28 @@ const app = new Hono();
 
 app.all("*", async (c) => {
   const provided = c.req.header("x-brain-key") || new URL(c.req.url).searchParams.get("key");
-  if (!provided || provided !== MCP_ACCESS_KEY) {
+  if (!provided) {
+    return c.json({ error: "Missing access key" }, 401);
+  }
+  let identity: CallerIdentity;
+  if (KEY_MAP[provided]) {
+    const entry = KEY_MAP[provided];
+    identity = {
+      harness: entry.harness,
+      scopes: entry.scopes?.length ? entry.scopes : ["*"],
+      defaultScope: entry.default_scope || entry.scopes?.[0] || "global",
+    };
+  } else if (MCP_ACCESS_KEY && provided === MCP_ACCESS_KEY) {
+    identity = { harness: "legacy", scopes: ["*"], defaultScope: "global" };
+  } else {
     return c.json({ error: "Invalid or missing access key" }, 401);
   }
 
-  const transport = new StreamableHTTPTransport();
-  await server.connect(transport);
-  return transport.handleRequest(c);
+  return authStore.run(identity, async () => {
+    const transport = new StreamableHTTPTransport();
+    await server.connect(transport);
+    return transport.handleRequest(c);
+  });
 });
 
 Deno.serve({ port: parseInt(Deno.env.get("PORT") || "8000", 10) }, app.fetch);

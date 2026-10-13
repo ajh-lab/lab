@@ -515,8 +515,13 @@ Worker recovery note:
 
 ### DroneOps Field Data Host
 
-- Host: `bs01-data` (`192.168.1.109`, Dell OptiPlex 3046, Ubuntu Server 24.04 LTS)
+- Host: `bs01-data` (`192.168.1.109`, Dell OptiPlex 7040 Micro, Ubuntu Server 24.04 LTS)
 - Role: dedicated data node for the DroneOps field base station. This host is intentionally outside k3s and separate from the gateway node.
+- Hardware baseline as of 2026-10-06:
+  - 32 GB RAM.
+  - Static management address `192.168.1.109/24` on `enp0s31f6`; MAC `64:00:6a:88:f2:e4`.
+  - Ubuntu boot/root is on the 1 TB Patriot P300 NVMe at `/dev/nvme0n1` (serial `P300ZDCB25080613911`).
+  - The LVM root logical volume is 950.82 GiB and its ext4 filesystem exposes 936 GiB. The former 120 GB WDC SATA system disk was removed after the verified migration.
 - Installed baseline as of 2026-08-19:
   - PostgreSQL 16 service enabled and active.
   - PostGIS 3.4 enabled in database `droneops`.
@@ -1304,10 +1309,16 @@ Bootstrap behavior:
   - External PostgreSQL + pgvector on `lab-pgsql01` (`192.168.1.216:5432`, DB `openbrain`)
   - `openbrain-mcp` (MCP server)
 - Secrets source: OpenBao `secret/lab/runtime/openbrain`
-  - fields: `postgres_password`, `mcp_access_key`, `embedding_api_base`, `embedding_api_key`, `embedding_model`, `chat_api_base`, `chat_api_key`, `chat_model`
+  - fields: `postgres_password`, `mcp_access_key`, `mcp_keys_json`, `embedding_api_base`, `embedding_api_key`, `embedding_model`, `chat_api_base`, `chat_api_key`, `chat_model`
 - Model provider: Ollama on AI workstation (`AI_WORKSTATION_IP`)
   - embeddings: `nomic-embed-text` (vector dim 768)
   - chat metadata: `qwen3-coder:latest`
+- Image: `192.168.1.15:5000/openbrain-mcp-server:<tag>` (lab registry, arm64, built in-cluster via kaniko)
+  - build job manifest: `automation/openbrain/kaniko-build-job.yaml` (ConfigMap build context; kaniko requires `subPath` mounts for ConfigMap files)
+- Multi-harness access (added 2026-10-12):
+  - per-harness access keys in `mcp_keys_json` (JSON map key -> harness, scopes, default scope); `mcp_access_key` remains the legacy all-scope key
+  - thoughts carry a `scope` column (migration `automation/openbrain/migrations/002_scope.sql`, default `global`); search/list/stats can filter by scope; provenance (`captured`/`human`) and harness name are stamped into metadata
+  - harness keys are wired per client via the `x-brain-key` header; scope isolation is per harness key
 - Deployment automation:
   - `automation/openbrain/scripts/bootstrap-openbrain-secrets.ps1`
   - `automation/openbrain/scripts/deploy-openbrain.ps1`
@@ -1317,4 +1328,8 @@ Bootstrap behavior:
 
 Operational notes:
 - OpenBrain compute runs in k3s (`openbrain-mcp`) while persistence is external on `lab-pgsql01`.
-- Current image publishing uses `ttl.sh` (24h TTL). Move to the internal registry once k3s nodes are configured for insecure registry pull or TLS-enabled registry endpoints.
+- Current image publishing uses the lab registry (`192.168.1.15:5000`, insecure HTTP). Builds run in-cluster via the kaniko job manifest because Docker Desktop is not available on the Windows workstation.
+- `svc/openbrain-mcp-lan` (NodePort `32100`, manifest `k8s/manifests/openbrain/service-nodeport.yaml`) fronts the same pods on plain HTTP for harness clients that cannot trust the `lab-selfsigned` CA. The ingress is unchanged for existing consumers.
+- First real harness client wired 2026-10-13: the DSH desktop app on this Windows workstation, via an `insert` of `@deepseek-ai/dsh-mcp-client` in `~/.dsh/profiles/desktop/cordis.patch.yml` using the `dsh-windows` harness key. Tools register as `mcp__openbrain__*`. The DSH MCP client has no insecure-TLS option, which is why the NodePort exists rather than the ingress URL. The profile patch is read at process start and MCP servers attach at `session/new`, so wiring changes need an app restart plus a new session.
+- Corpus is still effectively empty (2 rows, both self-tests), so the open decision is use-it-or-shelve-it; the DSH connection above is the first step towards actually using it. See `automation/openbrain/README.md`.
+

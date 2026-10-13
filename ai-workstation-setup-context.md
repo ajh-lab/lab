@@ -3,7 +3,7 @@ You are operating or recovering the Fedora AI workstation (`ai-workstation-evox2
 
 ## CURRENT OPERATIONAL CONTEXT
 
-Last verified: 2026-09-08 08:35 America/Chicago.
+Last verified: 2026-09-17 23:01 America/Chicago.
 
 Start with the root lab `ai-baseline-context.md`, then use:
 
@@ -16,21 +16,27 @@ Start with the root lab `ai-baseline-context.md`, then use:
 Current Hermes experimental manual-test default:
 
 - Model alias: `qwen3.8-flash-next-uncensored-orcarouter-iq4_xs`
-- Service: `llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service`
+- Active service: transient `llama-qwen38-flashnext-iq4xs-131k-manual.service`
+- Durable 64k service: `llama-qwen38-flashnext-orcarouter-uncensored-iq4xs.service`,
+  disabled for autostart
 - llama.cpp route: `http://127.0.0.1:11454/v1`
 - LiteLLM route: `http://127.0.0.1:4004/v1`
-- Context: `65536`
+- Context: `131072` for the current transient manual test; durable 64k service
+  remains disabled for autostart
 - Runtime: Flash-Next ROCm toolbox `llama-rocm-10.0-qwen38-flash-next`
-- Runtime flags: `-ngl 999 -c 65536 -b 1024 -ub 256 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui`
+- Runtime flags: `--mmproj /mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs/mmproj-Qwen3.8-Flash-Next-Uncensored-F16.gguf -ngl 999 -c 131072 -b 1024 -ub 256 -fa on -ctk q8_0 -ctv q8_0 --parallel 1 --reasoning off --temp 0 --repeat-penalty 1.0 -lm dio --no-warmup --no-webui`
 - Model files: `/mnt/ai/models/qwen38-flashnext-orcarouter-uncensored-iq4xs`
 - Host memory split during current test: observed 96 GiB VRAM / 31 GiB Linux
   RAM, with disk-backed swap persisted at `/mnt/ai/swap/qwen-flashnext-test.swap`.
 - Guardrail: the current IQ4_XS full-offload route reproduced the 17/18
-  repaired score, but startup is still dangerous. The 2026-09-08 reload reached
-  health after 193 seconds, with only 518 MiB minimum available RAM and 39897
-  MiB maximum swap used during load. The service is active now for manual Hermes
-  testing, but all large llama.cpp model services should stay disabled for
-  autostart.
+  repaired score at 64k, but startup is still dangerous. The 131k smoke
+  reached health after 173 seconds, with only 465 MiB minimum available RAM
+  and 39571 MiB maximum swap used during load. The 262k smoke also passed, but
+  a later live backup showed the 262k process in a swap-heavy steady state with
+  about 34 GiB swap used and about 5.5 GiB available RAM, so the manual default
+  was reduced back to 131k on 2026-09-17. The transient service is active now
+  for manual Hermes testing, but all large llama.cpp model services should stay
+  disabled for autostart.
 - Previous 64 GiB VRAM split during test: observed 64 GiB VRAM / 62 GiB Linux
   RAM, with disk-backed swap persisted at `/mnt/ai/swap/qwen-flashnext-test.swap`.
 - Previous 64 GiB split guardrail: the IQ4_XS test had no available-RAM floor. Full offload
@@ -41,6 +47,28 @@ Current Hermes experimental manual-test default:
 - Current residency expectation: only IQ4_XS should be resident for normal
   manual testing. `ollama ps` should remain empty before controlled Flash-Next
   tests.
+- Current 131k manual test state from 2026-09-08: active transient service
+  `llama-qwen38-flashnext-iq4xs-131k-manual.service` reached health in 173
+  seconds with no RAM floor, `n_ctx=131072`, minimum available RAM 465 MiB,
+  maximum swap use 39571 MiB, and about 72.3 GB decimal VRAM after direct and
+  LiteLLM sentinel smokes. LiteLLM advertises `max_input_tokens=131072`; the
+  global Hermes default and the legacy Discord profile both use
+  `model.context_length=131072`. This state is again the active manual default
+  as of 2026-09-17 after backing up the 262k configuration; no controlled
+  Python telemetry quality benchmark was run at 131k. On 2026-09-17, the
+  matching OrcaRouter F16 mmproj was downloaded, hashed, and added to the 131k
+  launch. `/props` reported `vision=True`, and direct plus LiteLLM red-image
+  smokes returned `Red`.
+- Current 262k manual test state from 2026-09-08: active transient service
+  `llama-qwen38-flashnext-iq4xs-262k-manual.service` reached health in 161
+  seconds with no RAM floor, `n_ctx=262144`, minimum available RAM 385 MiB,
+  maximum swap use 39340 MiB, and about 75.0 GB decimal VRAM after direct and
+  LiteLLM sentinel smokes. LiteLLM advertises `max_input_tokens=262144`; the
+  global Hermes default and the legacy Discord profile both use
+  `model.context_length=262144`. A 2026-09-17 live backup captured the 262k
+  command and config before reducing the active route to 131k because the
+  process was swap-heavy during interactive use. No controlled Python telemetry
+  quality benchmark has been run at 262k yet.
 
 Current controlled-quality rollback:
 

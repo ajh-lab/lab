@@ -226,7 +226,7 @@ function Classify-Row {
     }
   }
 
-  if (($l -match 'bs01-data' -or $l -match 'field data') -and $l -match 'opti?plex 3046') {
+  if (($l -match 'bs01-data' -or $l -match 'field data') -and $l -match 'opti?plex 7040') {
     return @{
       assetType = 'device'
       roleSlug = 'field-data-server'
@@ -234,9 +234,9 @@ function Classify-Row {
       roleColor = '00bcd4'
       manufacturerSlug = 'dell'
       manufacturerName = 'Dell'
-      deviceTypeSlug = 'optiplex-3046-micro'
-      deviceTypeModel = 'OptiPlex 3046 Micro'
-      interfaceName = 'mgmt0'
+      deviceTypeSlug = 'optiplex-7040-micro'
+      deviceTypeModel = 'OptiPlex 7040 Micro'
+      interfaceName = 'enp0s31f6'
     }
   }
 

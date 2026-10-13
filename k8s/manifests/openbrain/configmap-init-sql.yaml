@@ -12,11 +12,13 @@ data:
       content TEXT NOT NULL,
       embedding vector(768),
       metadata JSONB DEFAULT '{}'::jsonb,
+      scope TEXT NOT NULL DEFAULT 'global',
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
 
     CREATE INDEX IF NOT EXISTS idx_thoughts_created_at ON thoughts (created_at DESC);
     CREATE INDEX IF NOT EXISTS idx_thoughts_metadata ON thoughts USING GIN (metadata);
+    CREATE INDEX IF NOT EXISTS idx_thoughts_scope ON thoughts (scope);
 
     CREATE OR REPLACE FUNCTION match_thoughts(
       query_embedding vector(768),

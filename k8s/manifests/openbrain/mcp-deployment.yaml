@@ -13,9 +13,11 @@ spec:
       labels:
         app: openbrain-mcp
     spec:
+      imagePullSecrets:
+        - name: lab-registry-pull
       containers:
         - name: mcp
-          image: ttl.sh/lab-openbrain-arm64-20260501:24h
+          image: 192.168.1.15:5000/openbrain-mcp-server:0.2.0
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
@@ -51,6 +53,11 @@ spec:
                 secretKeyRef:
                   name: openbrain-runtime-secret
                   key: mcp-access-key
+            - name: MCP_KEYS_JSON
+              valueFrom:
+                secretKeyRef:
+                  name: openbrain-runtime-secret
+                  key: mcp-keys-json
             - name: EMBEDDING_API_BASE
               valueFrom:
                 secretKeyRef:
