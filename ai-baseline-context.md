@@ -9,6 +9,19 @@ access applies outside those hours. See [policy and rollback](automation/ai-work
 
 ## Purpose
 
+DroneOps deployment direction (owner decision 2026-10-16): use Argo CD on BS01
+for connected development, retain signed bundles for field release/USB acceptance,
+and later separate a development cluster from the physical acceptance station.
+The platform repository owns the canonical
+[ADR 0012](https://github.com/ajh-lab/droneops-platform/blob/main/docs/adr/0012-development-and-field-release-deployment-modes.md).
+[Platform #1215](https://github.com/ajh-lab/droneops-platform/issues/1215)
+owns the reviewed live handoff. This documentation does not enable reconciliation,
+run a database migration or change deployment ownership. Preserve the ER605 rack
+network, native local Secrets, data and resilience settings. The older ownership
+record below remains historical/current-custody guidance until verified handoff;
+it does not override the newly accepted direction. Argo uses Helm rendering,
+so reconcile appliance Helm history and custody explicitly at either transition.
+
 DroneOps release catalog (2026-10-09): `lab-gha-runner-01` (`192.168.1.48`)
 serves `https://releases.droneops.home.arpa:8443/releases/catalog.json` through
 the dedicated `droneops-release-catalog.service`. BS01 uses outbound mTLS and
@@ -25,7 +38,7 @@ revision 3. The release is `droneops-platform` in namespace `droneops`, using
 `HELM_DRIVER=configmap`. Argo reconciliation and Image Updater promotion are
 suspended for this application; its Application and finalizer remain intact.
 Main merges and image builds no longer deploy automatically to BS01. Do not
-resume development automation as a routine deployment step. Consult platform
+resume development automation outside the reviewed #1215 handoff. Consult platform
 `docs/context/issue-1087-acceptance.md` for later rollback/current-revision
 evidence and `docs/runbooks/bs01-appliance-release-recovery.md` before updates.
 The native Secret values remain unchanged, and physical #670 is undispatched.
