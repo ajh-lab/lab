@@ -1,0 +1,11 @@
+server:
+  defaultFlagsOverride: []
+  remoteWrite: []
+serverFiles:
+  prometheus.yml:
+    remote_write: []
+    rule_files:
+      - /etc/config/recording_rules.yml
+      - /etc/config/alerting_rules.yml
+      - /etc/config/rules
+      - /etc/config/alerts
