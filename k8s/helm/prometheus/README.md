@@ -1,7 +1,7 @@
 ﻿# Prometheus Deployment (Helm)
 
 Chart: `prometheus-community/prometheus`
-Version: `29.2.0`
+Version: `29.14.0`
 Namespace: `observability`
 
 ## Access
@@ -12,7 +12,7 @@ Namespace: `observability`
 
 ```bash
 helm upgrade --install prometheus prometheus-community/prometheus \
-  --version 29.2.0 \
+  --version 29.14.0 \
   -n observability --create-namespace \
   -f k8s/helm/prometheus/values.yaml
 ```
@@ -26,3 +26,13 @@ helm upgrade --install prometheus prometheus-community/prometheus \
 - `ai-workstation-gpu`: `192.168.1.123:9101`
 
 The node exporter and GPU exporter run as user systemd services on the workstation. Dashboard source and exporter code live in the private `lab-monitoring` repository.
+
+## Retention
+
+Prometheus retains samples for up to 90 days, with a 48 GB TSDB size ceiling.
+The earlier limit wins: sustained growth may shorten the effective history.
+Changing retention does not restore samples already deleted under the old 15-day limit.
+The local-path volume shares the control-plane node filesystem; its 8 GiB PVC
+request is not a filesystem quota. Check free space on that node and the
+Prometheus TSDB size regularly, and move the database to dedicated storage if
+the shared disk can no longer leave adequate headroom.

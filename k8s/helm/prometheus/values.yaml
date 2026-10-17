@@ -31,6 +31,8 @@ extraScrapeConfigs: |
           host: ai-workstation-evox2
 
 server:
+  retention: 90d
+  retentionSize: 48GB
   service:
     type: NodePort
     nodePort: 32091
