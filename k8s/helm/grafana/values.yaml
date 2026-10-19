@@ -10,6 +10,9 @@ persistence:
   storageClassName: local-path
   size: 5Gi
 
+initChownData:
+  enabled: false
+
 resources:
   requests:
     cpu: 100m
@@ -25,7 +28,7 @@ datasources:
       - name: Prometheus
         type: prometheus
         access: proxy
-        url: http://prometheus-server.observability.svc.cluster.local
+        url: http://192.168.1.50:9090
         isDefault: true
       - name: Loki
         type: loki
