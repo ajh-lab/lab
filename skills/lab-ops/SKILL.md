@@ -32,7 +32,15 @@ Once located, read `ai-baseline-context.md` first. For infrastructure-specific w
 
 ## Start Workflow
 
-Before any operational task from the lab repo, run the bootstrap script:
+Read `AGENTS.md`, `ai-baseline-context.md`, and
+`docs/agent-context-and-handoffs.md` before operational work. Context loading
+is read-only: do not synchronize secrets or inventory as a startup step.
+
+The bootstrap below writes OpenBAO secrets. Run it only for a task that
+explicitly authorizes secret synchronization, after the baseline's existing
+bootstrap safety gate is resolved. A context-only task never clears that gate.
+Use the documented read-only SecretResolver helpers when credentials are
+needed within an authorized task. The controlled bootstrap command is:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File automation\agent\scripts\bootstrap-lab-context.ps1
@@ -44,7 +52,9 @@ On Linux, use PowerShell if `pwsh` is installed:
 pwsh -NoProfile -ExecutionPolicy Bypass -File automation/agent/scripts/bootstrap-lab-context.ps1
 ```
 
-If PowerShell is unavailable, continue with read-only context gathering and report that bootstrap could not run.
+If PowerShell is unavailable, continue with read-only context gathering.
+Report a blocker only if an explicitly authorized secret-sync operation
+actually requires the unavailable bootstrap; ordinary context loading does not.
 
 ## Secrets And OpenBao
 

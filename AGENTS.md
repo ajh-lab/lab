@@ -7,9 +7,12 @@ for their own scope.
 ## Context Loading
 
 - Detect the current operating system and shell before running commands.
-- For non-trivial lab work, read `ai-baseline-context.md` first and run
-  `automation/agent/scripts/bootstrap-lab-context.ps1` when documented for the
-  task.
+- For non-trivial lab work, read `ai-baseline-context.md` and
+  `docs/agent-context-and-handoffs.md` first. Context discovery is read-only;
+  it does not run secret synchronization, inventory writes, or deployment.
+- `automation/agent/scripts/bootstrap-lab-context.ps1` writes secrets. Do not
+  run it as context loading. Follow the baseline's existing bootstrap safety
+  gate and require task scope that explicitly authorizes secret synchronization.
 - For work under `repositories/<repo-name>`, read that repository's
   `AGENTS.md`, `ai-baseline-context.md`, and `docs/context/project-status.md`
   before planning or implementation. Follow only the referenced context files
@@ -36,8 +39,15 @@ for their own scope.
 
 - Treat the selected issue as the sole active durable goal. Read its body,
   comments, dependencies, linked PRs, and Project fields before changing code.
-- Use short-lived branches and small coherent PR phases. Link each PR to its
+- Use short-lived branches and small coherent PR phases for code and durable
+  documentation changes. Do not push directly to `main`. Link each PR to its
   owning issue and keep issue and Project status truthful.
+- Record evidence-backed follow-ups in the owning issue or project context;
+  recording, grooming, assigning, or moving an item does not start a worker.
+  Do not dispatch another issue without explicit owner authorization.
+- Use the shared context and handoff policy for checkpoint summaries and
+  documentation promotion. OpenBrain is optional working knowledge, not
+  project-state authority or permission to expand the current issue.
 - Follow test-driven development where practical: write and run the narrowest
   failing test or check first, implement the minimum passing change, then
   refactor. Record red, green, and regression evidence in the PR; explain when

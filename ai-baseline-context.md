@@ -288,7 +288,8 @@ For direct Hermes browser chat on the ai-workstation, use `qwen38-27b-uncensored
 - `.env`: credentials and secrets (never commit to git).
 - `automation/common/SecretResolver.psm1`: shared OpenBAO-first secret resolution module.
 - `automation/secrets/scripts/sync-env-to-openbao.ps1`: sync `.env` bootstrap values into OpenBAO KV v2.
-- `automation/agent/scripts/bootstrap-lab-context.ps1`: mandatory agent bootstrap entrypoint.
+- `automation/agent/scripts/bootstrap-lab-context.ps1`: controlled secret-writing bootstrap; not a context-loading step. Honor the bootstrap safety gate below.
+- `docs/agent-context-and-handoffs.md`: canonical read-only context discovery, durable documentation promotion, and checkpoint/handoff policy.
 - `k8s/helm/*` and `k8s/manifests/*`: deployment definitions for lab services.
 - `automation/n8n/*`: n8n workflow exports/templates and API helper scripts.
 - `automation/netbox/*`: NetBox IPAM + asset sync scripts.
@@ -322,7 +323,7 @@ detail into custom instructions or every project repo.
 
 | Work Area | Start Here | Then Read |
 |---|---|---|
-| Any non-trivial lab task | `ai-baseline-context.md` | Relevant rows below plus task-specific files |
+| Any non-trivial lab task | `ai-baseline-context.md` | `AGENTS.md`, `docs/agent-context-and-handoffs.md`, then relevant rows below and task-specific files |
 | Windows workstation to Linux SSH/service work | `skills/remote-linux-from-windows/SKILL.md` | Host-specific docs and repo runbooks for the target |
 | Secrets, credentials, API keys, ESO | `skills/openbao-secrets/SKILL.md` | `automation/common/SecretResolver.psm1`, relevant OpenBAO path docs |
 | k3s, Helm, ArgoCD, ESO, registry, CI/CD | `skills/lab-gitops/SKILL.md` | Cluster-specific kubeconfig and deployment repo docs |
@@ -1376,7 +1377,7 @@ OpenBao records and verified against the bootstrap snapshot without printing
 values. An earlier broad local correction had been rejected by automatic
 approval review; only these five BS01 fields were changed afterward.
 
-Do not run `sync-env-to-openbao.ps1` or the mandatory
+Do not run `sync-env-to-openbao.ps1` or the secret-writing
 `bootstrap-lab-context.ps1` below until the remaining rotated-host fields in
 the local `.env` fallback are checked and corrected without printing values.
 The bootstrap script calls the sync script and could copy stale values back
@@ -1423,9 +1424,14 @@ Current key groups include:
 
 `.env` is excluded by `.gitignore`.
 
-## Agent Bootstrap (Mandatory)
+## Controlled Secret Bootstrap
 
-Before any operational task, run:
+Context discovery is read-only. Do not run this bootstrap for routine startup,
+documentation review, handoff, or memory retrieval. It writes OpenBAO secrets.
+The temporary bootstrap safety gate above remains in force: secret
+synchronization requires explicit task authorization and reconciliation of
+the stale fallback fields before execution. No context-only task clears that
+gate. For an authorized secret-sync operation after the gate is resolved:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File automation\agent\scripts\bootstrap-lab-context.ps1
@@ -1452,7 +1458,7 @@ zero-downtime operation. Aircraft failsafes are separate from cluster recovery.
 
 ### General operating rules
 
-1. Run `automation/agent/scripts/bootstrap-lab-context.ps1` first.
+1. Load `AGENTS.md`, this baseline, and `docs/agent-context-and-handoffs.md` read-only; do not run the secret-writing bootstrap as startup.
 2. Load inventory context from `network_devices.csv` first.
 3. Resolve credentials with `Resolve-LabSecret`; do not implement new direct `.env` reads in automation scripts.
 4. Validate management reachability before attempting remote ops.
@@ -1460,7 +1466,7 @@ zero-downtime operation. Aircraft failsafes are separate from cluster recovery.
 6. Keep service definitions in `k8s/` aligned with runtime state after every change.
 7. For n8n workflow changes, export updated JSON to `automation/n8n/workflows/exports/` and keep reusable templates in `automation/n8n/workflows/templates/`.
 8. For inventory updates, run both NetBox sync scripts: first `sync-network-devices-to-netbox.ps1` (IPs/prefixes), then `sync-netbox-assets-from-csv.ps1` (devices/VMs + primary IP links).
-9. For UniFi context refresh, run `automation/unifi/scripts/fetch-unifi-inventory.ps1` and then `automation/unifi/scripts/sync-unifi-to-netbox.ps1 -FetchFresh`.
+9. Read existing UniFi inventory for context. Run `automation/unifi/scripts/fetch-unifi-inventory.ps1` and `automation/unifi/scripts/sync-unifi-to-netbox.ps1 -FetchFresh` only when the task authorizes inventory refresh and NetBox writes, not as routine startup.
 10. For Strix Halo workstation inference backend operations, use `kyuz0/amd-strix-halo-toolboxes` and keep it synced with `automation/ai-workstation/scripts/sync-strix-halo-backend.ps1`.
 11. `Hermes-Test` should be treated as disposable validation only; durable planning and execution state belongs in this `lab` repo.
 12. For OpenClaw operations on the workstation, use `automation/ai-workstation/README.md` for install/status/security/runtime reference.
