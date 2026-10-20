@@ -1069,7 +1069,8 @@ Worker recovery note:
   provisioning route. No app database/credentials have been provisioned;
   shared lab_admin must never be the runtime identity. Complete independent
   source/release preparation without repeating unchanged credential probes.
-- Last verified runtime snapshot (2026-10-20): Argo Synced/Healthy at foundation SHA `b4b9d10`,
+- Last verified runtime snapshot (2026-10-20 20:23Z): Argo Synced/Healthy at
+  merged source SHA `e47f67a383707dca164a327ab91546ce76247440`,
   bootstrap API 1/1, pod `pulsetrader-api-c77578457-td5wx` on arm64 wknd04.
   It still source-clones main and uses python:3.11-slim, not a tested product
   digest; Argo source retains the former URL. June readiness notes below are
