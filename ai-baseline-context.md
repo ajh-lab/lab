@@ -1043,10 +1043,10 @@ Worker recovery note:
   infrastructure. Weekly reports target a separate CronJob with numeric
   analysis persisted before local-model commentary.
 - [Foundation PR #7](https://github.com/ajh-lab/PulseTrader/pull/7) merged at
-  `b4b9d108b1194da51ba6258c71990f9da3930c37`; native ARM main CI passed32tests.
+  `b4b9d108b1194da51ba6258c71990f9da3930c37`; native ARM main CI passed 32 tests.
   Node arm64/runner and daemon aarch64 are verified on `lab-org-arm64-dind`.
   Main-only publication environment exists; required reviewers/private branch
-  protection are unavailable on GitHub Free. Candidate run39481669806 passed
+  protection are unavailable on GitHub Free. Candidate run 39481669806 passed
   gate/build then failed because organization registry secrets arrived empty.
   Automatic approval review rejected repository Actions secret upload
   (`blocked by policy`); no upload occurred. Source now prepares tested archive
@@ -1066,16 +1066,18 @@ Worker recovery note:
   provisioning route. No app database/credentials have been provisioned;
   shared lab_admin must never be the runtime identity. Complete independent
   source/release preparation without repeating unchanged credential probes.
-- Last read-only runtime snapshot: Argo Synced at docs SHA `34741c7`,
-  Progressing, API0/1 with Unknown pod. June healthy/readiness statements below
-  are historical. Workstation Git read checks using existing Argo/app secrets
+- Refreshed runtime: Argo Synced/Healthy at foundation SHA `b4b9d10`,
+  bootstrap API 1/1, pod `pulsetrader-api-c77578457-td5wx` on arm64 wknd04.
+  It still source-clones main and uses python:3.11-slim, not a tested product
+  digest; Argo source retains the former URL. June readiness notes below are
+  historical. Workstation Git read checks using existing Argo/app secrets
   passed against canonical repository, not controller or pod execution. Refresh
   live state before any release and retain DB migration/backup/restore,
   immutable pod image, API/auth/browser and durable paper evidence gates.
 - No strategy count, accepted calibration, positive after-cost P&L, two-week
-  stability or owner reviews are established. Preserve500unique resolved
+  stability or owner reviews are established. Preserve 500 unique resolved
   windows, two full stable weeks, calibration assessment, positive net paper
-  P&L, owner reviewing30wrong predictions, and a later explicit live switch.
+  P&L, owner reviewing 30 wrong predictions, and a later explicit live switch.
   Fixtures/retries/secondary arms do not inflate them; paper shadow continues.
 - GitHub repository: `https://github.com/ajh-lab/PulseTrader`
 - Local lab checkout: `repositories/PulseTrader`
