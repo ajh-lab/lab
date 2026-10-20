@@ -604,6 +604,13 @@ Worker recovery note:
     - `secret/lab/runtime/*` (legacy runtime path still in use for some services including Wiki.js DB credentials)
   - agent policies: `lab-context-read` (read/list env) and `lab-deploy-write` (read env + write runtime)
   - ESO policy/token: `eso-read-lab` with token stored in k8s secret `external-secrets/openbao-eso-token`
+    - Approved recovery verified 2026-10-20: exact PulseTrader KV data-read
+      addition and scoped periodic token; no root/default policy in ESO.
+      Manual maintenance owner Adam/operator: first weekly inspection/renewal
+      2026-10-27, intervene by 2026-11-17 before the current 2026-11-21 expiry.
+      No automatic renewal or automation is assumed. See
+      [ESO maintenance](docs/openbao-eso-maintenance.md) for references, recovery
+      limitations and the separate controller/API stability gate.
   - firewall: `8200/tcp` allowed from `192.168.1.0/24`
 - Recovery note 2026-06-26: `lab-secrets01` had been powered off. After it was powered back on, OpenBao was reachable but sealed. The instance was unsealed with the stored Shamir key, `ClusterSecretStore/openbao-store` returned to `Valid`, and all known ExternalSecret resources returned to `SecretSynced`.
 - Credential references:
@@ -1084,17 +1091,28 @@ Worker recovery note:
   live state before any release and retain DB migration/backup/restore,
   immutable pod image, API/auth/browser and durable paper evidence gates.
 - Secret/TLS release gates (2026-10-20 observations):
-  `ClusterSecretStore/openbao-store` is `Ready=False`, reason
-  `ValidationFailed`, with OpenBao `lookup-self` HTTP 403. Restore the
-  documented ESO authentication route before claiming runtime secret sync;
-  no shared credentials were changed. The concrete minimal PulseTrader read
-  ACL plus scoped periodic-token replacement is awaiting explicit approval.
+  The owner explicitly approved the exact ESO policy/token recovery.
+  `ClusterSecretStore/openbao-store` became Ready/Valid at 22:14:29Z;
+  all 13 prior consumers freshly SecretSynced at 22:14:29-35Z, and the three
+  PulseTrader app/pull ExternalSecrets synced at 22:20:59-22:21:00Z.
+  The exact read-only PulseTrader ACL was added, and only the approved ESO
+  token field was reconciled across Kubernetes/bootstrap/local fallback.
+  Original last-applied annotation bytes were not retained after kubectl's
+  automatic rewrite; metadata preservation is not claimed. See
+  [ESO recovery and manual maintenance](docs/openbao-eso-maintenance.md).
+  The core ESO controller still has a historical lease-error crash loop, and
+  intermittent API/Kine SQLite latency remains under read-only diagnosis;
+  successful sync does not establish controller stability or workload reload.
   Exact-host `pulsetrader-tls` Certificate is issued/Ready at generation1 via
   existing lab-selfsigned. Its public SAN/serverAuth/non-CA/validity/fingerprints
   were verified. The owner approved this exact public certificate in Windows
   CurrentUser Root; import/store fingerprints and a fresh serverAuth user-chain
   check passed, with no private key or other store change. Ingress is unapplied;
   normal served-origin HTTPS and browser acceptance remain unverified.
+  The coordinator also verified fresh digest-pinned node pulls and 16 rollout
+  server dry-run checks; these are preparation, not an application deployment.
+  Follow the linked PulseTrader main checkpoint for subsequently accepted
+  rollout evidence; do not infer current runtime from this dated snapshot.
 - No strategy count, accepted calibration, positive after-cost P&L, two-week
   stability or owner reviews are established. Preserve 500 unique resolved
   windows, two full stable weeks, calibration assessment, positive net paper
