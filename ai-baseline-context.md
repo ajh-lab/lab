@@ -1072,8 +1072,8 @@ Worker recovery note:
   parse/reload/log and 16 fresh rejection probes; existing operator access
   still passes. Shared passwords, existing HBA rule bytes/order, global grants
   and firewall remain unchanged. Never use shared lab_admin as runtime.
-  [Actual DB evidence PR #13](https://github.com/ajh-lab/PulseTrader/pull/13)
-  is under review; populated real-data restore remains a later acceptance gate.
+  See [actual DB evidence PR #13](https://github.com/ajh-lab/PulseTrader/pull/13);
+  populated real-data restore remains a later acceptance gate.
 - Last verified runtime snapshot (2026-10-20 21:51Z): Argo Synced/Healthy at
   accepted release-documentation SHA `d5bffc2ae166e5711d53389a500ecc15aee4d5df`,
   bootstrap API 1/1, pod `pulsetrader-api-c77578457-td5wx` on arm64 wknd04.
