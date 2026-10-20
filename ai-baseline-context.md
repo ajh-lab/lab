@@ -1032,182 +1032,44 @@ Worker recovery note:
 
 ## Platform Services (Live)
 
-### PulseTrader (API bootstrap; paper product not deployed)
+### PulseTrader (deployed immutable paper observer)
 
-- Purpose: safety-constrained Kalshi BTC 15-minute market experiment platform for observe/paper-first market watching, deterministic risk gating, and a modern dark second-monitor dashboard.
-- Current checkpoint (2026-10-20): canonical private repository is
-  `ajh-lab/PulseTrader` with identity/history retained after owner-authorized
-  transfer. The [Project](https://github.com/orgs/ajh-lab/projects/2) contains
-  all six issues: #9 foundation, #3 evidence, #8 unified UI, #4 real-data/paper,
-  #5 local Qwen/memory and #6 weekly reports/readiness. Owner subsequently
-  authorized full autonomous PAPER delivery and bounded parallel agents,
-  routine PR/check/merge/image/GitOps work and dedicated DB/account provisioning
-  through documented access. Live orders, paid fallback, credential rotation,
-  hardware and unrelated infrastructure remain excluded.
-- UI/API/worker stay in one repository with separate Deployments/images,
-  UI/API Services and outbound worker without a Service. All experiment
-  assessment and manual review belongs in one PulseTrader UI; Grafana handles
-  infrastructure. Weekly reports target a separate CronJob with numeric
-  analysis persisted before local-model commentary.
-- [Foundation PR #7](https://github.com/ajh-lab/PulseTrader/pull/7) merged at
-  `b4b9d108b1194da51ba6258c71990f9da3930c37`; native ARM main CI passed 32 tests.
-  Node arm64/runner and daemon aarch64 are verified on `lab-org-arm64-dind`.
-  Main-only publication environment exists; required reviewers/private branch
-  protection are unavailable on GitHub Free. Candidate run 39481669806 passed
-  gate/build then failed because organization registry secrets arrived empty.
-  Automatic approval review rejected repository Actions secret upload
-  (`blocked by policy`); no upload occurred. Source now prepares tested archive
-  export and authenticated publication inside Lab, keeping registry credentials
-  out of GitHub. Track image export/publication evidence in the PulseTrader
-  release checkpoint; candidate publication does not establish deployed acceptance.
-- [Product integration PR #10](https://github.com/ajh-lab/PulseTrader/pull/10)
-  merged on 2026-10-20 at `e47f67a383707dca164a327ab91546ce76247440`.
-  It contains evidence/auth/API, unified UI, public feeds/paper accounting,
-  cutoff-safe Qwen forecasts and frozen weekly reports. Source/fixture tests
-  and native CI remain distinct from deployed acceptance. See PulseTrader's
-  sole [project-status checkpoint](https://github.com/ajh-lab/PulseTrader/blob/main/docs/context/project-status.md)
-  for current commits,
-  exact checks, remaining gates and continuation; do not duplicate checkpoints.
-- Documented PostgreSQL host access was restored externally by the owner.
-  Fresh OpenBao host reads now establish SSH/sudo superuser access. Dedicated
-  database `pulsetrader`, migrator/runtime roles and guarded schema v1 are
-  provisioned. Service authority `secret/homelab/services/pulsetrader` has
+- Canonical private repository: `ajh-lab/PulseTrader`; owner-authorized full
+  PAPER delivery is active. Live orders, paid fallback, shared password rotation,
+  hardware and unrelated infrastructure changes remain excluded.
+- UI and same-origin API: `https://pulsetrader.192.168.1.80.sslip.io/`.
+  Namespace `pulsetrader`, Argo Application `argocd/pulsetrader`, canonical
+  repository/main/path `deploy/k8s`. Separate API/UI/worker immutable images;
+  UI/API Services, outbound worker without a Service, separate report CronJob.
+- Verified 2026-10-20 23:46Z: Argo Synced/Healthy at accepted `5fe46dbe`, all
+  three published digest image IDs Ready on wknd03, mode paper/live false.
+  Initial inference/execution disabled, reports suspended. Refer to the product
+  checkpoint for any subsequently reviewed activation; this is a dated snapshot.
+- Normal Windows HTTPS accepts the exact owner-approved public certificate;
+  owner API login/CSRF/logout/replay-revocation, real public collection and
+  official outcome lineage, same-cutoff store/API/public browser consistency,
+  populated consistent restore and API/worker frozen-projection restart passed.
+  These do not prove actual forecasts, simulated fills/fees/settlement,
+  authenticated-browser acceptance, profitability or strategy readiness.
+- Dedicated PostgreSQL database/accounts/schema v1 and role-only HBA isolation
+  are verified on `lab-pgsql01`; never use shared `lab_admin` as runtime.
+  OpenBao authority `secret/homelab/services/pulsetrader` fields:
   `database_url`, `migrator_database_url`, `owner_password`, `session_secret`,
-  `llm_api_key`; no secret values are recorded here. Actual loopback/LAN
-  password/TLS, append-only permissions and empty-database snapshot/restore
-  passed. PR #12's five-rule role-only HBA prefix passed backup/byte-preservation,
-  parse/reload/log and 16 fresh rejection probes; existing operator access
-  still passes. Shared passwords, existing HBA rule bytes/order, global grants
-  and firewall remain unchanged. Never use shared lab_admin as runtime.
-  See [actual DB evidence PR #13](https://github.com/ajh-lab/PulseTrader/pull/13);
-  populated real-data restore remains a later acceptance gate.
-- Last verified runtime snapshot (2026-10-20 21:51Z): Argo Synced/Healthy at
-  accepted release-documentation SHA `d5bffc2ae166e5711d53389a500ecc15aee4d5df`,
-  bootstrap API 1/1, pod `pulsetrader-api-c77578457-td5wx` on arm64 wknd04.
-  It still source-clones main and uses python:3.11-slim, not a tested product
-  digest; Argo source retains the former URL. June readiness notes below are
-  historical. Workstation Git read checks using existing Argo/app secrets
-  passed against canonical repository, not controller or pod execution. Refresh
-  live state before any release and retain DB migration/backup/restore,
-  immutable pod image, API/auth/browser and durable paper evidence gates.
-- Secret/TLS release gates (2026-10-20 observations):
-  The owner explicitly approved the exact ESO policy/token recovery.
-  `ClusterSecretStore/openbao-store` became Ready/Valid at 22:14:29Z;
-  all 13 prior consumers freshly SecretSynced at 22:14:29-35Z, and the three
-  PulseTrader app/pull ExternalSecrets synced at 22:20:59-22:21:00Z.
-  The exact read-only PulseTrader ACL was added, and only the approved ESO
-  token field was reconciled across Kubernetes/bootstrap/local fallback.
-  Original last-applied annotation bytes were not retained after kubectl's
-  automatic rewrite; metadata preservation is not claimed. See
-  [ESO recovery and manual maintenance](docs/openbao-eso-maintenance.md).
-  The core ESO controller still has a historical lease-error crash loop, and
-  intermittent API/Kine SQLite latency remains under read-only diagnosis;
-  successful sync does not establish controller stability or workload reload.
-  Exact-host `pulsetrader-tls` Certificate is issued/Ready at generation1 via
-  existing lab-selfsigned. Its public SAN/serverAuth/non-CA/validity/fingerprints
-  were verified. The owner approved this exact public certificate in Windows
-  CurrentUser Root; import/store fingerprints and a fresh serverAuth user-chain
-  check passed, with no private key or other store change. Ingress is unapplied;
-  normal served-origin HTTPS and browser acceptance remain unverified.
-  The coordinator also verified fresh digest-pinned node pulls and 16 rollout
-  server dry-run checks; these are preparation, not an application deployment.
-  Follow the linked PulseTrader main checkpoint for subsequently accepted
-  rollout evidence; do not infer current runtime from this dated snapshot.
-- No strategy count, accepted calibration, positive after-cost P&L, two-week
-  stability or owner reviews are established. Preserve 500 unique resolved
-  windows, two full stable weeks, calibration assessment, positive net paper
-  P&L, owner reviewing 30 wrong predictions, and a later explicit live switch.
-  Fixtures/retries/secondary arms do not inflate them; paper shadow continues.
-- GitHub repository: `https://github.com/ajh-lab/PulseTrader`
-- Local lab checkout: `repositories/PulseTrader`
-- AI workstation checkout: `/mnt/ai/agent/PulseTrader`
-- Hermes Kanban board: `pulsetrader` (`PulseTrader`)
-- Live URL: `http://pulsetrader.192.168.1.80.sslip.io/`
-- ArgoCD Application: `argocd/pulsetrader`
-  - Status verified 2026-06-26: `Synced` / `Healthy`
-  - Revision verified 2026-06-26: `793f11c79c06826f22179831d983e9e38c2cbc58`
-  - Observed source (former URL, pending reviewed update): `https://github.com/AJHeitzman/PulseTrader.git`, `targetRevision: main`, path `deploy/k8s`
-- k3s resources:
-  - Namespace: `pulsetrader`
-  - Deployment: `pulsetrader-api` (`1/1 Ready` on 2026-06-26)
-  - Service: `pulsetrader-api` (`ClusterIP`, port `80`)
-  - Ingress: `pulsetrader`, host `pulsetrader.192.168.1.80.sslip.io`, class `traefik`
-- Runtime verification commands:
-  - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n argocd get applications.argoproj.io pulsetrader -o wide`
-  - `kubectl --kubeconfig .kubeconfig-192.168.1.80.yaml -n pulsetrader get pods,deploy,svc,ingress -o wide`
-  - `curl -sS http://pulsetrader.192.168.1.80.sslip.io/`
-  - `curl -sS http://pulsetrader.192.168.1.80.sslip.io/health`
-  - `curl -sS http://pulsetrader.192.168.1.80.sslip.io/api/v1/config`
-- Verified API responses on 2026-06-26:
-  - `/` returns `{"service":"pulsetrader","status":"ok","mode":"observe","docs":"/docs"}`
-  - `/health` returns `{"status":"ok"}`
-  - `/api/v1/config` returns `mode=observe` and `live_trading_enabled=false`
-- Historical June bootstrap implementation (merged product source is linked above):
-  - Initial FastAPI API scaffold.
-  - Safe runtime config defaults: `MODE=observe`, `LIVE_TRADING_ENABLED=false`.
-  - Mock current market endpoint for early API scaffolding and tests.
-  - Advisory-only agent analysis interface.
-  - Documentation for modern dark UI design and post-deploy verification.
-- Bootstrap deployment implementation notes:
-  - The June deployment was an API-only bootstrap to get PulseTrader reachable while lab image registry and OpenBao were unavailable; current readiness is superseded by the checkpoint above.
-  - The bootstrap manifest uses public multi-arch images (`python:3.11-slim`, `alpine/git`) instead of `192.168.1.15:5000`.
-  - The pod clones the private PulseTrader GitHub repo at startup using Kubernetes secret `pulsetrader/pulsetrader-git-credentials`. Do not commit that token or print it in logs.
-  - ArgoCD accesses the private PulseTrader repository via repository secret `argocd/repo-pulsetrader`. Do not commit or expose the token.
-  - Startup was stabilized in commit `793f11c` by using plain `uvicorn`, adding a startup probe, and raising the bootstrap memory limit.
-  - This bootstrap is not the desired final production shape; replace it with CI-built immutable images once the lab registry and CI path are healthy.
-- Important data-provider rule:
-  - Mock providers are only for tests, local offline development, deterministic demos, and CI.
-  - Deployed observe/paper mode should use real read-only Kalshi/BTC market data APIs when configured.
-  - UI must consume PulseTrader backend API endpoints and must not own provider selection.
-- Safety model:
-  - Default mode is observe only.
-  - Live trading must remain disabled unless intentionally configured by the owner.
-  - Any future live-limited order path must go through deterministic risk gate code.
-  - LLM/Hermes/agent analysis is advisory only and must not hold Kalshi credentials, place orders, modify risk state, or bypass risk checks.
-  - Market orders are forbidden by project policy.
-- CI/CD target state captured in Hermes cards:
-  - GitHub Actions PR checks must run on the lab self-hosted runner in k3s/ARC, not GitHub-hosted runners.
-  - PR checks should include Python tests, safety/risk tests, frontend install/build/typecheck/test where applicable, manifest validation, Dockerfile validation, and practical secret-leak checks.
-  - GitHub Actions image workflow should build API, worker, and UI images after tests pass.
-  - Images should push to the lab registry at `192.168.1.15:5000`, using immutable commit SHA tags.
-  - Expected image naming convention: `192.168.1.15:5000/lab/pulsetrader-api`, `192.168.1.15:5000/lab/pulsetrader-worker`, and `192.168.1.15:5000/lab/pulsetrader-ui` unless revised during implementation.
-  - Registry credentials should come from OpenBao/GitHub Actions secrets, not committed files.
-  - CD should use ArgoCD in the k3s lab, with an ArgoCD Application targeting the PulseTrader repo and k3s manifests.
-- Final k3s/GitOps target:
-  - Keep namespace `pulsetrader`, ArgoCD Application `pulsetrader`, and host `pulsetrader.192.168.1.80.sslip.io`.
-  - Move from bootstrap source-clone pod to CI-built API, worker, and UI images with immutable SHA tags.
-  - Deployment should include API, worker, and UI processes with readiness/liveness probes, resource requests/limits, and safe ConfigMap defaults.
-  - Add TLS when the service is promoted beyond bootstrap; current ingress is HTTP only.
-- Planned OpenBao/ESO work:
-  - Define PulseTrader runtime secret paths, likely `secret/homelab/services/pulsetrader` and/or `secret/lab/runtime/pulsetrader`.
-  - Store Kalshi read-only credentials, optional future live credentials, provider config, and any registry/k8s secret references in OpenBao.
-  - Add ESO manifests only if pods require runtime secrets.
-  - Observe/paper mode must remain runnable without live Kalshi credentials.
-- Planned Wiki.js page:
-  - `https://wikijs.192.168.1.80.sslip.io/en/services/pulsetrader`
-  - The page should include repo URL, ArgoCD app, namespace, service URL, registry images, safety defaults, provider policy, secret policy, CI/CD workflow, and rollback/post-deploy checklist links.
-- Planned NetBox work:
-  - Model PulseTrader as a service/application, not a VM with a dedicated IP.
-  - Capture service dependencies on k3s, ArgoCD, GitHub, temporary Kubernetes Git credentials, lab registry, OpenBao, Wiki.js, and optional PostgreSQL if persistence is added later.
-- Key PulseTrader Kanban cards added on 2026-06-20:
-  - `[CI/CD] Configure GitHub Actions PR checks on lab self-hosted runner`
-  - `[CI/CD] Build PulseTrader images in GitHub Actions`
-  - `[CI/CD] Push images to lab registry`
-  - `[CI/CD] Wire registry credentials through OpenBao and GitHub Actions secrets`
-  - `[CD] Create ArgoCD Application for PulseTrader`
-  - `[CD] Finalize k3s manifests for lab deployment`
-  - `[CD] Deploy and verify PulseTrader through ArgoCD`
-  - `[Docs/Ops] Publish PulseTrader Wiki.js service page`
-  - `[Docs/Ops] Update NetBox for PulseTrader service`
-  - `[Docs/Ops] Create OpenBao runtime secret plan for PulseTrader`
-  - `[Docs/Ops] Update lab baseline context after PulseTrader deployment`
-
-Operational note for future agents:
-- PulseTrader remains an API-only source-cloning bootstrap at the last verified runtime snapshot above. Merged product source or candidate images do not establish deployed product acceptance; DB, secret/TLS, immutable runtime, authenticated browser, Wiki.js and NetBox acceptance remain separately verified work.
-- Before implementing PulseTrader CI/CD, inspect the existing ARC runner apps/namespaces (`arc-systems`, `arc-runners`) and use the correct self-hosted runner labels for this lab.
-- Before publishing deployment manifests, use canonical repo `https://github.com/ajh-lab/PulseTrader.git` and the lab hostname/registry values above, after private-access and release/rollback review.
-- Be careful with the Hermes Kanban board: earlier PulseTrader deployment cards were marked done after local manifest inspection without real cluster verification. Always verify ArgoCD status, k3s resources, and HTTP endpoints before completing deploy cards.
-- AI workstation caveat: `/usr/local/bin/kubectl` on `ai-workstation-evox2` was observed to be the wrong architecture for that Fedora x86_64 host during PulseTrader deploy work. Use this Windows workstation's kubeconfig (`.kubeconfig-192.168.1.80.yaml`) for cluster verification unless kubectl on the AI workstation has been fixed.
+  `llm_api_key`. Scoped API/worker/registry ExternalSecrets use existing ESO.
+  Registry authority remains `secret/homelab/registry/lab-registry01`.
+- Shared ESO recovery/manual renewal is documented in
+  [ESO maintenance](docs/openbao-eso-maintenance.md); first weekly owner/operator
+  renewal check Oct27, intervene by Nov17 before current Nov21 expiry. Sync
+  success does not establish continuous shared controller/API stability.
+- [Lab service/runbook](docs/pulsetrader-service.md) records URL, image digests,
+  TLS identity/renewal boundary, Wiki.js path `/en/services/pulsetrader`, NetBox
+  ingress modeling and verification/rollback. No physical inventory changes.
+- Sole product continuation and issue acceptance:
+  [PulseTrader checkpoint](https://github.com/ajh-lab/PulseTrader/blob/main/docs/context/project-status.md).
+  Preserve 500 unique resolved strategy windows, two stable full weeks,
+  calibration assessment, positive after-cost paper results, 30 wrong predictions
+  personally read by the owner and later explicit live authorization. Fixtures,
+  retries, secondary arms and deployment do not satisfy these gates.
 
 ### n8n
 
