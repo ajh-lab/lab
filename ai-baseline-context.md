@@ -1028,42 +1028,55 @@ Worker recovery note:
 ### PulseTrader (Bootstrap; currently unavailable)
 
 - Purpose: safety-constrained Kalshi BTC 15-minute market experiment platform for observe/paper-first market watching, deterministic risk gating, and a modern dark second-monitor dashboard.
-- Current checkpoint (2026-10-20): owner-authorized private repository transfer
-  to `ajh-lab/PulseTrader` verified with unchanged repository identity/history,
-  issues and PRs. [PulseTrader Project](https://github.com/orgs/ajh-lab/projects/2)
-  is natively linked. Six visible issue memberships are verified: selected
-  source-only foundation #9, then blocked evidence/dashboard #3, unified UI #8,
-  real data/paper #4, local Qwen/memory #5, weekly report/readiness #6.
-  Product issues remain unstarted; creating a queue does not dispatch workers.
-  UI/API/worker stay in one repository, with separate target Deployments,
-  UI/API Services and normally no outbound-worker Service. Weekly reporting
-  targets a future CronJob, not an activated scheduler. All experiment metrics
-  and decision/manual-review inspection belong in ONE PulseTrader UI through
-  API; Grafana may monitor infrastructure. The existing API package stays in
-  `api/`; future UI/worker paths and actual/pending CI gates are documented in
-  PulseTrader PR #7 rather than duplicated as implemented services here.
-  Native architecture verified: node arm64; runner/daemon aarch64 on
-  `lab-org-arm64-dind`. The protected publication environment is absent;
-  organization registry Actions secrets have private-repository visibility
-  but their validity was not tested. No image was promoted or runtime rolled.
-- Latest read-only runtime snapshot: Argo `Synced` at accepted docs SHA
-  `34741c7cd8bf965a2e8415489d88532e713d7811`, health `Progressing`; API 0/1
-  available, pod `Unknown`. The June healthy/readiness statements below are
-  historical. Transfer and merged docs do not establish application readiness.
-- Argo and startup source clone still reference the former personal repo URL.
-  Canonical manifest/reference updates require a reviewed PulseTrader PR;
-  changing the clone URL in the pod template can trigger rollout on merge.
-  [PulseTrader PR #7](https://github.com/ajh-lab/PulseTrader/pull/7) contains
-  those proposed updates and planning/resume pointers; it remains draft.
-  Owner-authorized canonical Git read checks separately passed with existing
-  `argocd/repo-pulsetrader` and `pulsetrader/pulsetrader-git-credentials`
-  credentials: HTTP 200 upload-pack advertisements, expected main SHA. Values
-  stayed in memory. This is workstation read access, not an in-pod startup or
-  Argo controller reconciliation. No live manifests, credentials or pods
-  changed for transfer. No database was
-  provisioned or checked by the planning task. Use PulseTrader's `AGENTS.md`,
-  `ai-baseline-context.md` and `docs/context/project-status.md` for requirements
-  and evidence; no live execution or scheduler authority is granted.
+- Current checkpoint (2026-10-20): canonical private repository is
+  `ajh-lab/PulseTrader` with identity/history retained after owner-authorized
+  transfer. The [Project](https://github.com/orgs/ajh-lab/projects/2) contains
+  all six issues: #9 foundation, #3 evidence, #8 unified UI, #4 real-data/paper,
+  #5 local Qwen/memory and #6 weekly reports/readiness. Owner subsequently
+  authorized full autonomous PAPER delivery and bounded parallel agents,
+  routine PR/check/merge/image/GitOps work and dedicated DB/account provisioning
+  through documented access. Live orders, paid fallback, credential rotation,
+  hardware and unrelated infrastructure remain excluded.
+- UI/API/worker stay in one repository with separate Deployments/images,
+  UI/API Services and outbound worker without a Service. All experiment
+  assessment and manual review belongs in one PulseTrader UI; Grafana handles
+  infrastructure. Weekly reports target a separate CronJob with numeric
+  analysis persisted before local-model commentary.
+- [Foundation PR #7](https://github.com/ajh-lab/PulseTrader/pull/7) merged at
+  `b4b9d108b1194da51ba6258c71990f9da3930c37`; native ARM main CI passed32tests.
+  Node arm64/runner and daemon aarch64 are verified on `lab-org-arm64-dind`.
+  Main-only publication environment exists; required reviewers/private branch
+  protection are unavailable on GitHub Free. Candidate run39481669806 passed
+  gate/build then failed because organization registry secrets arrived empty.
+  Automatic approval review rejected repository Actions secret upload
+  (`blocked by policy`); no upload occurred. Source now prepares tested archive
+  export and authenticated publication inside Lab, keeping registry credentials
+  out of GitHub. No published digest or immutable rollout is yet established.
+- [Product integration PR #10](https://github.com/ajh-lab/PulseTrader/pull/10)
+  contains evidence/auth/API, unified UI, public feeds/paper accounting,
+  cutoff-safe Qwen forecasts and frozen weekly reports. Source/fixture tests
+  and native CI remain distinct from deployed acceptance. See PulseTrader's
+  sole `docs/context/project-status.md` Resume here for current commits,
+  exact checks, remaining gates and continuation; do not duplicate checkpoints.
+- DATABASE BLOCKER: existing `lab_admin` login works but lacks CREATEROLE and
+  superuser. Documented PostgreSQL SSH fields are present and identical in
+  root `.env` and direct OpenBao bootstrap; host authentication fails, as does
+  the documented key path. No password/account changed. Owner must restore
+  documented privileged host access or provide an authorized existing role
+  provisioning route. No app database/credentials have been provisioned;
+  shared lab_admin must never be the runtime identity. Complete independent
+  source/release preparation without repeating unchanged credential probes.
+- Last read-only runtime snapshot: Argo Synced at docs SHA `34741c7`,
+  Progressing, API0/1 with Unknown pod. June healthy/readiness statements below
+  are historical. Workstation Git read checks using existing Argo/app secrets
+  passed against canonical repository, not controller or pod execution. Refresh
+  live state before any release and retain DB migration/backup/restore,
+  immutable pod image, API/auth/browser and durable paper evidence gates.
+- No strategy count, accepted calibration, positive after-cost P&L, two-week
+  stability or owner reviews are established. Preserve500unique resolved
+  windows, two full stable weeks, calibration assessment, positive net paper
+  P&L, owner reviewing30wrong predictions, and a later explicit live switch.
+  Fixtures/retries/secondary arms do not inflate them; paper shadow continues.
 - GitHub repository: `https://github.com/ajh-lab/PulseTrader`
 - Local lab checkout: `repositories/PulseTrader`
 - AI workstation checkout: `/mnt/ai/agent/PulseTrader`
