@@ -1061,16 +1061,21 @@ Worker recovery note:
   sole [project-status checkpoint](https://github.com/ajh-lab/PulseTrader/blob/main/docs/context/project-status.md)
   for current commits,
   exact checks, remaining gates and continuation; do not duplicate checkpoints.
-- DATABASE BLOCKER: existing `lab_admin` login works but lacks CREATEROLE and
-  superuser. Documented PostgreSQL SSH fields are present and identical in
-  root `.env` and direct OpenBao bootstrap; host authentication fails, as does
-  the documented key path. No password/account changed. Owner must restore
-  documented privileged host access or provide an authorized existing role
-  provisioning route. No app database/credentials have been provisioned;
-  shared lab_admin must never be the runtime identity. Complete independent
-  source/release preparation without repeating unchanged credential probes.
-- Last verified runtime snapshot (2026-10-20 20:23Z): Argo Synced/Healthy at
-  merged source SHA `e47f67a383707dca164a327ab91546ce76247440`,
+- Documented PostgreSQL host access was restored externally by the owner.
+  Fresh OpenBao host reads now establish SSH/sudo superuser access. Dedicated
+  database `pulsetrader`, migrator/runtime roles and guarded schema v1 are
+  provisioned. Service authority `secret/homelab/services/pulsetrader` has
+  `database_url`, `migrator_database_url`, `owner_password`, `session_secret`,
+  `llm_api_key`; no secret values are recorded here. Actual loopback/LAN
+  password/TLS, append-only permissions and empty-database snapshot/restore
+  passed. PR #12's five-rule role-only HBA prefix passed backup/byte-preservation,
+  parse/reload/log and 16 fresh rejection probes; existing operator access
+  still passes. Shared passwords, existing HBA rule bytes/order, global grants
+  and firewall remain unchanged. Never use shared lab_admin as runtime.
+  See [actual DB evidence PR #13](https://github.com/ajh-lab/PulseTrader/pull/13);
+  populated real-data restore remains a later acceptance gate.
+- Last verified runtime snapshot (2026-10-20 21:51Z): Argo Synced/Healthy at
+  accepted release-documentation SHA `d5bffc2ae166e5711d53389a500ecc15aee4d5df`,
   bootstrap API 1/1, pod `pulsetrader-api-c77578457-td5wx` on arm64 wknd04.
   It still source-clones main and uses python:3.11-slim, not a tested product
   digest; Argo source retains the former URL. June readiness notes below are
@@ -1082,9 +1087,14 @@ Worker recovery note:
   `ClusterSecretStore/openbao-store` is `Ready=False`, reason
   `ValidationFailed`, with OpenBao `lookup-self` HTTP 403. Restore the
   documented ESO authentication route before claiming runtime secret sync;
-  no shared credentials were changed. No PulseTrader TLS Secret exists, and
-  normal Windows HTTPS client trust fails. The ready lab-selfsigned issuer
-  alone does not establish a certificate or trusted owner-auth browser path.
+  no shared credentials were changed. The concrete minimal PulseTrader read
+  ACL plus scoped periodic-token replacement is awaiting explicit approval.
+  Exact-host `pulsetrader-tls` Certificate is issued/Ready at generation1 via
+  existing lab-selfsigned. Its public SAN/serverAuth/non-CA/validity/fingerprints
+  were verified. The owner approved this exact public certificate in Windows
+  CurrentUser Root; import/store fingerprints and a fresh serverAuth user-chain
+  check passed, with no private key or other store change. Ingress is unapplied;
+  normal served-origin HTTPS and browser acceptance remain unverified.
 - No strategy count, accepted calibration, positive after-cost P&L, two-week
   stability or owner reviews are established. Preserve 500 unique resolved
   windows, two full stable weeks, calibration assessment, positive net paper
