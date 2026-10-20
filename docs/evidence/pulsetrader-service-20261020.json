@@ -1,0 +1,15 @@
+{
+  "captured_at": "2026-10-20T23:55:11.3691057Z",
+  "wiki_action": "unchanged",
+  "wiki_page_id": 20,
+  "wiki_path": "services/pulsetrader",
+  "wiki_content_readback_exact": true,
+  "wiki_route": "loopback-only kubectl service port-forward over existing Kubernetes access; no TLS bypass/trust change",
+  "netbox_action": "created",
+  "netbox_service_id": 3,
+  "netbox_parent_device": 6,
+  "netbox_ingress_ip": 84,
+  "netbox_tcp_port": 443,
+  "netbox_readback_verified": true,
+  "physical_inventory_changed": false
+}
