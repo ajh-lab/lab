@@ -1025,11 +1025,28 @@ Worker recovery note:
 
 ## Platform Services (Live)
 
-### PulseTrader (Live Bootstrap Deployment)
+### PulseTrader (Bootstrap; currently unavailable)
 
 - Purpose: safety-constrained Kalshi BTC 15-minute market experiment platform for observe/paper-first market watching, deterministic risk gating, and a modern dark second-monitor dashboard.
-- Current deployment status: **live bootstrap deployment in k3s** as of 2026-06-26 verification.
-- GitHub repository: `https://github.com/AJHeitzman/PulseTrader`
+- Current checkpoint (2026-10-20): owner-authorized private repository transfer
+  to `ajh-lab/PulseTrader` verified with unchanged repository identity/history,
+  issues and PRs. [PulseTrader Project](https://github.com/orgs/ajh-lab/projects/2)
+  is natively linked. Ordered issues #3 -> #4 -> #5 -> #6 cover evidence/dashboard,
+  real data/paper, local Qwen/memory, and weekly report/readiness. Only #3 is
+  Ready for future owner selection; creation does not dispatch implementation.
+- Latest read-only runtime snapshot: Argo `Synced` at accepted docs SHA
+  `34741c7cd8bf965a2e8415489d88532e713d7811`, health `Progressing`; API 0/1
+  available, pod `Unknown`. The June healthy/readiness statements below are
+  historical. Transfer and merged docs do not establish application readiness.
+- Argo and startup source clone still reference the former personal repo URL.
+  Canonical manifest/reference updates require a reviewed PulseTrader PR;
+  changing the clone URL in the pod template can trigger rollout on merge.
+  Private organization access for Argo/clone credentials remains unverified;
+  no live manifests, credentials or pods changed for transfer. No database was
+  provisioned or checked by the planning task. Use PulseTrader's `AGENTS.md`,
+  `ai-baseline-context.md` and `docs/context/project-status.md` for requirements
+  and evidence; no live execution or scheduler authority is granted.
+- GitHub repository: `https://github.com/ajh-lab/PulseTrader`
 - Local lab checkout: `repositories/PulseTrader`
 - AI workstation checkout: `/mnt/ai/agent/PulseTrader`
 - Hermes Kanban board: `pulsetrader` (`PulseTrader`)
@@ -1037,7 +1054,7 @@ Worker recovery note:
 - ArgoCD Application: `argocd/pulsetrader`
   - Status verified 2026-06-26: `Synced` / `Healthy`
   - Revision verified 2026-06-26: `793f11c79c06826f22179831d983e9e38c2cbc58`
-  - Source: `https://github.com/AJHeitzman/PulseTrader.git`, `targetRevision: main`, path `deploy/k8s`
+  - Observed source (former URL, pending reviewed update): `https://github.com/AJHeitzman/PulseTrader.git`, `targetRevision: main`, path `deploy/k8s`
 - k3s resources:
   - Namespace: `pulsetrader`
   - Deployment: `pulsetrader-api` (`1/1 Ready` on 2026-06-26)
@@ -1060,7 +1077,7 @@ Worker recovery note:
   - Advisory-only agent analysis interface.
   - Documentation for modern dark UI design and post-deploy verification.
 - Bootstrap deployment implementation notes:
-  - The current live deployment is an API-only bootstrap to get PulseTrader reachable while lab image registry and OpenBao are unavailable.
+  - The June deployment was an API-only bootstrap to get PulseTrader reachable while lab image registry and OpenBao were unavailable; current readiness is superseded by the checkpoint above.
   - The bootstrap manifest uses public multi-arch images (`python:3.11-slim`, `alpine/git`) instead of `192.168.1.15:5000`.
   - The pod clones the private PulseTrader GitHub repo at startup using Kubernetes secret `pulsetrader/pulsetrader-git-credentials`. Do not commit that token or print it in logs.
   - ArgoCD accesses the private PulseTrader repository via repository secret `argocd/repo-pulsetrader`. Do not commit or expose the token.
@@ -1114,9 +1131,9 @@ Worker recovery note:
   - `[Docs/Ops] Update lab baseline context after PulseTrader deployment`
 
 Operational note for future agents:
-- PulseTrader is live as an API-only bootstrap. Do not overstate it as production complete until UI/worker images, lab registry publishing, OpenBao/ESO-backed runtime secrets, Wiki.js, and NetBox updates are complete.
+- PulseTrader has an API-only bootstrap with unavailable replicas at the latest checkpoint above. Do not overstate readiness or production completion; UI/worker images, registry publishing, OpenBao/ESO secrets, Wiki.js and NetBox acceptance remain separately verified work.
 - Before implementing PulseTrader CI/CD, inspect the existing ARC runner apps/namespaces (`arc-systems`, `arc-runners`) and use the correct self-hosted runner labels for this lab.
-- Before publishing deployment manifests, replace placeholder repo URLs/hosts with `https://github.com/AJHeitzman/PulseTrader.git` and the lab hostname/registry values above.
+- Before publishing deployment manifests, use canonical repo `https://github.com/ajh-lab/PulseTrader.git` and the lab hostname/registry values above, after private-access and release/rollback review.
 - Be careful with the Hermes Kanban board: earlier PulseTrader deployment cards were marked done after local manifest inspection without real cluster verification. Always verify ArgoCD status, k3s resources, and HTTP endpoints before completing deploy cards.
 - AI workstation caveat: `/usr/local/bin/kubectl` on `ai-workstation-evox2` was observed to be the wrong architecture for that Fedora x86_64 host during PulseTrader deploy work. Use this Windows workstation's kubeconfig (`.kubeconfig-192.168.1.80.yaml`) for cluster verification unless kubectl on the AI workstation has been fixed.
 
