@@ -1025,7 +1025,7 @@ Worker recovery note:
 
 ## Platform Services (Live)
 
-### PulseTrader (Bootstrap; currently unavailable)
+### PulseTrader (API bootstrap; paper product not deployed)
 
 - Purpose: safety-constrained Kalshi BTC 15-minute market experiment platform for observe/paper-first market watching, deterministic risk gating, and a modern dark second-monitor dashboard.
 - Current checkpoint (2026-10-20): canonical private repository is
@@ -1051,12 +1051,15 @@ Worker recovery note:
   Automatic approval review rejected repository Actions secret upload
   (`blocked by policy`); no upload occurred. Source now prepares tested archive
   export and authenticated publication inside Lab, keeping registry credentials
-  out of GitHub. No published digest or immutable rollout is yet established.
+  out of GitHub. Track image export/publication evidence in the PulseTrader
+  release checkpoint; candidate publication does not establish deployed acceptance.
 - [Product integration PR #10](https://github.com/ajh-lab/PulseTrader/pull/10)
-  contains evidence/auth/API, unified UI, public feeds/paper accounting,
+  merged on 2026-10-20 at `e47f67a383707dca164a327ab91546ce76247440`.
+  It contains evidence/auth/API, unified UI, public feeds/paper accounting,
   cutoff-safe Qwen forecasts and frozen weekly reports. Source/fixture tests
   and native CI remain distinct from deployed acceptance. See PulseTrader's
-  sole `docs/context/project-status.md` Resume here for current commits,
+  sole [project-status checkpoint](https://github.com/ajh-lab/PulseTrader/blob/main/docs/context/project-status.md)
+  for current commits,
   exact checks, remaining gates and continuation; do not duplicate checkpoints.
 - DATABASE BLOCKER: existing `lab_admin` login works but lacks CREATEROLE and
   superuser. Documented PostgreSQL SSH fields are present and identical in
@@ -1066,7 +1069,7 @@ Worker recovery note:
   provisioning route. No app database/credentials have been provisioned;
   shared lab_admin must never be the runtime identity. Complete independent
   source/release preparation without repeating unchanged credential probes.
-- Refreshed runtime: Argo Synced/Healthy at foundation SHA `b4b9d10`,
+- Last verified runtime snapshot (2026-10-20): Argo Synced/Healthy at foundation SHA `b4b9d10`,
   bootstrap API 1/1, pod `pulsetrader-api-c77578457-td5wx` on arm64 wknd04.
   It still source-clones main and uses python:3.11-slim, not a tested product
   digest; Argo source retains the former URL. June readiness notes below are
@@ -1074,6 +1077,13 @@ Worker recovery note:
   passed against canonical repository, not controller or pod execution. Refresh
   live state before any release and retain DB migration/backup/restore,
   immutable pod image, API/auth/browser and durable paper evidence gates.
+- Secret/TLS release gates (2026-10-20 observations):
+  `ClusterSecretStore/openbao-store` is `Ready=False`, reason
+  `ValidationFailed`, with OpenBao `lookup-self` HTTP 403. Restore the
+  documented ESO authentication route before claiming runtime secret sync;
+  no shared credentials were changed. No PulseTrader TLS Secret exists, and
+  normal Windows HTTPS client trust fails. The ready lab-selfsigned issuer
+  alone does not establish a certificate or trusted owner-auth browser path.
 - No strategy count, accepted calibration, positive after-cost P&L, two-week
   stability or owner reviews are established. Preserve 500 unique resolved
   windows, two full stable weeks, calibration assessment, positive net paper
@@ -1103,7 +1113,7 @@ Worker recovery note:
   - `/` returns `{"service":"pulsetrader","status":"ok","mode":"observe","docs":"/docs"}`
   - `/health` returns `{"status":"ok"}`
   - `/api/v1/config` returns `mode=observe` and `live_trading_enabled=false`
-- Current committed implementation state:
+- Historical June bootstrap implementation (merged product source is linked above):
   - Initial FastAPI API scaffold.
   - Safe runtime config defaults: `MODE=observe`, `LIVE_TRADING_ENABLED=false`.
   - Mock current market endpoint for early API scaffolding and tests.
@@ -1164,7 +1174,7 @@ Worker recovery note:
   - `[Docs/Ops] Update lab baseline context after PulseTrader deployment`
 
 Operational note for future agents:
-- PulseTrader has an API-only bootstrap with unavailable replicas at the latest checkpoint above. Do not overstate readiness or production completion; UI/worker images, registry publishing, OpenBao/ESO secrets, Wiki.js and NetBox acceptance remain separately verified work.
+- PulseTrader remains an API-only source-cloning bootstrap at the last verified runtime snapshot above. Merged product source or candidate images do not establish deployed product acceptance; DB, secret/TLS, immutable runtime, authenticated browser, Wiki.js and NetBox acceptance remain separately verified work.
 - Before implementing PulseTrader CI/CD, inspect the existing ARC runner apps/namespaces (`arc-systems`, `arc-runners`) and use the correct self-hosted runner labels for this lab.
 - Before publishing deployment manifests, use canonical repo `https://github.com/ajh-lab/PulseTrader.git` and the lab hostname/registry values above, after private-access and release/rollback review.
 - Be careful with the Hermes Kanban board: earlier PulseTrader deployment cards were marked done after local manifest inspection without real cluster verification. Always verify ArgoCD status, k3s resources, and HTTP endpoints before completing deploy cards.
