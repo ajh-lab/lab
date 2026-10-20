@@ -9,6 +9,13 @@ access applies outside those hours. See [policy and rollback](automation/ai-work
 
 ## Purpose
 
+BS01 OS maintenance (2026-10-20): all five hosts completed reviewed Ubuntu
+24.04 package updates (262 total) and owner-approved rolling reboots. Final
+cluster, attached storage, authenticated app and direct gateway Wi-Fi checks
+passed; no failed units or pending service restart recommendations remained.
+See [maintenance evidence and recovery limits](docs/bs01-os-maintenance-20261020.md).
+No K3s, application-image or database-schema upgrade was performed.
+
 DroneOps deployment direction (owner decision 2026-10-16): use Argo CD on BS01
 for connected development, retain signed bundles for field release/USB acceptance,
 and later separate a development cluster from the physical acceptance station.
