@@ -1041,8 +1041,12 @@ Worker recovery note:
 - Argo and startup source clone still reference the former personal repo URL.
   Canonical manifest/reference updates require a reviewed PulseTrader PR;
   changing the clone URL in the pod template can trigger rollout on merge.
-  Private organization access for Argo/clone credentials remains unverified;
-  no live manifests, credentials or pods changed for transfer. No database was
+  Owner-authorized canonical Git read checks separately passed with existing
+  `argocd/repo-pulsetrader` and `pulsetrader/pulsetrader-git-credentials`
+  credentials: HTTP 200 upload-pack advertisements, expected main SHA. Values
+  stayed in memory. This is workstation read access, not an in-pod startup or
+  Argo controller reconciliation. No live manifests, credentials or pods
+  changed for transfer. No database was
   provisioned or checked by the planning task. Use PulseTrader's `AGENTS.md`,
   `ai-baseline-context.md` and `docs/context/project-status.md` for requirements
   and evidence; no live execution or scheduler authority is granted.
