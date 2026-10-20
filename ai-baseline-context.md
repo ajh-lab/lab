@@ -1031,9 +1031,20 @@ Worker recovery note:
 - Current checkpoint (2026-10-20): owner-authorized private repository transfer
   to `ajh-lab/PulseTrader` verified with unchanged repository identity/history,
   issues and PRs. [PulseTrader Project](https://github.com/orgs/ajh-lab/projects/2)
-  is natively linked. Ordered issues #3 -> #4 -> #5 -> #6 cover evidence/dashboard,
-  real data/paper, local Qwen/memory, and weekly report/readiness. Only #3 is
-  Ready for future owner selection; creation does not dispatch implementation.
+  is natively linked. Six visible issue memberships are verified: selected
+  source-only foundation #9, then blocked evidence/dashboard #3, unified UI #8,
+  real data/paper #4, local Qwen/memory #5, weekly report/readiness #6.
+  Product issues remain unstarted; creating a queue does not dispatch workers.
+  UI/API/worker stay in one repository, with separate target Deployments,
+  UI/API Services and normally no outbound-worker Service. Weekly reporting
+  targets a future CronJob, not an activated scheduler. All experiment metrics
+  and decision/manual-review inspection belong in ONE PulseTrader UI through
+  API; Grafana may monitor infrastructure. The existing API package stays in
+  `api/`; future UI/worker paths and actual/pending CI gates are documented in
+  PulseTrader PR #7 rather than duplicated as implemented services here.
+  Native architecture verified: node arm64; runner/daemon aarch64 on
+  `lab-org-arm64-dind`. Publication environment/Actions registry credentials
+  are not established; no image was promoted and no runtime rollout occurred.
 - Latest read-only runtime snapshot: Argo `Synced` at accepted docs SHA
   `34741c7cd8bf965a2e8415489d88532e713d7811`, health `Progressing`; API 0/1
   available, pod `Unknown`. The June healthy/readiness statements below are
