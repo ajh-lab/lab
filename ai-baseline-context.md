@@ -1043,8 +1043,9 @@ Worker recovery note:
   `api/`; future UI/worker paths and actual/pending CI gates are documented in
   PulseTrader PR #7 rather than duplicated as implemented services here.
   Native architecture verified: node arm64; runner/daemon aarch64 on
-  `lab-org-arm64-dind`. Publication environment/Actions registry credentials
-  are not established; no image was promoted and no runtime rollout occurred.
+  `lab-org-arm64-dind`. The protected publication environment is absent;
+  organization registry Actions secrets have private-repository visibility
+  but their validity was not tested. No image was promoted or runtime rolled.
 - Latest read-only runtime snapshot: Argo `Synced` at accepted docs SHA
   `34741c7cd8bf965a2e8415489d88532e713d7811`, health `Progressing`; API 0/1
   available, pod `Unknown`. The June healthy/readiness statements below are
