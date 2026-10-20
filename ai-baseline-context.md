@@ -1041,6 +1041,8 @@ Worker recovery note:
 - Argo and startup source clone still reference the former personal repo URL.
   Canonical manifest/reference updates require a reviewed PulseTrader PR;
   changing the clone URL in the pod template can trigger rollout on merge.
+  [PulseTrader PR #7](https://github.com/ajh-lab/PulseTrader/pull/7) contains
+  those proposed updates and planning/resume pointers; it remains draft.
   Owner-authorized canonical Git read checks separately passed with existing
   `argocd/repo-pulsetrader` and `pulsetrader/pulsetrader-git-credentials`
   credentials: HTTP 200 upload-pack advertisements, expected main SHA. Values
