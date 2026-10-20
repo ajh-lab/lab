@@ -1091,8 +1091,10 @@ Worker recovery note:
   ACL plus scoped periodic-token replacement is awaiting explicit approval.
   Exact-host `pulsetrader-tls` Certificate is issued/Ready at generation1 via
   existing lab-selfsigned. Its public SAN/serverAuth/non-CA/validity/fingerprints
-  were verified; ingress is unapplied and exact Windows CurrentUser Root trust
-  import awaits separate approval. Issuance is not normal-client/browser trust.
+  were verified. The owner approved this exact public certificate in Windows
+  CurrentUser Root; import/store fingerprints and a fresh serverAuth user-chain
+  check passed, with no private key or other store change. Ingress is unapplied;
+  normal served-origin HTTPS and browser acceptance remain unverified.
 - No strategy count, accepted calibration, positive after-cost P&L, two-week
   stability or owner reviews are established. Preserve 500 unique resolved
   windows, two full stable weeks, calibration assessment, positive net paper
