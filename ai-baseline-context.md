@@ -1032,7 +1032,7 @@ Worker recovery note:
 
 ## Platform Services (Live)
 
-### PulseTrader (deployed immutable paper observer)
+### PulseTrader (immutable paper deployment)
 
 - Canonical private repository: `ajh-lab/PulseTrader`; owner-authorized full
   PAPER delivery is active. Live orders, paid fallback, shared password rotation,
