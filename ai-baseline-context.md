@@ -1074,8 +1074,11 @@ Worker recovery note:
   No fill/fee/filled-settlement recovery, memory benefit, owner-reading
   or strategy-readiness credit.
   Source PR20/main2a02 CI and export39539284470 passed; actual performance release
-  is recorded above. Final Lab Wiki/NetBox publication remains pending; inventory
-  unchanged. Product report/manual/live gates remain separate.
+  is recorded above. Dated05:08:18Z Wiki.js page20 readback matched accepted
+  Lab PR66 service content after an uncertain response (fresh read, no blind
+  rewrite). NetBox service3 GET matched TCP443/IP84/device6 with no inventory
+  write. Source publication and external readback are separate dated evidence;
+  product report/manual/live gates remain separate.
 - Dedicated PostgreSQL database/accounts/schema v1 and role-only HBA isolation
   are verified on `lab-pgsql01`; never use shared `lab_admin` as runtime.
   OpenBao authority `secret/homelab/services/pulsetrader` fields:
