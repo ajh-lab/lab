@@ -24,9 +24,15 @@ then-published observer runbook content, and NetBox service3 records TCP443, exi
 and existing device6. No device, IP assignment or physical inventory changed.
 Wiki publication used a loopback-only Kubernetes service tunnel after its
 normal workstation HTTPS request failed; no TLS bypass or trust-store change.
-The current paper-state source update has not yet been republished to Wiki.js;
-the coordinator owns final publication after remaining natural-cycle verification. Inventory
-and ingress service association are unchanged; no NetBox write is part of this update.
+Dated documentation verification at `2026-10-21T05:08:18Z`: Wiki.js page20
+(`services/pulsetrader`) exactly matched the accepted Lab PR #66 service content.
+The initial write response was uncertain; a fresh read confirmed success without
+a blind rewrite. Access used the existing loopback-only Kubernetes service
+tunnel, with no TLS bypass or trust change. Read-only NetBox service3 verification
+matched TCP443, ingress IP84 and device6; no inventory or NetBox write occurred.
+This records that source/readback checkpoint, not an assertion that every later
+Git revision is already published externally. Inventory and ingress association
+are unchanged.
 
 ## Verified active paper rollout
 
@@ -114,8 +120,8 @@ and exact-main CI39536710367 passed (03:33:15Z, 26m58s). Approved
 passed 04:03:24Z; artifact/revision/checksums, inside-Lab publication, registry
 digests and inert pulls passed before promotion. Local/disposable profiles and
 sampled runtime results do not prove universal deadlines or fourteen-day
-capacity. Final Wiki.js/NetBox publication/readbacks remain with the coordinator;
-inventory is unchanged.
+capacity. The dated Wiki.js/NetBox verification above is separate from product
+and strategy acceptance; inventory is unchanged.
 
 ## Credentials and TLS
 
