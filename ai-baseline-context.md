@@ -1041,16 +1041,41 @@ Worker recovery note:
   Namespace `pulsetrader`, Argo Application `argocd/pulsetrader`, canonical
   repository/main/path `deploy/k8s`. Separate API/UI/worker immutable images;
   UI/API Services, outbound worker without a Service, separate report CronJob.
-- Verified 2026-10-20 23:46Z: Argo Synced/Healthy at accepted `5fe46dbe`, all
-  three published digest image IDs Ready on wknd03, mode paper/live false.
-  Initial inference/execution disabled, reports suspended. Refer to the product
-  checkpoint for any subsequently reviewed activation; this is a dated snapshot.
-- Normal Windows HTTPS accepts the exact owner-approved public certificate;
-  owner API login/CSRF/logout/replay-revocation, real public collection and
-  official outcome lineage, same-cutoff store/API/public browser consistency,
-  populated consistent restore and API/worker frozen-projection restart passed.
-  These do not prove actual forecasts, simulated fills/fees/settlement,
-  authenticated-browser acceptance, profitability or strategy readiness.
+- Verified 2026-10-21 04:51:47Z: Argo Synced/Healthy at accepted performance
+  release `26b1c594fb9d1336ba5c350b16c82c44fe4336f3`; new API/worker Ready/zero
+  restarts on wknd02, retained e47 UI pod on wknd03. API digest
+  `sha256:f9c78ede779fe0001bf71731fc24cbace8fe945656ef1eee1a7f0e6bdfc1502d`,
+  worker/report `sha256:d54b7e73173edf1f01116d6adf84ad3d89fb74fe2bbe03fd35a4048640e2ed8a`,
+  both OCI source 2a02; UI source e47. PR21 CI39543515671 passed 04:47:09Z;
+  exact-main CI39546030242 passed 05:02:53Z (14m36s), full validation/browser chain.
+  Paper/live false, inference/execution enabled, one worker/Recreate, unchanged
+  primary 903-memory/paired no-memory and $10/order/$25 exposure/$10 daily loss
+  confirmed by a completed cycle after new-worker creation. Weekly schedule
+  remains Monday 00:30 UTC, first completed-week report October 26 for October 19–26.
+- Normal approved-leaf HTTPS, owner API/browser auth, collection/official labels,
+  cutoff-safe nonempty supplied memory, restore/replacement evidence passed.
+  Frozen 02:49Z store/API/public browser: five primary forecasts, four resolved/
+  one unresolved, all SKIP, Brier 0.257625, cash $100/net $0. After promotion the
+  same eight-read/four-concurrent/15-second probe passed 0.735s with exact frozen
+  hashes, settled Edge rendering matched; fresh 04:49 owner API CSRF/logout/
+  revocation passed, zero acknowledgements. Old concurrency/readiness failures
+  remain historical. Nodes changed 03→02, so no code-only performance attribution.
+  New worker import 2.239s/round-trip 3.922s is one sample within 5s, not continuous
+  health/fourteen-day capacity. Actual new-worker 05:00 pair both SKIP/p_yes 0.355,
+  primary eight prior resolved memories versus baseline zero, current contract
+  recorded 05:00:13.965615Z before cutoff 05:00:15Z; recursive lineage passed.
+  Frozen 05:01 SQL/API snapshot fb60db... matches 13 primary forecasts/12 resolved/
+  one unresolved/all 13 SKIP, Brier 0.2326083333, cash $100/net $0. Settled actual
+  Edge 05:01 matched full fb60 snapshot/counts 13/12/1 and Brier 0.23261. Actual 05:02
+  both new pods Ready/zero restarts; API's one 04:49:24 startup-probe refused
+  connection was not readiness/liveness, worker zero warnings. Sample API 64Mi/
+  5m CPU, worker 52Mi/74m, UI 4Mi/1m; all 16 ESO consumers Ready including product 3.
+  These are sampled observations, not continuous-health/14-day capacity proof.
+  No fill/fee/filled-settlement recovery, memory benefit, owner-reading
+  or strategy-readiness credit.
+  Source PR20/main2a02 CI and export39539284470 passed; actual performance release
+  is recorded above. Final Lab Wiki/NetBox publication remains pending; inventory
+  unchanged. Product report/manual/live gates remain separate.
 - Dedicated PostgreSQL database/accounts/schema v1 and role-only HBA isolation
   are verified on `lab-pgsql01`; never use shared `lab_admin` as runtime.
   OpenBao authority `secret/homelab/services/pulsetrader` fields:
