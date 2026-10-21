@@ -546,6 +546,22 @@ Worker recovery note:
   - namespace creation admission works again
 - Deployment pinned to master node selector to avoid scheduling back onto unreachable worker nodes.
 
+### VMware Host and iLO
+
+- `lab-vm-host` (`OMAESXMGT01`, `192.168.1.49`) is an HPE ProLiant DL360p Gen8
+  running ESXi 6.7.0 build 13006603, not a Windows workstation.
+- Owner-approved 2026-10-21 maintenance installed HPONCFG and the iLO channel
+  driver, gracefully stopped/restored the five running guests, and rebooted
+  ESXi. OpenBao was unsealed again and core service recovery was verified.
+- iLO 4 MAC `2C:59:E5:46:97:0E` now reads back static `192.168.1.39/24`, gateway
+  and primary DNS `192.168.1.1`; a UniFi reservation protects the address.
+  After the owner connected its dedicated cable, matching ARP identity, ping,
+  and HTTPS login-page availability passed. Authenticated iLO login was not
+  tested; its self-signed certificate has not been enrolled into trusted PKI.
+- See [maintenance and recovery evidence](docs/esxi-ilo-maintenance-20261021.md)
+  and [lab #68](https://github.com/ajh-lab/lab/issues/68). No passwords, storage
+  configuration, or application releases were changed.
+
 ### GitHub Actions Runner VM
 
 - Host: `lab-gha-runner-01` (`192.168.1.48`, Ubuntu 24.04 LTS)
