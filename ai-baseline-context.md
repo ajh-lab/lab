@@ -1050,6 +1050,84 @@ Worker recovery note:
 
 ### PulseTrader (immutable paper deployment)
 
+- Current scoped release observed2026-10-22T04:42:51.775Z (October21
+  11:42PMCDT): PR42/D4f339bf4f8abcca94be4e471c7dffaa0913608a6 Argo
+  Synced/Healthy, actual UI6740b6fc… Ready/zero restarts. API/worker UIDs,
+  creation times, imageIDs/restarts, ConfigMap/environment references unchanged;
+  four ESO Ready, matched62 cohort/risk/report preserved. Initial operation
+  Running was followed by terminalSucceeded, finished04:43:03Z/observed04:44:10Z;
+  77s operation,4m23s merge-to-terminal including reconciliation/refresh wait.
+  PR42 five checks passed2m19s CI/2m22s PR-created; exactmain39723520555
+  passed1m03s, no application rebuild. Complete deploy56passes/17serverdryrun.
+  Actual desktop04:43:44Z current62/blankasof/loadingfalse/22results showed
+  11:30PMCDT SKIP/unresolved and green/red/yellow result colors; both1254px
+  logos loaded. No owner acknowledgements or strategy/live acceptance.
+- Pipeline issue #35 / source PR #36: scoped x86 PR checks, exact merge-tree
+  provenance, selected native ARM main builds and artifact-only protected export
+  have native core/scoped UI/export/publication and dated runtime success above.
+  Registry auth stays
+  inside Lab. Desktop acceptance is primary; phone checks are incidental.
+  UI-only selection preserved API/worker/report, ConfigMap, cohort pair and risk
+  identity. Point-in-time readiness does not establish uninterrupted operation.
+- Dated pipeline state: PR36 merged dd9161a; main39711928318 failed on
+  incorrect skipped image/candidate jobs. PR37 merged027e92c; main39713316542
+  images naturally failed at2026-10-22T03:03:34Z reaching candidate creation;
+  workflow terminal was cancelled03:03:47Z. Independent shallow-history proof
+  is consistent with the first topology guard; sanitized exception logs do not
+  expose the exact cause. PR38 merged379890a after seven checks; main39715786409
+  passed full-history preflight/native imports then sanitized candidate BLOCKED
+  at2026-10-22T03:24:14Z, failed images job03:24:23Z, zero artifacts.
+  Real Docker29 fixture03:34:07Z proves index-ID differs from config-ID; Podman
+  5.8.4 exact config-ID load/inspect passed03:35:09Z without ARM execution/push.
+  PR39/631d919 strict OCI descriptor-chain binding retains native/config/source
+  checks, legacy IDs and attestations;66 focused software checks passed.
+  PR39 then merged379b91f3f41eea4bdd527d917e76525ef633ee58; actual main
+  CI39719291961 succeeded2026-10-22T04:14:00Z (October21 11:14PMCDT), all3native
+  images/import/HTTP smokes plus independent uploaded-candidate verification and
+  aggregate. Artifact12400784228:190,963,175bytes, SHA39a48d34ac402241…;
+  full digest/expiry recorded in service runbook. One-run total20m50s,
+  production15m47s/upload57s/postcache2m03s; no registry publish/runtime rollout.
+  UI-only PR40/sourceB d49991d passed native main39721710614 at04:24:56Z,
+  5m43s; artifact12401945949/31,363,743bytes/SHA1b455343f6f3edec….
+  Docs PR41 approvedC4b9b984 merged04:29:30Z after four applicable checks
+  (1m05s PR-created-to-green); protected export39722805110 explicitC/sourceB
+  passed04:31:42Z in45s, independently exact original bytes/approval verified.
+  Lab UI-only publication04:32:48.603→55.716Z took7.113s; freshHEAD04:33:02Z
+  HTTP200/exact digest6740b6fc… . Reviewed selection PR42 has15 deployment
+  focused checks/17serverdryrun passed; actual merge/Argo/new UI served checks
+  followed above. API/worker/report/config/cohort/risk identity unchanged.
+- UI-only PR34/ed2b3e9 was Argo Synced/Healthy at2026-10-22T01:38:32Z
+  (October21 8:38PMCDT), actual UI digest a97bd75e…; API/worker pod UIDs,
+  restarts/images, CM4b8a9fb46f392166 and matched62 pair unchanged. Served
+  historical accuracy deltas were green +0.5pp at01:59:55Z/red−0.7pp
+  at02:01:48Z. At03:06:17Z, actual current explorer showed10PMCDT SKIP/
+  unresolved with Chicago timestamps and computed green/red/yellow results;
+  at03:07:04Z rolling latest9:45PMCDT n15/40.0% shared snapshot e3c3611b….
+  Actual frozen raw audit before/after formatting matched37,974chars/SHA87f8e703…
+  at01:53:19Z; initially empty feature selector was inconclusive, followed by
+  populated readable-feature capture02:04:29Z. These dated samples do not
+  establish continuous health, a fill, weekly analysis or strategy readiness.
+- BRTI/UI checkpoint 2026-10-21 23:00 UTC (6:00 PM CDT): Argo Synced/Healthy
+  at `beef70a704fd0d77f0b0e37adeef54c451a973ac`; actual Ready images use source
+  `c11fb06b991937ff5a3ce968590a91b513277187`, feature `cutoff-brti-v2` and pair
+  `local-62a04307fb214d52-memory` / `local-62a04307fb214d52-none`.
+- Dedicated ESO reads `secret/homelab/services/pulsetrader-kalshi-benchmark`
+  fields `api_key_id` / `private_key_pem`; only the non-root worker mounts
+  read-only `0440` files with `KALSHI_BRTI_ENABLED=true`. API/UI/report have no
+  benchmark access. Strict source/receipt/ingestion/cutoff guards remain.
+- Paper enabled, live disabled; caps remain $10/order, $25 exposure and $10
+  daily gross settled loss. Weekly reporting remains Monday 00:30 UTC.
+  Old 903-cohort history and separate old/new $100 simulated accounts are
+  preserved; both baselines remain unfunded. No forced trades or strategy acceptance.
+- Served UI: Chicago CDT/CST, green/red/yellow correctness, five-row paging,
+  newest-first rolling history, readable provenance/memory detail and complete
+  audit disclosure. Summaries retain full populations and explicit cohort/as-of
+  selections. Earlier desktop/390px checks passed; PR33 accuracy-delta colors
+  were pending then and later passed the dated PR34 observations above.
+  First natural 6PM pair is SKIP in both arms;
+  official NO outcomes and same-as-of SQL/API association passed at 6:16 PM CDT.
+- See the [service runbook](docs/pulsetrader-service.md) for immutable digests,
+  dated runtime/ledger/history/auth/browser evidence and remaining acceptance.
 - Canonical private repository: `ajh-lab/PulseTrader`; owner-authorized full
   PAPER delivery is active. Live orders, paid fallback, shared password rotation,
   hardware and unrelated infrastructure changes remain excluded.
