@@ -27,6 +27,8 @@ The transferred VIB hash matched. Native ESXi dry-run checks passed without
 force, signature bypass, dependency override, or acceptance-level reduction.
 Only `HPE_bootbank_ssacli_3.40.3.0-6.7.0.7535516` was installed; no VIB was
 removed. ESXi required a reboot for activation.
+Post-reboot package inspection confirms `Live Install Allowed: False` and
+`PartnerSupported` acceptance; the host acceptance level remains unchanged.
 
 ## Maintenance Evidence
 
