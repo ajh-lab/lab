@@ -548,6 +548,13 @@ Worker recovery note:
 
 ### VMware Host and iLO
 
+- Owner-approved 2026-10-23 SSA installation/reboot restored all five running
+  VMs and verified core services. SSA CLI 3.40.3.0 reports P420i core OK,
+  capacitor OK, and cache Permanently Disabled after backup-to-flash failure;
+  the 512 MB cache module is the replacement target, superseding the earlier
+  capacitor-first hypothesis. RAID/cache policy and firmware were not changed.
+  See [SSA diagnostics and recovery evidence](docs/esxi-ssa-diagnostics-20261023.md)
+  and open [lab #70](https://github.com/ajh-lab/lab/issues/70) for repair gates.
 - `lab-vm-host` (`OMAESXMGT01`, `192.168.1.49`) is an HPE ProLiant DL360p Gen8
   running ESXi 6.7.0 build 13006603, not a Windows workstation.
 - Owner-approved 2026-10-21 maintenance installed HPONCFG and the iLO channel
